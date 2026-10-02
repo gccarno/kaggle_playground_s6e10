@@ -13,6 +13,15 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT / "src"))
 from config import COMPETITION  # noqa: E402
 
+# Our OWN stdout can be a cp1252 Windows console. kaggle-cli's progress bar contains
+# U+258D, and echoing it crashed A0 *after* its submission succeeded, so the run was never
+# logged. Never let a print kill a run.
+for _s in (sys.stdout, sys.stderr):
+    try:
+        _s.reconfigure(errors="replace")
+    except (AttributeError, ValueError):
+        pass
+
 
 def run(cmd, cwd=REPO_ROOT):
     """Run a CLI command with UTF-8 forced in the child process: kaggle-cli crashes on a
@@ -38,7 +47,7 @@ def tag(run_id):
 def submit(sub_file, run_id, message):
     """Submit a file. The message always begins with "[run_id]". Returns the message."""
     msg = f"{tag(run_id)} {message}".strip()
-    out = kaggle("competitions", "submit", COMPETITION, "-f", str(sub_file), "-m", msg)
+    out = kaggle("competitions", "submit", COMPETITION, "-f", str(sub_file), "-m", msg, "-q")
     print(out.stdout.strip(), out.stderr.strip(), sep="\n")
     blob = out.stdout + out.stderr
     # Like `kernels push`, the CLI can exit 0 while reporting an error on stdout.
