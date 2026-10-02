@@ -216,3 +216,13 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# --- S6E10 project ---
+data/
+.kaggle_output/
+experiments/preds/
+experiments/public_lib/
+logs/
+lightning_logs/
+catboost_info/
+saved_models/

@@ -1,0 +1,18 @@
+[project]
+name = "kaggle-playground-s6e10"
+version = "0.1.0"
+description = "Kaggle Playground S6E10 -- airline passenger satisfaction (ROC AUC)"
+requires-python = ">=3.11,<3.12"
+# Pinned to the versions the harness was validated with (2026-10-01). Installing a new
+# package can silently bump these -- in S6E9 `pip install shap` upgraded pandas and broke a
+# library. Add packages with `uv add`, never a bare `pip install`.
+dependencies = [
+    "numpy==2.4.6",
+    "pandas==3.0.5",
+    "scipy==1.16.1",
+    "scikit-learn==1.9.0",
+    "lightgbm==4.7.0",
+    "xgboost==3.2.0",
+    "catboost==1.2.10",
+    "kaggle==2.2.3",
+]
