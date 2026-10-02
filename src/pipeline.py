@@ -67,8 +67,24 @@ DEFAULTS = {
     "fe_rating_stats": False,        # dataset.py: sum / n_zero / min of the 13 ratings
     "fe_delay_diff": False,          # dataset.py: arr_delay - dep_delay
 
+    # UNSUPERVISED group profile: for each key column, the mean of every other raw numeric
+    # column over all train+test rows sharing that key value, plus log1p(group size).
+    # MECHANISM (README Phase 2): if flight_distance is a route ID, a route's typical
+    # passenger (age, class mix, ratings) is a property of the ROUTE the tree can read off
+    # directly, instead of reconstructing it from 3,474 numeric split points.
+    "profile_keys": [],
+
     # -- original dataset: append its rows to every fold's TRAINING rows only
     "use_origin_extra": False,
+    # TEACHER: a model fit on the ORIGINAL dataset only (its own clean labels), whose
+    # logit becomes one feature on every train/test row. Not a leak w.r.t. the competition
+    # folds: it never sees a competition label. MECHANISM: competition label = the source's
+    # decision function + ~3.8% flips, so a model of the clean function is a denoised
+    # summary of all 21 columns at once (public: +0.0003 raw, +0.0006-0.0008 with routes).
+    "teacher": False,
+    "teacher_params": {"n_estimators": 1500, "learning_rate": 0.03, "num_leaves": 63,
+                       "min_child_samples": 20, "colsample_bytree": 0.8,
+                       "subsample": 0.8, "subsample_freq": 1},
 
     # -- SUPERVISED encoders (fit per fold; see encoders.py for each one's mechanism)
     "te_cols": [],
@@ -118,7 +134,7 @@ DEFAULTS = {
     "cat_params": {"iterations": 3000, "learning_rate": 0.08, "depth": 6, "l2_leaf_reg": 3.0},
     "glm_params": {"C": 1.0},
 }
-DICT_KEYS = ["lgb_params", "xgb_params", "cat_params", "glm_params"]
+DICT_KEYS = ["lgb_params", "xgb_params", "cat_params", "glm_params", "teacher_params"]
 
 
 def load_cfg(override=None):
@@ -164,6 +180,21 @@ def base_features(train, test, cfg):
                 df[f"q_{c}_{d}"] = np.floor_divide(df[c].to_numpy(np.float64), float(d))
             feats_num.append(f"q_{c}_{d}")
 
+    for key in cfg["profile_keys"]:
+        both = pd.concat([tr, te], ignore_index=True)
+        others = [c for c in RAW_NUM if c != key]
+        prof = both.groupby(key)[others].mean().add_prefix(f"prof_{key}__")
+        prof[f"prof_{key}__logn"] = np.log1p(both.groupby(key).size())
+        for df in (tr, te):
+            block = prof.reindex(df[key].to_numpy())
+            for c in prof.columns:
+                df[c] = block[c].to_numpy()
+        feats_num += list(prof.columns)
+
+    if cfg["teacher"]:
+        add_teacher(tr, te, cfg)
+        feats_num.append("teacher_logit")
+
     for c in cfg["num_as_cat"]:
         # Value IDENTITY handed to the learner as a categorical (LightGBM groups levels by
         # gradient statistics inside the fold -- not a leak).
@@ -178,6 +209,29 @@ def base_features(train, test, cfg):
         tr[c] = tr[c].astype(vocab)
         te[c] = te[c].astype(vocab)
     return tr, te, feats_num, feats_cat
+
+
+def add_teacher(tr, te, cfg):
+    """Fit LightGBM on the original dataset (raw columns, its own labels; fixed rounds, no
+    competition rows anywhere) and write its logit onto every train/test row."""
+    import lightgbm as lgb
+    og, oy = load_origin()
+    cols = RAW_NUM + RAW_CAT
+    A = og[cols].copy()
+    T, E = tr[cols].copy(), te[cols].copy()
+    for c in RAW_CAT:
+        vocab = pd.api.types.CategoricalDtype(sorted(set(A[c]) | set(T[c]) | set(E[c])))
+        A[c], T[c], E[c] = A[c].astype(vocab), T[c].astype(vocab), E[c].astype(vocab)
+    m = lgb.LGBMClassifier(random_state=SEED, n_jobs=-1, verbose=-1, **cfg["teacher_params"])
+    m.fit(A, oy)
+    for df, X in ((tr, T), (te, E)):
+        p = np.clip(m.predict_proba(X)[:, 1], 1e-6, 1 - 1e-6)
+        df["teacher_logit"] = np.log(p / (1 - p))
+    msg = f"teacher: fit on {len(A)} original rows"
+    if TARGET in tr:      # diagnostic only -- nothing downstream uses this number
+        msg += (f"; teacher alone vs competition labels AUC = "
+                f"{roc_auc_score(tr[TARGET].astype(int), tr['teacher_logit']):.6f}")
+    print(msg)
 
 
 def apply_supervised(cfg, Xtr, ytr, Xva, Xte, seed):

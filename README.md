@@ -186,3 +186,30 @@ The run order is cheapest first, and every run is submitted. Some predictions ar
 Checks against the pre-registered predictions:
 - Seed floor < 0.0001: **held** (0.000039).
 - Spearman ≥ 0.9 over the GBDT points: **missed** (0.79). The near-champion cluster is ordered by noise, which is a finding, not a failure.
+
+### Phase 2: the lookup hunt (2026-10-02)
+
+**Compute policy (user, 2026-10-02):** full runs go to Kaggle CPU kernels, up to 5 at a time. The laptop is for analysis only, after Phase 1's low-memory stop.
+
+**New config axes, default off, so every archived config is unchanged:**
+- `profile_keys`: per-key means of the other raw numerics over train+test, plus log group size. Unsupervised.
+- `teacher`: LightGBM fit on the original rows only (fixed 1,500 rounds at lr 0.03); its logit becomes a feature. Smoke check: the teacher alone scores 0.9558 AUC on competition labels.
+
+**Pre-registered probes.** Every probe is a strict twin of A0 (OOF 0.958787). The gate is the provisional **+0.00013 OOF**. All are run on Kaggle in parallel.
+
+| Tag | Change | Hypothesis / mechanism | Prediction |
+|---|---|---|---|
+| T1 | `te_cols: [flight_distance]` | FD is a route ID, not a magnitude (residual χ²/df 2.20). Per-value TE hands the tree the lookup directly. | **clears the gate**, +0.0005 to +0.0015 |
+| T2 | `profile_keys: [flight_distance]` | A route's typical passenger mix is a route property. Unsupervised, so it carries no label noise. | clears the gate |
+| T3 | `teacher: true` | Competition label = the source's function + about 3.8% flips; the teacher is a denoised summary of that function. | clears the gate (public reports +0.0003) |
+| T4 | `lgb_params.max_bin: 4096` | With 256 histogram bins, adjacent distances share a bin, so a lookup is invisible. Finer bins partially restore it. | small gain, below T1 |
+| T5 | `freq_cols: [flight_distance]` | **Control for T1:** is the gain group *size* (unsupervised) or the label rate? | below the gate |
+| T6 | `te_cols: [age]` | **Negative control:** the residual test says age is already handled (χ²/df 0.52), so TE should add nothing. | \|Δ\| < gate |
+| K1 | `learner: cat` | Phase 1 calibration point, re-run on Kaggle | about A0 |
+
+**Falsification:**
+- If T1 fails the gate, the residual test is wrong as a lookup detector.
+- If T6 clears the gate, the residual test misses information it should have caught.
+- Either outcome gets logged as a finding.
+
+**Slots:** only 1 is left today, and it goes to **T1**. The rest are submitted after 00:00 UTC on Oct 3.
