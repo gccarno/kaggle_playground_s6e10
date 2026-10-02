@@ -131,3 +131,33 @@ Once the gate is set, it stays fixed. **Do not re-derive it later from small lea
 The run order is cheapest first, and every run is submitted. Some predictions are recorded so the post-mortem can check the instrument:
 - the seed floor is below 0.0001;
 - Spearman(OOF, LB) over the GBDT points is at least 0.9.
+
+**Leaderboard reading, 2026-10-02 02:16 UTC.** From the Explore-agent survey of 22 public notebooks; the notes live in the session scratchpad.
+- **The board:**
+  - 277 teams; #1 has 0.96137, #10 0.96129, #50 0.96109, #100 0.96028, #200 0.95816;
+  - A0 (0.95829) sits around rank 180, the plain raw-feature level, which public XGBoost on raw columns also reaches (0.958763 CV);
+  - the **0.96124 band is mostly shared blend files** (0.995 × someone's csv + ε), plus stacks of public OOF libraries such as "Flight Log V5".
+- **Split:** almost every serious notebook uses **SKF(5, shuffle, 42), which is our frozen split**, so public OOF libraries are fold-aligned with ours. Exceptions: evgendvorkin uses seed 123, and ou20040313 uses 3 folds.
+- **Independent confirmation of our residual test.** Public authors found `flight_distance` is a lookup key, and "route" features carry the largest public gain, **+0.0016** for XGBoost:
+  - per-distance profiles of the other columns over train+test;
+  - counts;
+  - in-fold TE of FD, FD×Age, FD×Class and similar;
+  - `max_bin=4096` alone also helps (fold 0: +0.0007).
+- **Second lever, a "teacher".** A model trained *only on the original 129,880 rows* is used as a feature: +0.0003 on raw features, +0.0006–0.0008 next to the route features. Its mechanism is that competition label = the original's decision function + about 3.8% flips (dariushafshar). This is a *different* channel from the per-key label lookup we measured as null: the teacher generalises the original's function to every row.
+- **Third lever, RealMLP as the decorrelated stack member** (about +0.0003 in stacks). This contradicts S6E9's "neural is null", so it has to be re-tested here rather than assumed either way.
+- **Public nulls**, which are cheap to believe but still unverified by us:
+  - appending the original rows (−0.00013 to −0.00045);
+  - rating aggregates;
+  - label cleaning (−0.002);
+  - 10 folds;
+  - TabM, FT-Transformer and GPT-2.
+- **Noise:**
+  - thisray's resampling study: the public LB orders a 0.0001 gap correctly only about 85% of the time;
+  - our A0→A0s seed change alone moved public by +0.0001;
+  - dariushafshar estimates a label-noise ceiling of about 0.9613.
+
+**Artifact policy price** (§5.2, written down before it gets tempting):
+- The best published ours-style single models are about 0.9608 to 0.9611 public, and the best honest stacks of *our own* members are about 0.9612 to 0.9613. The shared-file frontier is 0.96124 to 0.96137.
+- Today, 0.9611 against 0.96124 is about **30 places** (48 teams at or above 0.96110).
+- At S6E9's final size (about 3.5k teams, roughly 12× today's count), the same gap scales to roughly **300 to 400 places**. The gap is inside the shakeup noise: the private paired SD is still to be measured.
+- **Policy unchanged:** ours-only until the Oct 18 review. *Ideas* from the public notebooks are allowed now.
