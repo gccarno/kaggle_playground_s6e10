@@ -26,7 +26,18 @@ The method comes from `KAGGLE_PLAYBOOK.md`, carried over from S6E9. Read §10 to
 
 Column names are normalised to snake_case on load (`src/dataset.py: RENAME`).
 
-*To fill in during Phase 1:* duplicates, train↔test drift (adversarial AUC), per-column cardinality, and how train relates to the original rows.
+**Phase 1 facts** (from `scripts/eda_phase1.py`):
+- **Duplicates:** none in train or test, and no test feature row appears in train.
+- **Drift:** none. Adversarial train-vs-test AUC is **0.5010**, so imputation or drift handling has nothing to fix.
+- **Cardinality:**
+  - `flight_distance`: 3,474 values in train, 3,821 in the original, 61 test rows with values unseen in train;
+  - `age`: 75 values;
+  - `dep_delay` / `arr_delay`: about 167 values each (the original has about 470, so the generator coarsened the delays);
+  - ratings: 6 levels each (0–5; `baggage` has no 0).
+- **Rating zeros** ("not answered") are rare, between 0.1% and 3.7%.
+- **The original dataset is not copied:**
+  - 17 of 699,635 train rows (0.0024%) match an original row exactly;
+  - matching on the key (`flight_distance`, `age`, `customer_type`, `travel_type`, `travel_class`) hits 54.7% of train rows, but the original label adds only **+0.000014 AUC** on top of A0 for those rows, which is noise.
 
 ## 2. Frozen CV (never change)
 
@@ -59,7 +70,15 @@ Once the gate is set, it stays fixed. **Do not re-derive it later from small lea
 
 ## 6. Data model notes
 
-*Empty until Phase 1/2. This is where we record which columns behave as lookups and which as magnitudes.*
+**Lookup diagnostic, run against the model's residuals** (Phase 1). The question is whether A0's OOF residuals still vary by value more than binomial noise allows. This is the S6E9 income test, but conditioned on the model. A raw per-value rate test (which flags all four numerics at 2 to 18 times binomial) is confounded, because the other features already explain part of each value's rate.
+
+| Column | Values (n≥30) | Residual χ²/df | Read |
+|---|---|---|---|
+| `flight_distance` | 2,243 | **2.20** | **The model misses value-specific information. This is the prime lookup suspect.** |
+| `dep_delay` | 57 | 1.01 | Magnitude, handled |
+| `arr_delay` | 54 | 0.93 | Magnitude, handled |
+| `age` | 69 | 0.52 | Magnitude, handled |
+| ratings | 6 | below 0.3 | Handled |
 
 ## 7. Submission schedule
 
