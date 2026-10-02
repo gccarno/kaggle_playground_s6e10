@@ -54,10 +54,16 @@ Column names are normalised to snake_case on load (`src/dataset.py: RENAME`).
 
 | Number | Value | Source |
 |---|---|---|
-| Seed-noise floor (\|OOF(A0) − OOF(A0s)\|) | **UNSET** | Phase 1 |
-| Paired dAUC SD at public / private split size | **UNSET** | `split_resolution.py`, Phase 2 |
-| OOF→public slope, residual σ | **UNSET** | `oof_lb_fit.py` over ≥10 pairs, Phase 2 |
-| **SHIPPING GATE** (σ ÷ slope, in OOF units) | **UNSET**; use a placeholder of +0.0001 until then | |
+| Seed-noise floor (\|OOF(A0) − OOF(A0s)\|) | **0.000039** (S6E9: 0.000038) | Phase 1 |
+| Paired dAUC SD, seed-twin pair (A0 vs A0s) | public **0.000152** · private **0.000083** · full OOF 0.000047 | `split_resolution.py`, 200 boots |
+| Paired dAUC SD, cross-family pair (A0 vs X1) | public 0.000159 · private 0.000087 · full OOF 0.000051 | same |
+| OOF→public fit over 8 GBDT pairs | slope **0.971**, residual σ **0.000130**, Spearman 0.79 | `oof_lb_fit.py` |
+| **SHIPPING GATE** (σ ÷ slope) | **+0.00013 OOF, PROVISIONAL** (8 pairs, below the 10-pair minimum). Re-fit once at ≥12 GBDT pairs in Phase 2, then freeze. | |
+
+How to read these:
+- **Any public LB delta below about 0.00015 is unreadable.** A0→A0s, a seed change alone, moved public by +0.00010.
+- **Inside the near-champion band (OOF 0.9583–0.9590) the public LB ranks models at Spearman 0.49.** The band is only 0.0006 wide, comparable to the noise.
+- **The private split resolves about 1.8× better than public.** Shakeup room between near-equal models is about ±0.0001.
 
 Once the gate is set, it stays fixed. **Do not re-derive it later from small leaderboard deltas.**
 
@@ -161,3 +167,22 @@ The run order is cheapest first, and every run is submitted. Some predictions ar
 - Today, 0.9611 against 0.96124 is about **30 places** (48 teams at or above 0.96110).
 - At S6E9's final size (about 3.5k teams, roughly 12× today's count), the same gap scales to roughly **300 to 400 places**. The gap is inside the shakeup noise: the private paired SD is still to be measured.
 - **Policy unchanged:** ours-only until the Oct 18 review. *Ideas* from the public notebooks are allowed now.
+
+**Calibration batch results.** All are strict twins of A0, and all were submitted except K1.
+
+| Tag | run_id | OOF | Public | Note |
+|---|---|---|---|---|
+| A0 | ee4536ff | 0.958787 | 0.95829 | baseline |
+| A0s | cbbda46e | 0.958826 | 0.95839 | seed floor 0.000039 OOF, but **+0.00010 public** |
+| A0b3 | ea8495f9 | 0.958971 | 0.95833 | 3-seed bag: **+0.000184 OOF (4.7× the seed floor)**, public +0.00004 |
+| L7 | 1936c4df | 0.958347 | 0.95781 | every fold hit about 3,000 rounds, so it is capacity-starved |
+| L255 | 7ecc574a | 0.958840 | 0.95834 | ≈ A0; it stops at about 150–230 rounds |
+| D1 | e8fbc4b0 | 0.953116 | 0.95301 | without `online_boarding` and `wifi`: −0.0057 |
+| D2 | e48f031c | 0.874472 | 0.87640 | without all ratings: −0.084. The ratings are the signal. |
+| G1 | 8d189ab3 | 0.921556 | 0.92227 | GLM; non-GBDT, excluded from the fit |
+| X1 | 061c20f8 | 0.958838 | 0.95818 | xgb ≈ lgb on OOF; public −0.00011 vs A0 (inside noise) |
+| K1 | — | — | — | **Not run.** Claude Code stopped the batch on low system memory (0.4 GB free of 15.7) during CatBoost training. Orphan processes were stopped before they could submit. To be re-run. |
+
+Checks against the pre-registered predictions:
+- Seed floor < 0.0001: **held** (0.000039).
+- Spearman ≥ 0.9 over the GBDT points: **missed** (0.79). The near-champion cluster is ordered by noise, which is a finding, not a failure.

@@ -29,8 +29,8 @@ from config import ID, RUNS_CSV, TARGET, target_to_int  # noqa: E402
 
 # README section 4. UNSET until measured in Phase 1/2 -- fill these in from
 # split_resolution.py (A0 vs A0s) and the A0/A0s OOF difference, then commit.
-PUBLIC_PAIRED_SD = None
-SEED_NOISE_FLOOR = None
+PUBLIC_PAIRED_SD = 0.000152   # A0 vs A0s, split_resolution.py, Phase 1
+SEED_NOISE_FLOOR = 0.000039   # |OOF(A0) - OOF(A0s)|, Phase 1
 
 
 def main():
