@@ -90,3 +90,25 @@ Once the gate is set, it stays fixed. **Do not re-derive it later from small lea
   - The kernel took about 1 minute from push to COMPLETE.
 - **The Kaggle image's library versions differ from local:** numpy 2.0.2, pandas 2.3.3, sklearn 1.6.1, lightgbm 4.6.0, xgboost 3.2.0, catboost 1.2.10. Locally we have pandas 3.0.5, sklearn 1.9.0 and lightgbm 4.7.0. Identical results on this config is evidence, not a guarantee. Re-check local-vs-kernel parity whenever a run is moved between the two.
 - **Deferred to Phase 4,** when blending starts: porting `stack_logit`, `leg_probe`, `leg_swap`, `subset_ceiling`, `public_blend` and `backfill_private`.
+
+### Phase 1: EDA, seed floor and calibration spread (2026-10-02)
+
+**Baseline.** A0 (`ee4536ff`): raw 21 features, 5-fold LightGBM. OOF 0.958787, public **0.95829**. Folds 0.958808 ± 0.000668. `best_iters` are 482/589/553/234/272, so folds 3 and 4 stopped training at about half the rounds of the others. Keep an eye on that.
+
+**Pre-registered calibration batch (9 slots, committed before any of it runs).** The purpose is *not* to improve the score. It is to buy OOF↔LB pairs spread across a range, so that `oof_lb_fit.py` can measure the slope and residual σ (playbook §4). Deliberately worse models are the "cheapest paired points" (S6E9 Phase 8). Nothing in this batch is a shipping candidate, so none of it has a gate.
+
+| Tag | Change vs A0 | Role | Expected OOF |
+|---|---|---|---|
+| A0s | `model_seed` 1337 | **seed-noise floor** = \|OOF(A0s) − OOF(A0)\|; also the near-twin pair for `split_resolution.py` | about 0.9588 |
+| A0b3 | `seed_bag` 3 | near-twin point; variance reduction inside each fold | ≥ A0 by noise |
+| L7 | `num_leaves` 7 | capacity ladder, low end | slightly below A0 |
+| L255 | `num_leaves` 255 | capacity ladder, high end | about A0 |
+| X1 | `learner` xgb | family point (S6E9 family offset for xgb: −0.00004) | about A0 |
+| K1 | `learner` cat | family point (S6E9 family offset for cat: −0.0001) | about A0 |
+| D1 | drop `online_boarding`, `wifi` | deliberately degraded GBDT, mid-range point | below A0 |
+| D2 | drop all 13 ratings | deliberately degraded GBDT, low point | far below |
+| G1 | `learner` glm | non-GBDT. **Excluded from the GBDT fit** (in S6E9 one neural point inflated σ 3×) and kept as a family check. | about 0.92 |
+
+The run order is cheapest first, and every run is submitted. Some predictions are recorded so the post-mortem can check the instrument:
+- the seed floor is below 0.0001;
+- Spearman(OOF, LB) over the GBDT points is at least 0.9.
