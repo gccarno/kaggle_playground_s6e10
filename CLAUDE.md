@@ -2,13 +2,74 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Project
+## What this is
 
-Entry for the Kaggle Playground Series Season 6, Episode 10 competition: https://www.kaggle.com/competitions/playground-series-s6e10
+A Kaggle Playground S6E10 entry. The task is binary airline-satisfaction prediction scored by ROC AUC, with a deadline of 2026-10-31 23:59 UTC and 10 submissions per day. Three documents, in order of authority:
 
-The repository is at its initial commit. It holds only `README.md` and the stock GitHub Python `.gitignore`, so there is no code, dependency manifest, build, lint, or test setup yet. Update this file once those exist.
+- **README.md** is the contract: data facts, the frozen split, the instrument numbers (§4), the standing decisions (§5), and the dated phase log (§8). It wins over FINDINGS.md.
+- **KAGGLE_PLAYBOOK.md** is the method carried over from S6E9. Start with §10 (checklist) and §12 (S6E9 additions). Don't re-argue its conclusions; test them as probes.
+- **FINDINGS.md** is the explanatory layer, written as results arrive.
 
-## Notes
+The previous contest's full repo is at `../kaggle_playground_s6e9`. That is where the harness and encoders came from.
 
-- The `.gitignore` is the generic Python template. It does **not** ignore competition data (`*.csv`, `data/`, `submission*.csv`) or model artifacts. Add those patterns before downloading data, so large files don't get committed.
-- Development happens on Windows (PowerShell is the primary shell).
+## Working agreement with the user
+
+- They're using this contest to learn, so explain *why*, not just *what*.
+- Work runs in **phases**. Each phase ends at a checkpoint: a short write-up of what was done, why, and what was learned. Don't start the next phase until the user approves.
+- The plan of record is `C:\Users\gccar\.claude\plans\this-project-is-a-lovely-garden.md`.
+
+## Commands
+
+```bash
+# local run (most probes): archives to experiments/preds/<run_id>/ and appends to experiments/runs.csv
+python scripts/run_local.py --cfg '{"run_tag":"B1","freq_cols":["age"]}' \
+    --diff-vs '{"run_tag":"A0"}' --description "B1: ..." \
+    --notes "HYPOTHESIS ... MECHANISM ... GATE ..." [--submit]
+
+# Kaggle CPU kernel (feature-heavy probes): commit src/ first, then
+python scripts/push_code.py                 # uploads src/ as private dataset gcarno/s6e10-code @ HEAD
+python scripts/collect_run.py --cfg '{...}' --description "..." --notes "..." [--submit]
+#   run collect_run as a harness background task (never shell &); up to ~5 at once
+
+python scripts/submit_run.py <run_tag|run_id>   # submit an archived run later
+python scripts/submit_run.py --today            # slots used since 00:00 UTC
+python scripts/submit_run.py --fill-missing     # backfill pending public scores
+python scripts/compare_oof.py experiments/preds/<a>/oof_proba_lgb.csv experiments/preds/<b>/oof_proba_lgb.csv
+python scripts/split_resolution.py experiments/preds/<a> experiments/preds/<b>
+python scripts/oof_lb_fit.py                    # OOF->LB slope and residual sigma -> gate
+
+# quick pipeline smoke test (never submit or calibrate on sample_frac < 1)
+KCFG='{"sample_frac":0.05,"n_folds":2}' KOUT=.kaggle_output/smoke python src/pipeline.py
+```
+
+Data: `kaggle competitions download -c playground-series-s6e10 -p data` (then unzip), and `kaggle datasets download arseniyshutko/binary-aviation-satisfaction-129k -p data/original --unzip`.
+
+Environment: Python 3.11, with versions pinned in `pyproject.toml`. Add packages with `uv add` and never a bare `pip install`, because in S6E9 installing `shap` silently upgraded pandas.
+
+## Architecture
+
+The flow is: config override → `src/pipeline.py` → artifacts plus a `RUN_METRICS_JSON:` line → runs.csv row.
+
+- `src/config.py`: the competition slug, target, user, code-dataset name and frozen CV constants. Every script imports from here.
+- `src/dataset.py`: **the only S6E10-specific code**. It holds the snake_case `RENAME` map, the column lists, the loaders (local `data/` vs a `/kaggle/input` glob), and `dataset_features` (unsupervised dataset-specific features, each behind a default-off key).
+- `src/encoders.py`: supervised target encoders ported verbatim from S6E9: per-value TE, multi-smoothing, neighbourhood backoff, `te_pseudo`, bin/pair keys, the shape encoder, and the centred-window encoder. They're generic, and their docstrings cite S6E9 numbers as history.
+- `src/learners.py`: `fit_predict` for lgb/xgb/cat/glm. Each learner reads its own `<learner>_params` dict.
+- `src/pipeline.py`: `DEFAULTS`, `load_cfg` (which **rejects unknown keys**), `base_features` (unsupervised), `apply_supervised` (per fold), `build_fold` (reuse it rather than re-implementing the fold loop), and `main`. The config arrives in env `KCFG`, the output dir in `KOUT`, and the run nonce in `KRUN_ID`.
+- `scripts/kaggle_io.py`: all Kaggle CLI submission traffic. Messages are always `"[run_id] ..."` and scores are matched only by that prefix.
+- `scripts/runlog.py`: the runs.csv schema, which grows as new metric keys appear (`notes` stays last).
+- The kernel path:
+  1. `push_code.py` refuses to run on a dirty `src/` and writes `CODE_SHA`.
+  2. `make_probe_kernel.py` writes into `.kaggle_output/_push_<slug>/`, never the repo root.
+  3. The kernel asserts the dataset's sha matches.
+  4. `collect_run.py` rejects output whose `run_id` or `code_sha` doesn't echo what it pushed.
+
+## Conventions to keep
+
+- **Every probe is a config override, never an edit to the pipeline body.** New axes go in `DEFAULTS` defaulted off. After any refactor, re-run an archived `cfg.json` and confirm the OOF is bit-identical.
+- **Pre-register:** put the hypothesis, mechanism and gate in `--notes` (and in the README phase log, committed) *before* running.
+- Use `--diff-vs` (strict twin) for every probe: exactly one key may change.
+- Judge ensemble legs by ADD/SWAP contribution at constant pool size, never by solo score.
+- Never delete `experiments/preds/*`, because the OOF/test pairs are what make any past run blendable later.
+- Use AUC everywhere and submit probabilities. Never change the CV split.
+- Use a unique `run_tag` per run. A public-only effect with no OOF movement and no mechanism is provisional and never becomes a rule. Offsets measured on public get their sign trusted and their size halved.
+- Submissions after 00:00 UTC count against the next day's limit.
