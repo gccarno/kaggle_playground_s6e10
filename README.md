@@ -281,3 +281,32 @@ Checks against the pre-registered predictions:
 | T13 | `fe_rating_stats: true` | Sum, zero-count and minimum of the 13 ratings. Public notebooks report null. | below the gate |
 | T14 | `learner: xgb` | Diversity leg for Phase 4. It is judged later by ADD/SWAP, **not by its own score**. | about T8 − 0.00004 |
 | T15 | `learner: cat` | Diversity leg (about 1 h on the VM) | about T8 − 0.0001 |
+
+**Results, batch 3** (banked; nothing submitted yet). Δ is against T8 (0.960590), and the gate is +0.00014.
+
+| Tag | run_id | OOF | ΔOOF | Read |
+|---|---|---|---|---|
+| T10 seed twin | 2212dd7c | 0.960535 | −0.000055 | **held** (\|Δ\| < 0.00006). The seed floor at the champion is 0.000055, against 0.000039 at A0. |
+| T11 seed_bag 3 | f19b5e12 | **0.960734** | **+0.000144** | **held. It clears the gate by a hair.** The bag gain repeats at A0's size. |
+| T12 + original rows | 949548bc | 0.959646 | **−0.000944** | **held**: clearly negative. The public null holds here, and it's 2–9× worse than public reported. |
+| T13 rating aggregates | e295bfa7 | 0.960587 | −0.000003 | **held**: null |
+| T14 xgb leg | 4cde76c7 | 0.960678 | +0.000088 | **prediction wrong in sign**: xgb is *above* lgb on this representation |
+| T15 cat leg | 636833f2 | 0.960683 | +0.000093 | **prediction wrong in sign**: cat is above lgb too |
+
+**Why the T12 penalty makes sense:** the teacher already delivers the original's decision function in a denoised form. The original rows themselves add a second distribution with different label noise, which the trees then have to fit.
+
+**Early blend read.** This is a quick fixed rank-mean over OOF, *not* the Phase 4 Gate 2. Pool size is held constant, so a cross-family pair is compared with a seed pair.
+
+| Pool | OOF | Compare with |
+|---|---|---|
+| T8 + T10 (2 lgb seeds) | 0.960712 | — |
+| T8 + T14 (lgb + xgb) | 0.960789 | +0.000077 vs the seed pair |
+| T8 + T15 (lgb + cat) | 0.960833 | +0.000121 vs the seed pair |
+| T11 (3 lgb seeds, bagged inside folds) | 0.960734 | — |
+| T8 + T14 + T15 (3 families) | 0.960889 | **+0.000155 vs T11** |
+
+- **Correlations:** the rank correlation between lgb and xgb is 0.985, and between lgb and cat it is 0.982.
+- **The family mix beats extra seeds at the same pool size.** That runs against S6E9's "cross-family pools are null", so it's a Phase 4 question to test properly with ADD/SWAP, not a rule yet.
+- **These blends are not submittable yet.** A submission needs a `runs.csv` row, and the blend scripts are deferred to Phase 4.
+
+**Submission queue for Oct 4** (the banked singles, every one a paired point): T11, T15, T14, T10, T12, T13. That leaves 4 slots free.
