@@ -253,3 +253,31 @@ Checks against the pre-registered predictions:
 **Falsification:**
 - If T9 clears the gate, T2 does not fully provide identity access, and the "two components" reading of T5 is incomplete.
 - If T7 is null, the profile already encodes the route's label rate.
+
+**Results, batch 2.** All five were submitted. Δ is measured against the stated baseline, and the gate is +0.00014.
+
+| Tag | run_id | Baseline | OOF | ΔOOF | Public | ΔPublic | Read |
+|---|---|---|---|---|---|---|---|
+| T6 age TE | b9272bbf | A0 | 0.958762 | −0.000025 | 0.95833 | +0.00004 | **held**: null, as predicted |
+| T7 T2 + FD TE | 6844d407 | T2 | 0.960386 | +0.000007 | 0.96018 | +0.00014 | **prediction failed**: null on OOF |
+| T8 T2 + teacher | 5ee7f1d3 | T2 | **0.960590** | **+0.000211** | **0.96022** | +0.00018 | **clears. New champion.** |
+| T9 T2 + max_bin 4096 | 4a621eb8 | T2 | 0.960353 | −0.000026 | 0.96000 | −0.00004 | **held**: null, as predicted |
+| K1 CatBoost | 4ecb3d67 | A0 | 0.958674 | −0.000113 | 0.95827 | −0.00002 | about A0. The family offset matches S6E9's −0.0001. |
+
+**What the results mean:**
+- **T6 closes the falsification check from the other side.** The residual χ²/df test flagged FD and not age, and target encoding helped FD and not age. The test is now validated both ways, as a lookup detector.
+- **T7: the passenger-mix profile already contains the route's label rate.** Adding the supervised target encoding on top contributed nothing to OOF. Its +0.00014 on public is below the readable threshold (0.00015).
+- **T8: the teacher is an interaction, not a main effect.** On raw features it added +0.00010, below the gate (T3). Next to the route profile it adds +0.00021. That's the same direction public notebooks report, at about a third of their size.
+- **T9: T2 already gives identity access.** Finer bins on FD add nothing once the profile is present. This confirms T5's two-component reading.
+- **K1 ran fine on the 12 GB VM** (52 minutes on 2 cores). The Phase 1 failure was laptop-wide memory pressure, not CatBoost itself.
+
+**Pre-registered, batch 3: banked, not submitted (Oct 3, `oci-free`).** Today's 10 slots are spent. These runs are archived now and submitted later with `submit_run.py <tag>` as slots allow. All are strict twins of T8, `{"profile_keys":["flight_distance"],"teacher":true}`, OOF 0.960590, with the gate at +0.00014.
+
+| Tag | Change vs T8 | Purpose / mechanism | Prediction |
+|---|---|---|---|
+| T10 | `model_seed: 1337` | Seed twin of the champion: the seed floor at the champion, and a near-twin for slot rotation | \|Δ\| < 0.00006 |
+| T11 | `seed_bag: 3` | Variance reduction inside each fold (A0b3 gained +0.000184 at A0) | +0.0001 to +0.0002, near the gate |
+| T12 | `use_origin_extra: true` | Original rows added to training. The teacher already carries the original's function, and public notebooks report −0.0001 to −0.0004. | below the gate or negative |
+| T13 | `fe_rating_stats: true` | Sum, zero-count and minimum of the 13 ratings. Public notebooks report null. | below the gate |
+| T14 | `learner: xgb` | Diversity leg for Phase 4. It is judged later by ADD/SWAP, **not by its own score**. | about T8 − 0.00004 |
+| T15 | `learner: cat` | Diversity leg (about 1 h on the VM) | about T8 − 0.0001 |
