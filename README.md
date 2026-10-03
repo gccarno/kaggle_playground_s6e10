@@ -237,4 +237,19 @@ Checks against the pre-registered predictions:
 - **T5 is falsified, and it's the informative result.** Frequency alone is worth +0.00069, which is half of T1. FD counts over train+test are close to unique per value, so frequency works as a *second, re-ordered copy of the route ID*. Trees can then isolate single routes that sit between other routes on the distance axis. T4 (finer bins, +0.00071) is the same mechanism reached a different way: T4 ≈ T5.
   - **Reading:** about +0.0007 is *identity access* (any way of letting a tree address a single route). The extra +0.0007 to +0.0009 in T1 and T2 is *what is known about the route* (its label rate, or its passenger mix).
 
-**Still open in this phase:** T6 (the age-TE negative control) and K1 (CatBoost). K1 ran out of memory at 16 GB, so it needs the burst VM or a Kaggle kernel.
+**Still open in this phase:** T6 (the age-TE negative control) and K1 (CatBoost).
+
+**Pre-registered, batch 2 (Oct 3, 5 slots, on `oci-free`).**
+- **T6 and K1** run as already registered: strict twins of A0.
+- **K1 now runs on the 12 GB VM.** The Phase 1 failure was *system* memory on a laptop that was busy with other work, not CatBoost's own footprint (about 21 columns × 700k rows). The script runs it last, and a crash stops the run before it can submit.
+- **T7–T9 stack Phase 2's levers on the new champion T2** (`46e7df22`, OOF 0.960379). They are strict twins of `{"run_tag":"T2","profile_keys":["flight_distance"]}`, gated at **+0.00014 vs T2**.
+
+| Tag | Change vs T2 | Hypothesis / mechanism | Prediction |
+|---|---|---|---|
+| T7 | `te_cols: [flight_distance]` | The label rate (T1) and the passenger mix (T2) are different knowledge about a route, so they should partly add. | **clears**, +0.0002 to +0.0006 |
+| T8 | `teacher: true` | Public notebooks report +0.0006–0.0008 for the teacher *next to route features*, against our +0.0001 on raw features (T3). That would mean the teacher interacts with route identity. | borderline. Clears only if the interaction is real. |
+| T9 | `lgb_params.max_bin: 4096` | T2's 16 profile columns are close to unique per route, so T2 already gives *identity access* (the T4 ≈ T5 mechanism). Finer bins on FD should add nothing. | **below the gate** (\|Δ\| < 0.00014) |
+
+**Falsification:**
+- If T9 clears the gate, T2 does not fully provide identity access, and the "two components" reading of T5 is incomplete.
+- If T7 is null, the profile already encodes the route's label rate.
