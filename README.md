@@ -57,8 +57,8 @@ Column names are normalised to snake_case on load (`src/dataset.py: RENAME`).
 | Seed-noise floor (\|OOF(A0) − OOF(A0s)\|) | **0.000039** (S6E9: 0.000038) | Phase 1 |
 | Paired dAUC SD, seed-twin pair (A0 vs A0s) | public **0.000152** · private **0.000083** · full OOF 0.000047 | `split_resolution.py`, 200 boots |
 | Paired dAUC SD, cross-family pair (A0 vs X1) | public 0.000159 · private 0.000087 · full OOF 0.000051 | same |
-| OOF→public fit over 8 GBDT pairs | slope **0.971**, residual σ **0.000130**, Spearman 0.79 | `oof_lb_fit.py` |
-| **SHIPPING GATE** (σ ÷ slope) | **+0.00013 OOF, PROVISIONAL** (8 pairs, below the 10-pair minimum). Re-fit once at ≥12 GBDT pairs in Phase 2, then freeze. | |
+| OOF→public fit over 13 GBDT pairs (G1 excluded) | slope **0.971**, residual σ **0.000135**, Spearman 0.89 | `oof_lb_fit.py` re-fit, Phase 2 (Oct 3) |
+| **SHIPPING GATE** (σ ÷ slope) | **+0.00014 OOF, FROZEN 2026-10-03.** The 8-pair provisional value was 0.00013, and the re-fit moved it by less than its own precision. | |
 
 How to read these:
 - **Any public LB delta below about 0.00015 is unreadable.** A0→A0s, a seed change alone, moved public by +0.00010.
@@ -213,3 +213,28 @@ Checks against the pre-registered predictions:
 - Either outcome gets logged as a finding.
 
 **Slots:** only 1 is left today, and it goes to **T1**. The rest are submitted after 00:00 UTC on Oct 3.
+
+**Compute change (user, Oct 3).** T1–T5 ran on the OCI VM `oci-free` instead of Kaggle kernels.
+- **The VM:** aarch64, 2 OCPU / 12 GB, managed in `~/Documents/oci-infra`. `uv sync` gives the same package versions as the laptop, and the data md5s match.
+- **Parity:** A0arm (`6391ae86`, A0 replayed on ARM, not submitted) gives OOF 0.958787. Max |Δp| against A0 is **4.4e-16** on both OOF and test, the same rounding-level parity as the Phase 0 kernel. So deltas are read against A0 directly, with no platform offset.
+- **Speed:** about 3–4 min per probe, 23 min for all six runs.
+
+**Results, batch of Oct 3.** T1 went out with the batch rather than in the Oct 2 slot. All five were submitted, each a strict twin of A0 (OOF 0.958787, public 0.95829), gated at **+0.00014**.
+
+| Tag | run_id | OOF | ΔOOF | Gate | Public | ΔPublic |
+|---|---|---|---|---|---|---|
+| T1 FD target encoding | 0a155047 | 0.960139 | +0.00135 | **pass** | 0.95971 | +0.00142 |
+| T2 FD profiles | 46e7df22 | **0.960379** | **+0.00159** | **pass** | **0.96004** | **+0.00175** |
+| T3 teacher | f7b789ea | 0.958887 | +0.00010 | fail | 0.95820 | −0.00009 |
+| T4 max_bin 4096 | 17bd6d92 | 0.959498 | +0.00071 | **pass** | 0.95904 | +0.00075 |
+| T5 FD frequency (control) | 5cdc1a57 | 0.959480 | +0.00069 | **pass** | 0.95906 | +0.00077 |
+
+**Checks against the pre-registration:**
+- **T1 held.** It cleared the gate inside the predicted +0.0005 to +0.0015 band, so the residual χ²/df test works as a lookup detector. The first falsification arm is not triggered.
+- **T2 held, and it is the best probe.** The *unsupervised* route profile beats the supervised TE. The route is described better by who flies it than by its noisy label rate, and the profile carries no in-fold estimation noise.
+- **T3 missed.** It came in below the gate on both OOF and public. Public notebooks report +0.0003 on raw features; we measured a third of that. They also report +0.0006 to +0.0008 *next to route features*, so the teacher is not closed. Re-test it on top of the new champion.
+- **T4 held** (a small gain, below T1).
+- **T5 is falsified, and it's the informative result.** Frequency alone is worth +0.00069, which is half of T1. FD counts over train+test are close to unique per value, so frequency works as a *second, re-ordered copy of the route ID*. Trees can then isolate single routes that sit between other routes on the distance axis. T4 (finer bins, +0.00071) is the same mechanism reached a different way: T4 ≈ T5.
+  - **Reading:** about +0.0007 is *identity access* (any way of letting a tree address a single route). The extra +0.0007 to +0.0009 in T1 and T2 is *what is known about the route* (its label rate, or its passenger mix).
+
+**Still open in this phase:** T6 (the age-TE negative control) and K1 (CatBoost). K1 ran out of memory at 16 GB, so it needs the burst VM or a Kaggle kernel.
