@@ -31,8 +31,16 @@ def run(cmd, cwd=REPO_ROOT):
                           errors="replace", cwd=cwd, env=env)
 
 
+def _kaggle_exe():
+    """The CLI from PATH, else the one installed next to this interpreter. Under cron, or in
+    a non-login ssh command on the VM, .venv/bin is not on PATH."""
+    import shutil
+    return (shutil.which("kaggle")
+            or shutil.which("kaggle", path=str(Path(sys.executable).parent)) or "kaggle")
+
+
 def kaggle(*args):
-    return run(["kaggle", *args])
+    return run([_kaggle_exe(), *args])
 
 
 def submissions_table():

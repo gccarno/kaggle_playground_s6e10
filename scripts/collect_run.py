@@ -32,7 +32,7 @@ from run_local import check_strict_twin, read_json_arg  # noqa: E402
 
 
 def push(push_dir, accelerator=None):
-    cmd = ["kaggle", "kernels", "push", "-p", str(push_dir)]
+    cmd = [kaggle_io._kaggle_exe(), "kernels", "push", "-p", str(push_dir)]
     if accelerator:
         cmd += ["--accelerator", accelerator]   # only a push flag; e.g. NvidiaTeslaT4
     out = kaggle_io.run(cmd)
