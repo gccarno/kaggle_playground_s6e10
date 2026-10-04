@@ -36,6 +36,7 @@ For ad-hoc CLI calls (`kernels status <ref>`, `kernels output`, `competitions su
 | `collect_run.py` refuses output whose `run_id` or `code_sha` differs from what it pushed | That's a stale-output guard. Don't bypass it; re-run instead. |
 
 ## Common mistakes
+- **Submitting a banked run by hand.** The nightly scheduler on `oci-free` sends banked runs anyway. Use a manual submit only when you need the score today, and check `submit_scheduler.py list` first.
 - **"Submitted, but the score never came back."** Run `submit_run.py --fill-missing` later. Don't resubmit.
 - **"Is the submission table up to date?"** Kaggle scoring takes a few minutes, and a status of `pending` is normal.
 - **Platform parity:** OOF from Kaggle (x86), the laptop and `oci-free` (ARM) agree to within 4.4e-16. Deltas across platforms read directly.

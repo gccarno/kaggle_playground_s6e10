@@ -20,13 +20,13 @@ $VM .venv/bin/python scripts/submit_scheduler.py enqueue T16 T17  # jump the aut
 $VM .venv/bin/python scripts/submit_scheduler.py remove T17
 $VM .venv/bin/python scripts/submit_scheduler.py run --dry-run    # what would go now
 $VM tail -20 logs/scheduler.log                                   # last nights' summaries
-python scripts/submit_run.py --fill-missing                       # laptop, next morning
+python scripts/sync_runs.py pull && python scripts/submit_run.py --fill-missing   # laptop, next morning
 ```
 
 ## Making a run visible to the scheduler
 The VM can only submit a run whose **row is in the VM's runs.csv** and whose **`preds_dir/submission.csv` exists on the VM**.
 - **Ran on the VM:** nothing to do.
-- **Ran on the laptop or a Kaggle kernel:** append its row to the VM's runs.csv (merge by run_id; never copy the whole file over), and `scp -r experiments/preds/<run_id> oci-free:/data/kaggle_playground_s6e10/experiments/preds/`. Then `list` should show it.
+- **Ran on the laptop or a Kaggle kernel:** run `python scripts/sync_runs.py push T16` from the laptop. It copies the preds dir and merges just that row into the VM's runs.csv by run_id. Then `enqueue` and `list` on the VM.
 
 ## Keeping a run out
 - Put `NOSUBMIT` in its `--notes` when you log it. Auto-fill skips it; an explicit `enqueue` still sends it.
@@ -47,4 +47,5 @@ The VM's TZ is UTC. Remove the entry after 2026-10-31.
 
 ## Common mistakes
 - **Running `enqueue` on the laptop.** It writes the *laptop's* queue file, which nobody reads.
+- **`--fill-missing` filled nothing for a VM-run row.** It only updates rows that already exist in the laptop's runs.csv, so run `sync_runs.py pull` first.
 - **"N slot(s) unfilled -- bank more runs" in the log.** Fewer eligible runs existed than free slots. Bank seed twins or probes earlier in the day.
