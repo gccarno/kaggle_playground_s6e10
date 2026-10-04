@@ -48,4 +48,6 @@ The VM's TZ is UTC. Remove the entry after 2026-10-31.
 ## Common mistakes
 - **Running `enqueue` on the laptop.** It writes the *laptop's* queue file, which nobody reads.
 - **`--fill-missing` filled nothing for a VM-run row.** It only updates rows that already exist in the laptop's runs.csv, so run `sync_runs.py pull` first.
+- **The VM's code silently stops updating.** A VM batch leaves the VM's runs.csv dirty. Once the laptop commits runs.csv, the cron job's `git pull --ff-only` refuses, and the scheduler keeps running old code. After `sync_runs.py pull` and the laptop commit, clean up the VM:
+  `ssh oci-free 'cd /data/kaggle_playground_s6e10 && cp experiments/runs.csv /tmp/vm_runs.bak && git stash -q && git pull -q --ff-only && .venv/bin/python scripts/sync_runs.py merge /tmp/vm_runs.bak && git stash drop -q'`. A merge that reports "0 new" means nothing was lost.
 - **"N slot(s) unfilled -- bank more runs" in the log.** Fewer eligible runs existed than free slots. Bank seed twins or probes earlier in the day.
