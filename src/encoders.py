@@ -97,7 +97,21 @@ def _pseudo_label_test(cfg, Xtr, ytr, Xte):
     return m.predict_proba(Xte)[:, 1]
 
 
-def apply_target_encoding(Xtr, ytr, Xva, Xte, cols, cfg, rng_seed, pseudo=None):
+def _pool_extra(parts):
+    """Concatenate several (values, targets, bins-or-None) extra pools into one, or None.
+    Bins survive only if every part has them (see _fit_encoder)."""
+    parts = [p for p in parts if p is not None]
+    if not parts:
+        return None
+    if len(parts) == 1:
+        return parts[0]
+    bins = (None if any(p[2] is None for p in parts)
+            else np.concatenate([np.asarray(p[2]) for p in parts]))
+    return (np.concatenate([np.asarray(p[0]) for p in parts]),
+            np.concatenate([np.asarray(p[1], dtype=np.float64) for p in parts]), bins)
+
+
+def apply_target_encoding(Xtr, ytr, Xva, Xte, cols, cfg, rng_seed, pseudo=None, support=None):
     """Fit per-value target encodings on the TRAINING FOLD ONLY.
 
     Training rows get their encoding from an inner K-fold so a row never contributes to
@@ -114,6 +128,11 @@ def apply_target_encoding(Xtr, ytr, Xva, Xte, cols, cfg, rng_seed, pseudo=None):
     frontier recipe's "smooth=10 and smooth='auto' side by side" idea (README Phase 14).
     Empty (the default) reproduces the original single-column behaviour exactly, so every
     archived run stays bit-identical.
+
+    `support`, when given, is (frame, labels) of rows that are pooled into every per-value
+    statistic but are never encoded themselves. That's the original dataset under
+    cfg["te_origin_support"]. Their labels say nothing about competition labels, so
+    pooling them into the inner folds too is leak-free.
     """
     prior = float(ytr.mean())
     new_cols = []
@@ -148,6 +167,15 @@ def apply_target_encoding(Xtr, ytr, Xva, Xte, cols, cfg, rng_seed, pseudo=None):
             bva = pd.Series(np.searchsorted(edges, cva.values), index=Xva.index)
             bte = pd.Series(np.searchsorted(edges, cte.values), index=Xte.index)
 
+        pseudo_part = support_part = None
+        if pseudo is not None:
+            pseudo_part = (cte.values, pseudo, None if bte is None else bte.values)
+        if support is not None:
+            sv = support[0][c].astype(str) if cat_src else support[0][c]
+            support_part = (sv.values, support[1],
+                            None if btr is None else np.searchsorted(edges, sv.values))
+        extra = _pool_extra([pseudo_part, support_part])
+
         reps = max(1, int(cfg["te_inner_repeats"]))
         last_n, last_cnt_tr = None, None
         for sm in smooths:
@@ -168,10 +196,7 @@ def apply_target_encoding(Xtr, ytr, Xva, Xte, cols, cfg, rng_seed, pseudo=None):
                 for i, j in inner.split(Xtr, ytr):
                     e, n, br = _fit_encoder(ctr.iloc[i].values, ytr[i],
                                             None if btr is None else btr.iloc[i], cfg,
-                                            prior, sm,
-                                            extra=None if pseudo is None else
-                                            (cte.values, pseudo, None if bte is None
-                                             else bte.values))
+                                            prior, sm, extra=extra)
                     fb = (pd.Series(prior, index=Xtr.index[j]) if br is None
                           else btr.iloc[j].map(br).fillna(prior))
                     enc_tr[j] += ctr.iloc[j].map(e).fillna(fb).astype(np.float64).values / reps
@@ -180,10 +205,7 @@ def apply_target_encoding(Xtr, ytr, Xva, Xte, cols, cfg, rng_seed, pseudo=None):
             Xtr[name] = enc_tr
             last_cnt_tr = cnt_tr
 
-            e, n, br = _fit_encoder(ctr.values, ytr, btr, cfg, prior, sm,
-                                    extra=None if pseudo is None else
-                                    (cte.values, pseudo, None if bte is None
-                                     else bte.values))
+            e, n, br = _fit_encoder(ctr.values, ytr, btr, cfg, prior, sm, extra=extra)
             last_n = n
             for X, c_, b in ((Xva, cva, bva), (Xte, cte, bte)):
                 fb = prior if br is None else b.map(br).fillna(prior)

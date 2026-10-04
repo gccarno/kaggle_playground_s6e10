@@ -334,6 +334,15 @@ Checks against the pre-registered predictions:
 - **The seed floor at the champion:** across T8, T10 and T16–T18, OOF has a standard deviation of about 0.00003. The range is 0.000081, from T10 to T16. The gate of +0.00014 is about 4.7 sd, so it still holds.
 - **T11 public came back at 0.96025**, which is +0.00003 over T8 against +0.000144 on OOF. That's one point and within public noise, so it's not read as a contradiction yet. The twins give the public seed spread to judge it against tomorrow.
 
+**Pre-registered, batch 5: the original dataset as TE support (plan probe c, `oci-free`, banked).**
+- **New axis:** `te_origin_support`, default off. The original's (FD, label) pairs are pooled into every per-value TE statistic. Its rows are never fit on and never encoded. The original's labels carry no information about competition labels, so pooling them in every inner fold is leak-free.
+- **T1r** replays T1's archived config on the new code. Its OOF must be **bit-identical** to T1 (`0a155047`), per the refactor rule. It's marked NOSUBMIT.
+- **T19** is T1 + `te_origin_support: true`, a strict twin of T1 (OOF 0.960139), gated at +0.00014. It's tested on T1 because that's where FD TE is the active channel. On the T8 champion, FD TE is already null (T7).
+  - **Mechanism:** 130k extra pairs shrink per-route noise. But the original's route rates differ from the competition's (3.8% flips, generator drift), so they also add bias.
+  - **Prediction: null** (|Δ| < 0.00014). The original's per-key label added +0.000014 in Phase 1.
+  - **Falsification:** if T19 clears, the original's per-route rate holds information that per-key matching missed. It would then be re-tested next to the teacher on T8.
+- **Plan status after this:** probes (a) T12, (b) Phase 1 matching, and (c) T19 close the original-dataset arm, and the lookup hunt is closed: only FD is a key (§6). So batch 5 ends Phase 2, and Checkpoint 2 follows.
+
 **Tooling (Oct 4).** Three new skills:
 - `kaggle-cli` (this repo);
 - `oci-vm` (user-level);

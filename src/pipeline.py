@@ -76,6 +76,11 @@ DEFAULTS = {
 
     # -- original dataset: append its rows to every fold's TRAINING rows only
     "use_origin_extra": False,
+    # -- original dataset as extra SUPPORT for te_cols: its (value, label) pairs are pooled
+    # into every per-value statistic, but its rows are never fit on and never encoded.
+    # Plan Phase 2 probe (c). The original's labels carry no information about competition
+    # labels, so pooling them in every fold is leak-free.
+    "te_origin_support": False,
     # TEACHER: a model fit on the ORIGINAL dataset only (its own clean labels), whose
     # logit becomes one feature on every train/test row. Not a leak w.r.t. the competition
     # folds: it never sees a competition label. MECHANISM: competition label = the source's
@@ -234,13 +239,15 @@ def add_teacher(tr, te, cfg):
     print(msg)
 
 
-def apply_supervised(cfg, Xtr, ytr, Xva, Xte, seed):
-    """Every SUPERVISED transform, fit on the training fold only. The load-bearing call."""
+def apply_supervised(cfg, Xtr, ytr, Xva, Xte, seed, support=None):
+    """Every SUPERVISED transform, fit on the training fold only. The load-bearing call.
+    `support` = (origin features, origin labels) for cfg["te_origin_support"]."""
     if cfg["te_cols"]:
-        apply_target_encoding(Xtr, ytr, Xva, Xte, cfg["te_cols"], cfg, seed)
+        apply_target_encoding(Xtr, ytr, Xva, Xte, cfg["te_cols"], cfg, seed, support=support)
         if cfg["te_pseudo"]:
             pseudo = _pseudo_label_test(cfg, Xtr, ytr, Xte)
-            apply_target_encoding(Xtr, ytr, Xva, Xte, cfg["te_cols"], cfg, seed, pseudo=pseudo)
+            apply_target_encoding(Xtr, ytr, Xva, Xte, cfg["te_cols"], cfg, seed, pseudo=pseudo,
+                                  support=support)
             print(f"  te_pseudo pass1: mean soft label {pseudo.mean():.6f}", flush=True)
     if cfg["te_bin_cols"]:
         apply_key_target_encoding(Xtr, ytr, Xva, Xte, cfg["te_bin_cols"], cfg["te_bin_smooth"],
@@ -265,7 +272,7 @@ def load_frame(cfg):
         train, y = train.iloc[keep].reset_index(drop=True), y[keep]
         print(f"SMOKE: sample_frac={cfg['sample_frac']} -> {len(train)} train rows")
 
-    origin = load_origin() if cfg["use_origin_extra"] else None
+    origin = load_origin() if (cfg["use_origin_extra"] or cfg["te_origin_support"]) else None
     if origin is not None:
         # Run the origin rows through base_features WITH the test frame so they get the same
         # unsupervised columns and category vocabulary; they never enter a validation fold.
@@ -290,10 +297,11 @@ def build_fold(cfg, frame, f, i, j):
     train, test, _, y, feats, _, og_X, og_y = frame
     Xtr, Xva, Xte = train[feats].iloc[i].copy(), train[feats].iloc[j].copy(), test[feats].copy()
     ytr, yva = y[i], y[j]
-    if og_X is not None:
+    if og_X is not None and cfg["use_origin_extra"]:
         Xtr = pd.concat([Xtr.reset_index(drop=True), og_X], ignore_index=True)
         ytr = np.concatenate([ytr, og_y])
-    apply_supervised(cfg, Xtr, ytr, Xva, Xte, cfg["cv_seed"] + f)
+    support = (og_X, og_y) if cfg["te_origin_support"] else None
+    apply_supervised(cfg, Xtr, ytr, Xva, Xte, cfg["cv_seed"] + f, support=support)
     return Xtr, ytr, Xva, yva, Xte
 
 
@@ -320,8 +328,10 @@ def main():
     frame = load_frame(cfg)
     train, test, sample, y, feats, feats_cat, og_X, _ = frame
     print(f"{len(feats)} base features: {feats}")
-    if og_X is not None:
+    if og_X is not None and cfg["use_origin_extra"]:
         print(f"origin extra rows: {len(og_X)} (training folds only)")
+    if og_X is not None and cfg["te_origin_support"]:
+        print(f"origin TE support rows: {len(og_X)} (statistics only, never fit on)")
 
     skf = StratifiedKFold(cfg["n_folds"], shuffle=True, random_state=cfg["cv_seed"])
     oof = np.zeros(len(train))
