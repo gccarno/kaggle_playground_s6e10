@@ -316,6 +316,13 @@ Checks against the pre-registered predictions:
 
 **Submission queue for Oct 4** (the banked singles, every one a paired point): T11, T15, T14, T10, T12, T13. That leaves 4 slots free.
 
+**Pre-registered, batch 4: seed twins to fill the Oct 4 slots (`oci-free`, banked for the nightly scheduler).**
+- **What:** T16, T17 and T18 are T8 (`{"profile_keys":["flight_distance"],"teacher":true}`) with `model_seed` set to 7, 2024 and 31337. Each is a strict twin of T8 (OOF 0.960590).
+- **Why:** three slots would otherwise go unused tonight (§7). Each twin is also a seed-floor point at the champion on both OOF and public.
+- **Prediction:** |ΔOOF| < 0.00006 each, given T10's 0.000055. Public spread across T8/T10/T16–T18 within about ±0.0001.
+- **No gate.** These are noise measurements, not candidates.
+- **A0arm** is now marked `NOSUBMIT`: it's a parity replay, so its public score would just repeat A0's.
+
 **Tooling (Oct 4).** Three new skills:
 - `kaggle-cli` (this repo);
 - `oci-vm` (user-level);
