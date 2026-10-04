@@ -323,6 +323,17 @@ Checks against the pre-registered predictions:
 - **No gate.** These are noise measurements, not candidates.
 - **A0arm** is now marked `NOSUBMIT`: it's a parity replay, so its public score would just repeat A0's.
 
+**Results, batch 4** (banked; the scheduler submits them tonight). Δ is against T8 (0.960590).
+
+| Tag | run_id | Seed | OOF | ΔOOF | Read |
+|---|---|---|---|---|---|
+| T16 | 3c4ec810 | 7 | 0.960616 | +0.000026 | held |
+| T17 | 8dc6ed00 | 2024 | 0.960587 | −0.000003 | held |
+| T18 | fc3188ab | 31337 | 0.960568 | −0.000022 | held |
+
+- **The seed floor at the champion:** across T8, T10 and T16–T18, OOF has a standard deviation of about 0.00003. The range is 0.000081, from T10 to T16. The gate of +0.00014 is about 4.7 sd, so it still holds.
+- **T11 public came back at 0.96025**, which is +0.00003 over T8 against +0.000144 on OOF. That's one point and within public noise, so it's not read as a contradiction yet. The twins give the public seed spread to judge it against tomorrow.
+
 **Tooling (Oct 4).** Three new skills:
 - `kaggle-cli` (this repo);
 - `oci-vm` (user-level);
