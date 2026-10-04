@@ -399,6 +399,25 @@ Checks against the pre-registered predictions:
 
 **Stop rule (plan):** three consecutive gate failures close an axis.
 
+**Results, batch 6** (banked). Δ is against T8 (0.960590); the gate is +0.00014.
+
+| Tag | run_id | OOF | ΔOOF | Read |
+|---|---|---|---|---|
+| T8r parity | a15c7e3c | 0.960590 | 0 | **bit-identical** (max \|Δp\| = 0.0 on OOF and test). NOSUBMIT. |
+| T20 categorical shares | d981cc08 | 0.960539 | −0.000051 | **prediction failed**: null |
+| T21 per-route std | f27d4805 | 0.960589 | −0.000001 | held: null |
+| T22 route × class profile | 7a4d0a7c | 0.960500 | −0.000090 | prediction failed: null to slightly negative |
+
+**Why T20 failed: a measurement mistake worth keeping.**
+- The 57× "over binomial" figure measured the *total* across-route spread of the Business share. Most of that spread is a **smooth function of distance**, because long routes carry more Business passengers.
+- On routes with at least 50 rows, distance alone predicts the route's Business share with **R² 0.92** (shuffled 5-fold, HistGBR). The 16 numeric means give 0.92, and both together give **0.97**. For travel type the figures are 0.78, 0.88 and 0.91; for loyal customers, 0.78, 0.80 and 0.88.
+- The tree already sees raw distance and the means, so the shares told it nothing new.
+- **Rule:** a candidate feature has to vary more than noise *after conditioning on what the model already has*. That's the residual χ² logic from Phase 1, applied to features. The unconditioned binomial ratio is the wrong test.
+
+**Stop rule fired: the profile-variants axis is CLOSED.** T20, T21 and T22 are three consecutive gate failures.
+
+**What's left of the Phase 3 list.** It is mostly the TE family on FD (multi-smoothing, quantile ladders, digits, window). Phase 2 already showed that family is saturated next to the profile: TE added nothing (T7) and finer bins added nothing (T9). These are **not run blind**, and each would need a conditioned mechanism first. The one lever that showed an *interaction* with the route features is the teacher (T8), which is still untuned. That's next.
+
 **Tooling (Oct 4).** Three new skills:
 - `kaggle-cli` (this repo);
 - `oci-vm` (user-level);
