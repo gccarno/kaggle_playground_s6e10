@@ -322,3 +322,5 @@ Checks against the pre-registered predictions:
 - `submission-scheduler` (this repo, together with `scripts/submit_scheduler.py` and the cron entry on `oci-free`).
 
 The submit guards in `submit_run.py` were moved into a shared `eligible()` function, and `tests/test_submit_scheduler.py` covers the pick order. This is plumbing only: no probe or OOF changed.
+
+`scripts/sync_runs.py` (`pull` / `push <tag>`) merges runs.csv between the laptop and the VM by run_id, and copies the preds dirs along with their rows. Never scp one runs.csv over the other.
