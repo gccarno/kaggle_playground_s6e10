@@ -11,7 +11,7 @@ and fills blank score columns, and the preds dirs travel with their rows.
                                                      #   (so the slot scheduler can submit them)
     python scripts/sync_runs.py merge other.csv [--only ID ...]   # the primitive both use
 """
-import argparse, csv, subprocess, sys, tempfile
+import argparse, csv, re, subprocess, sys, tempfile
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -26,13 +26,24 @@ REMOTE_REPO = "/data/kaggle_playground_s6e10"
 FILL = ("public_lb_score", "private_lb_score", "submission_msg")
 
 
+def well_formed(r):
+    """Only 8-hex run_ids with the canonical preds_dir cross machines. Both values end up
+    in scp paths and a remote shell command, so a malformed row must not be able to steer
+    either one."""
+    rid = r.get("run_id", "")
+    return bool(re.fullmatch(r"[0-9a-f]{8}", rid)) and r.get("preds_dir") == f"experiments/preds/{rid}"
+
+
 def plan_merge(local, other, only=None):
     """Returns (rows to append, {run_id: {col: value}} fills). Pure, so it can be tested."""
     have = {r["run_id"]: r for r in local}
     append, fills = [], {}
     for r in other:
         rid = r.get("run_id", "")
-        if not rid or (only is not None and rid not in only):
+        if only is not None and rid not in only:
+            continue
+        if not well_formed(r):
+            print(f"  skip malformed row {rid!r}")
             continue
         if rid not in have:
             append.append(r)
@@ -78,9 +89,13 @@ def pull():
 
 def push(keys):
     rows = runlog.read_rows()
-    ids = [find_run(rows, k)["run_id"] for k in keys]
-    for rid in ids:
-        pd = next(r for r in rows if r["run_id"] == rid)["preds_dir"]
+    hits = [find_run(rows, k) for k in keys]
+    bad = [r["run_id"] for r in hits if not well_formed(r)]
+    if bad:
+        raise SystemExit(f"refusing malformed run_id/preds_dir: {bad}")
+    ids = [r["run_id"] for r in hits]
+    for r in hits:
+        pd = r["preds_dir"]
         sh(["scp", "-q", "-r", str(REPO_ROOT / pd),
             f"{HOST}:{REMOTE_REPO}/{Path(pd).parent.as_posix()}/"])
     sh(["scp", "-q", str(runlog.RUNS_CSV), f"{HOST}:/tmp/laptop_runs.csv"])
