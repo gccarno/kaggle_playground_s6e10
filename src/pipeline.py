@@ -19,7 +19,7 @@ train + test together.
 Module layout:  config.py (names) | dataset.py (the only S6E10-specific code) |
                 encoders.py (target encoders) | learners.py (fit_predict) | this file.
 """
-import gc, json, os, sys, time, warnings
+import gc, json, os, re, sys, time, warnings
 from pathlib import Path
 
 import numpy as np
@@ -73,6 +73,17 @@ DEFAULTS = {
     # passenger (age, class mix, ratings) is a property of the ROUTE the tree can read off
     # directly, instead of reconstructing it from 3,474 numeric split points.
     "profile_keys": [],
+    # Phase 3 profile variants, each applied to every profile key (default off):
+    # profile_cat_shares: per-key share of every level of every raw categorical (class,
+    #   travel type, customer type, gender). The comment above promised a "class mix", but
+    #   the means-only profile never had one. Across routes, the Business-class share
+    #   varies 57x more than binomial sampling allows (README Phase 3).
+    # profile_stats: extra per-key aggregates of the other raw numerics, e.g. ["std"].
+    # profile_pair_keys: [[key, cat], ...] profiles keyed on a (key, categorical) PAIR,
+    #   e.g. route x class = a fare product. Means of the other numerics plus log size.
+    "profile_cat_shares": False,
+    "profile_stats": [],
+    "profile_pair_keys": [],
 
     # -- original dataset: append its rows to every fold's TRAINING rows only
     "use_origin_extra": False,
@@ -190,8 +201,31 @@ def base_features(train, test, cfg):
         others = [c for c in RAW_NUM if c != key]
         prof = both.groupby(key)[others].mean().add_prefix(f"prof_{key}__")
         prof[f"prof_{key}__logn"] = np.log1p(both.groupby(key).size())
+        for stat in cfg["profile_stats"]:
+            prof = prof.join(both.groupby(key)[others].agg(stat)
+                             .add_prefix(f"prof_{key}__{stat}_"))
+        if cfg["profile_cat_shares"]:
+            for c in RAW_CAT:
+                if c == key or c in cfg["drop_cols"]:
+                    continue
+                sh = pd.crosstab(both[key], both[c], normalize="index")
+                # LightGBM rejects JSON-special characters in feature names.
+                sh.columns = [f"prof_{key}__{c}_" + re.sub(r"\W+", "_", str(v)) for v in sh.columns]
+                prof = prof.join(sh)
         for df in (tr, te):
             block = prof.reindex(df[key].to_numpy())
+            for c in prof.columns:
+                df[c] = block[c].to_numpy()
+        feats_num += list(prof.columns)
+
+    for key, cat in cfg["profile_pair_keys"]:
+        both = pd.concat([tr, te], ignore_index=True)
+        others = [c for c in RAW_NUM if c != key]
+        pre = f"prof2_{key}_x_{cat}__"
+        prof = both.groupby([key, cat], observed=True)[others].mean().add_prefix(pre)
+        prof[f"{pre}logn"] = np.log1p(both.groupby([key, cat], observed=True).size())
+        for df in (tr, te):
+            block = prof.reindex(pd.MultiIndex.from_arrays([df[key].to_numpy(), df[cat].to_numpy()]))
             for c in prof.columns:
                 df[c] = block[c].to_numpy()
         feats_num += list(prof.columns)

@@ -377,6 +377,28 @@ Checks against the pre-registered predictions:
 
 **Slots:** tonight's run (23:15 UTC) sends T18, T17, T16, T19, T15, T14, T13, T12 and T10. That's 9 of the 9 free slots.
 
+### Phase 3: representation build-out (from 2026-10-04)
+
+**Data check before choosing probes** (laptop, light):
+- **No FD jitter.** Every train FD value exists in the original dataset.
+- **Route sizes:** the median route has 72 rows. Only 1.1% of rows sit in routes with fewer than 30 rows, so a window encoder that borrows from neighbouring distances has almost nothing to work with. It's **deprioritised**.
+- **The adjacent-distance label rates correlate at 0.70.** That's a smooth trend that trees already capture.
+- **The profile's gap:** across routes, the share of each categorical level varies far more than binomial: Business class **57×**, business travel 20×, loyal customer 17×. The T2 profile averages only the numerics, so the route's *class mix* is missing, even though the code comment claimed it.
+
+**New axes, default off:** `profile_cat_shares`, `profile_stats`, `profile_pair_keys`.
+
+**Pre-registered, batch 6** (banked for the nightly scheduler). Every run is a strict twin of T8 (0.960590), gated at **+0.00014**. T8r replays T8 on the new code and must be bit-identical; it's NOSUBMIT.
+
+| Tag | Change vs T8 | Mechanism | Prediction |
+|---|---|---|---|
+| T20 | `profile_cat_shares: true` | The route's passenger mix *by category* (57× / 20× / 17× over binomial). A row's own class is visible, but its route's class mix isn't. | **clears**, +0.0002 to +0.0006 |
+| T21 | `profile_stats: ["std"]` | Route heterogeneity, a second moment, is weaker than the mean | below the gate |
+| T22 | `profile_pair_keys: [[FD, travel_class]]` | Route × class is a fare product. A Business passenger's satisfaction depends on that route's Business product, which the route-wide mean blends with Economy. | borderline, +0.0001 to +0.0003 |
+
+**Falsification:** if T20 is null, the categorical mix is already recoverable from the numeric means (ratings correlate with class), and "who flies it" is saturated.
+
+**Stop rule (plan):** three consecutive gate failures close an axis.
+
 **Tooling (Oct 4).** Three new skills:
 - `kaggle-cli` (this repo);
 - `oci-vm` (user-level);
