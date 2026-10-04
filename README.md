@@ -343,6 +343,40 @@ Checks against the pre-registered predictions:
   - **Falsification:** if T19 clears, the original's per-route rate holds information that per-key matching missed. It would then be re-tested next to the teacher on T8.
 - **Plan status after this:** probes (a) T12, (b) Phase 1 matching, and (c) T19 close the original-dataset arm, and the lookup hunt is closed: only FD is a key (§6). So batch 5 ends Phase 2, and Checkpoint 2 follows.
 
+**Results, batch 5** (T19 banked for tonight's scheduler; T1r is NOSUBMIT).
+
+| Tag | run_id | Baseline | OOF | ΔOOF | Read |
+|---|---|---|---|---|---|
+| T1r parity | 02728c4e | T1 | 0.960139 | 0 | **bit-identical**: max \|Δp\| = 0.0 on all OOF and test rows. The refactor is clean. |
+| T19 + origin TE support | 1f8aa334 | T1 | 0.960161 | +0.000022 | **held**: null, as predicted |
+
+- **The original-dataset arm is closed.** The original's labels add nothing as rows (T12, −0.00094), nothing through key matching (Phase 1, +0.000014), and nothing as TE support (T19, +0.00002). Its only useful channel is the **teacher**, which carries its *decision function* rather than its labels (T8, +0.00021).
+- **A process note:** a parity replay can't use `--diff-vs`, because the strict-twin check refuses a run that changes zero keys. Run parity replays without it.
+
+### Checkpoint 2 (2026-10-04): the instrument, and which columns are lookups
+
+**Instrument (§4, frozen Oct 3).**
+- **Seed floor:** 0.000039 at A0. At the champion it's about 0.00003 (one sd over T8, T10 and T16–T18).
+- **OOF→public:** slope 0.971, residual σ 0.000135.
+- **Gate:** **+0.00014 OOF.**
+- **Readability:** public deltas below about 0.00015 can't be read. The private split resolves about 1.8× better than public.
+
+**Lookups.** `flight_distance` is the only lookup key. It's a **route ID** (residual χ²/df 2.20). Age, both delays and the 13 ratings read as handled magnitudes (χ²/df ≤ 1.01), and T6 confirmed age TE is null. The route gain splits into two parts:
+1. **Identity access, about +0.0007.** This is anything that lets a tree address a single route: frequency (T5) or 4096 bins (T4).
+2. **Route knowledge, another +0.0007 to +0.0009.** This is either the route's label rate (T1, TE) or its passenger mix (T2, an *unsupervised* profile). The profile already contains the label rate, so T7 adds nothing on top of it.
+
+**The champion is T8:** the FD profile plus the teacher. OOF 0.960590 (+0.00180 over A0), public 0.96022 (+0.00193).
+- The teacher is an *interaction*. On raw features it adds +0.00010; next to the route profile it adds +0.00021.
+
+**Closed with nulls:** FD TE on top of the profile, finer bins on top of the profile, rating aggregates (T13), original rows (T12), original key matching, original TE support (T19), age TE.
+
+**Carried to Phase 3/4** (not acted on yet):
+- **Seed-bagging** clears the gate at the champion (T11, +0.000144), but its public score is only +0.00003, which is one point and unreadable.
+- **xgb and cat legs** on the T8 representation are *above* lgb (+0.00009), and a 3-family rank-mean gives +0.000155 over T11 at the same pool size.
+- **Next:** profile variants (other keys, profile statistics) and FD×X pair keys. The cross-family blend has to pass Gate 2 (ADD/SWAP) in Phase 4.
+
+**Slots:** tonight's run (23:15 UTC) sends T18, T17, T16, T19, T15, T14, T13, T12 and T10. That's 9 of the 9 free slots.
+
 **Tooling (Oct 4).** Three new skills:
 - `kaggle-cli` (this repo);
 - `oci-vm` (user-level);

@@ -10,4 +10,10 @@ This is the explanatory layer: *why* things worked or failed, written as results
 
 ## Phase findings
 
-*(none yet)*
+### Phase 2: the lookup hunt (Oct 2–4)
+
+1. **The S6E9 lesson carried over, and it's a route, not an income.** `flight_distance` is a value→label lookup: the synthetic generator copied each route's character from the source data. A tree that reads distance as a magnitude can't see it.
+2. **A lookup has two separable parts.** *Identity* is being able to address one route; frequency and fine bins provide it, for about +0.0007. *Knowledge* is what's true of that route, for about another +0.0008. The knowledge can come from labels (TE) or **without labels**, from the route's passenger mix. The unsupervised profile wins, because it carries no in-fold estimation noise.
+3. **The residual χ²/df test is a working lookup detector.** It flagged FD (2.20) and not age (0.52), and target encoding then confirmed both calls (T1 helped, T6 was null). Run it first in future contests, before trying any feature.
+4. **The original dataset helps through its function, not its labels.** As extra rows, as key-matched labels, or as TE support, the original's labels are null to negative. As a *teacher* (a model fit on the original, used as a feature), it helps, but only next to the route features. Its signal is the original's decision boundary, which a denoised model carries and individual noisy labels don't.
+
