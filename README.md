@@ -96,6 +96,11 @@ Once the gate is set, it stays fixed. **Do not re-derive it later from small lea
 | Oct 30 | **Finals chosen by hand.** Commit a predicted private score and rank band. |
 | Oct 31 | Spare slots only |
 
+**Automation (from Oct 4).** `scripts/submit_scheduler.py` runs from cron on `oci-free` at 23:15 UTC. It spends whatever slots are still free that day: the explicit queue first, then banked full-data runs that haven't been submitted, newest first.
+- Auto-fill stops after Oct 29. From then on, only queued runs are sent.
+- The scheduler never writes runs.csv. Scores come back through `submit_run.py --fill-missing`.
+- See the `submission-scheduler` skill.
+
 ---
 
 ## 8. Phase log
@@ -310,3 +315,10 @@ Checks against the pre-registered predictions:
 - **These blends are not submittable yet.** A submission needs a `runs.csv` row, and the blend scripts are deferred to Phase 4.
 
 **Submission queue for Oct 4** (the banked singles, every one a paired point): T11, T15, T14, T10, T12, T13. That leaves 4 slots free.
+
+**Tooling (Oct 4).** Three new skills:
+- `kaggle-cli` (this repo);
+- `oci-vm` (user-level);
+- `submission-scheduler` (this repo, together with `scripts/submit_scheduler.py` and the cron entry on `oci-free`).
+
+The submit guards in `submit_run.py` were moved into a shared `eligible()` function, and `tests/test_submit_scheduler.py` covers the pick order. This is plumbing only: no probe or OOF changed.

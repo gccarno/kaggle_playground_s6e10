@@ -34,3 +34,6 @@ def target_to_int(s):
         return s.astype(int).to_numpy()
     return s.astype(str).str.strip().str.lower().isin(
         ["true", "1", "satisfied"]).astype(int).to_numpy()
+
+# Kaggle's final-submission deadline (README, data facts table). The slot scheduler stops here.
+DEADLINE_UTC = "2026-10-31T23:59:00+00:00"

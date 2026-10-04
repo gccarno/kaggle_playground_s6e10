@@ -226,3 +226,8 @@ logs/
 lightning_logs/
 catboost_info/
 saved_models/
+
+# submit_scheduler.py state (VM-local; Kaggle submissions table is the record)
+experiments/submit_queue.txt
+experiments/submit_log.csv
+experiments/.submit_scheduler.lock

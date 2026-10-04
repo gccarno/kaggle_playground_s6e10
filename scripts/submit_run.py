@@ -29,6 +29,27 @@ def find_run(rows, key):
     return hit[0]
 
 
+def submitted_ids():
+    """run_ids that already carry a "[run_id]" submission on Kaggle."""
+    d = (s.get("description", "") for s in kaggle_io.submissions_table())
+    return {m[1:m.index("]")] for m in d if m.startswith("[") and "]" in m}
+
+
+def eligible(row, submitted, root=REPO_ROOT, ignore_nosubmit=False):
+    """The one set of submit guards, shared with submit_scheduler.py. Returns (ok, reason).
+    NOSUBMIT in a run's notes keeps it out of automatic picks; a named, deliberate
+    submission (this script, or an explicit queue entry) passes ignore_nosubmit=True."""
+    if float(row.get("sample_frac") or 1.0) < 1.0:
+        return False, "sample_frac < 1 smoke run"
+    if row["run_id"] in submitted:
+        return False, "already submitted"
+    if not (root / row.get("preds_dir", "") / "submission.csv").is_file():
+        return False, "submission.csv missing"
+    if not ignore_nosubmit and "NOSUBMIT" in (row.get("notes") or ""):
+        return False, "NOSUBMIT in notes"
+    return True, ""
+
+
 def fill_missing():
     by_tag = {}
     for s in kaggle_io.submissions_table():
@@ -71,13 +92,11 @@ def main():
         raise SystemExit("give a run_id/run_tag, or --fill-missing / --today")
 
     row = find_run(runlog.read_rows(), args.run)
-    if float(row.get("sample_frac") or 1.0) < 1.0:
-        raise SystemExit("refusing to submit a sample_frac < 1 smoke run")
-    if kaggle_io.find_submissions(row["run_id"]):
-        raise SystemExit(f"run {row['run_id']} has already been submitted")
+    done = {row["run_id"]} if kaggle_io.find_submissions(row["run_id"]) else set()
+    ok, why = eligible(row, done, ignore_nosubmit=True)
+    if not ok:
+        raise SystemExit(f"refusing to submit {row['run_id']}: {why}")
     sub = REPO_ROOT / row["preds_dir"] / "submission.csv"
-    if not sub.exists():
-        raise SystemExit(f"{sub} is missing -- cannot submit without retraining")
     msg = kaggle_io.submit(sub, row["run_id"], args.message or row["description"])
     runlog.update_run(row["run_id"], submission_msg=msg)
     print(f"submitted {row['run_id']} ({row.get('run_tag')}): {msg}")

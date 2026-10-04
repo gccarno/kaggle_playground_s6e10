@@ -16,3 +16,8 @@ dependencies = [
     "catboost==1.2.10",
     "kaggle==2.2.3",
 ]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
