@@ -418,6 +418,43 @@ Checks against the pre-registered predictions:
 
 **What's left of the Phase 3 list.** It is mostly the TE family on FD (multi-smoothing, quantile ladders, digits, window). Phase 2 already showed that family is saturated next to the profile: TE added nothing (T7) and finer bins added nothing (T9). These are **not run blind**, and each would need a conditioned mechanism first. The one lever that showed an *interaction* with the route features is the teacher (T8), which is still untuned. That's next.
 
+**Public scores from the Oct 4 scheduler run** (9 submitted at 23:15 UTC, no slot wasted). Read with `submit_run.py --fill-missing` on Oct 5.
+
+| Group | OOF | Public |
+|---|---|---|
+| T8 + seed twins T16/T17/T18 | 0.960568–0.960616 | 0.96022–0.96033 (range **0.00011**, sd about 0.00005) |
+| T11 seed_bag 3 | 0.960734 | 0.96025: **inside the seed band**, so its +0.000144 OOF is unconfirmed on public |
+| T14 xgb leg / T15 cat leg | 0.960678 / 0.960683 | **0.96039 / 0.96040**, +0.00012 over the T8-twin mean, the same direction as OOF (+0.00009) |
+| T19 / T20 / T21 / T22 | as above | 0.95977 / 0.96028 / 0.96026 / 0.96021, all consistent with their OOF nulls |
+
+- **Public seed spread at the champion is 0.00011.** That's the yardstick for every public delta from here on.
+- **The best single models are the xgb and cat legs on T8's representation.** They're still below the gate on OOF.
+
+**Teacher diagnostic** (`scripts/diag_teacher_rounds.py`, run on `oci-free`). Selection used only the original dataset's own CV; the competition AUC is shown for reference.
+
+| Rounds | 250 | 500 | 1000 | 1500 (current) | 3000 | 5000 |
+|---|---|---|---|---|---|---|
+| Original CV AUC | 0.99500 | **0.99519** | 0.99513 | 0.99505 | 0.99486 | 0.99470 |
+| vs competition labels | 0.95471 | 0.95434 | 0.95426 | 0.95426 | 0.95420 | 0.95433 |
+
+The curve is flat. The original's function is learned almost perfectly at any round count, so tuning rounds can't be the lever.
+
+**Pre-registered, batch 7** (`oci-free`, banked for the nightly scheduler).
+- **New axes, default off:** `teacher_profile` (the teacher also sees the FD profile, mapped onto original rows by route), `teacher_learner` (`lgb`/`cat`), `teacher_cat_params`.
+- **T8r2** replays T8 on the new code and must be bit-identical; it's NOSUBMIT.
+- **T23–T25** are strict twins of T8, gated at **+0.00014**.
+- **T26 and T27** are seed twins of the T14 and T15 legs. They aren't gated: they set the xgb/cat seed floor and give Phase 4 a second leg per family.
+
+| Tag | Change | Mechanism | Prediction |
+|---|---|---|---|
+| T23 | `teacher_profile: true` | The teacher's value is an interaction with route (+0.00010 raw vs +0.00021 next to the profile). A route-aware teacher learns the original's function per route. | borderline, +0.0001 to +0.0003 |
+| T24 | `teacher_learner: cat` | The original function is learned almost perfectly (CV AUC 0.995), so a second learner family reproduces it | below the gate |
+| T25 | `teacher_params.n_estimators: 500` | The best original-CV setting, but the curve is flat | below the gate (closes the rounds sub-axis) |
+| T26 | T14 + `model_seed: 7` | xgb seed floor | \|Δ\| < 0.00006 vs T14 |
+| T27 | T15 + `model_seed: 7` | cat seed floor | \|Δ\| < 0.00006 vs T15 |
+
+**Falsification:** if T23 is null, the teacher-route interaction is already fully formed downstream (the competition model combines the teacher logit with the route profile itself), and the teacher axis is done.
+
 **Tooling (Oct 4).** Three new skills:
 - `kaggle-cli` (this repo);
 - `oci-vm` (user-level);

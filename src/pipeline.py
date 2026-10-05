@@ -101,6 +101,15 @@ DEFAULTS = {
     "teacher_params": {"n_estimators": 1500, "learning_rate": 0.03, "num_leaves": 63,
                        "min_child_samples": 20, "colsample_bytree": 0.8,
                        "subsample": 0.8, "subsample_freq": 1},
+    # Phase 3 teacher variants (default off):
+    # teacher_profile: the teacher also sees the route profile (the prof_* columns, mapped
+    #   onto the original rows by flight_distance), so it learns the original's function
+    #   together with the route's character. T8 showed the teacher interacts with route.
+    # teacher_learner: "lgb" (default) or "cat", a different inductive bias for the same
+    #   clean function. CatBoost uses fixed iterations from teacher_cat_params.
+    "teacher_profile": False,
+    "teacher_learner": "lgb",
+    "teacher_cat_params": {"iterations": 1500, "learning_rate": 0.05, "depth": 6},
 
     # -- SUPERVISED encoders (fit per fold; see encoders.py for each one's mechanism)
     "te_cols": [],
@@ -150,7 +159,8 @@ DEFAULTS = {
     "cat_params": {"iterations": 3000, "learning_rate": 0.08, "depth": 6, "l2_leaf_reg": 3.0},
     "glm_params": {"C": 1.0},
 }
-DICT_KEYS = ["lgb_params", "xgb_params", "cat_params", "glm_params", "teacher_params"]
+DICT_KEYS = ["lgb_params", "xgb_params", "cat_params", "glm_params", "teacher_params",
+             "teacher_cat_params"]
 
 
 def load_cfg(override=None):
@@ -258,10 +268,33 @@ def add_teacher(tr, te, cfg):
     cols = RAW_NUM + RAW_CAT
     A = og[cols].copy()
     T, E = tr[cols].copy(), te[cols].copy()
+    if cfg["teacher_profile"]:
+        # The profile was computed over train+test (unsupervised). Original rows look their
+        # route up in that same table; a route absent from train+test stays NaN.
+        pcols = [c for c in tr.columns if c.startswith("prof_")]
+        if not pcols:
+            raise SystemExit("teacher_profile needs profile_keys")
+        for key in cfg["profile_keys"]:
+            kc = [c for c in pcols if c.startswith(f"prof_{key}__")]
+            table = pd.concat([tr[[key] + kc], te[[key] + kc]]).groupby(key)[kc].first()
+            block = table.reindex(og[key].to_numpy())
+            for c in kc:
+                A[c] = block[c].to_numpy()
+                T[c], E[c] = tr[c].to_numpy(), te[c].to_numpy()
     for c in RAW_CAT:
         vocab = pd.api.types.CategoricalDtype(sorted(set(A[c]) | set(T[c]) | set(E[c])))
         A[c], T[c], E[c] = A[c].astype(vocab), T[c].astype(vocab), E[c].astype(vocab)
-    m = lgb.LGBMClassifier(random_state=SEED, n_jobs=-1, verbose=-1, **cfg["teacher_params"])
+    if cfg["teacher_learner"] == "cat":
+        from catboost import CatBoostClassifier
+        for X in (A, T, E):
+            for c in RAW_CAT:
+                X[c] = X[c].astype(str)
+        m = CatBoostClassifier(random_seed=SEED, verbose=0, thread_count=-1,
+                               cat_features=RAW_CAT, **cfg["teacher_cat_params"])
+    elif cfg["teacher_learner"] == "lgb":
+        m = lgb.LGBMClassifier(random_state=SEED, n_jobs=-1, verbose=-1, **cfg["teacher_params"])
+    else:
+        raise SystemExit(f"unknown teacher_learner {cfg['teacher_learner']!r}")
     m.fit(A, oy)
     for df, X in ((tr, T), (te, E)):
         p = np.clip(m.predict_proba(X)[:, 1], 1e-6, 1 - 1e-6)
