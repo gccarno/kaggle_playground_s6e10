@@ -618,3 +618,28 @@ The submit guards in `submit_run.py` were moved into a shared `eligible()` funct
 - If U1 doesn't beat T1 in the blend, the teacher's value is already carried by the view-1 legs.
 
 **Slots tonight:** B2 and B1 go first in the queue. They're the first public read on blending. Auto-fill takes the 8 remaining slots.
+
+**Interim results, batch 10** (U1 and U5; Gate 2 on the B2 pool).
+
+| Tag | run_id | Solo | Gate 1 | ADD | SWAP | T1→leg in B2 | Read |
+|---|---|---|---|---|---|---|---|
+| U1 | c736b2cf | 0.960247 | +0.000108 vs T1 | −0.000023 | −0.000027 | **−0.000079** (sd 0.000013) | **prediction failed** |
+| U5 | 65ffd758 | 0.960210 | −0.000037 vs U1 | −0.000027 | −0.000029 | −0.000085 | held (fails) |
+
+**Why U1 failed: the teacher is shared.**
+- Every view-1 leg (T8, T14, T15, T24) carries a teacher logit.
+- Adding it to the TE view raised the leg's solo score (+0.000108), but it also moved the leg toward view 1. Disagreement with T15 fell from 0.036 (T1) to 0.029 (U1).
+- In a blend, the shared component's errors no longer cancel.
+- **Rule:** a leg's blend value comes from what it *doesn't* share with the pool. Improving a diversity leg with the pool's own best feature can destroy its value.
+- Also: inside B2, T8's leave-one-out is now −0.000009 (B2 − T8 = 0.961082, +0.000009, sd 0.000008, 1 SD). It's inside the noise, so **membership is not re-fitted.**
+
+**This changes what U2 and U3 test.** They're left running as pre-registered. The mechanism above now predicts that both **fail**, because they carry the teacher too.
+
+**Pre-registered, batch 11** (`oci-free`, queued straight after batch 10). These are the family legs on the second view *as it actually earned its place*: T1's representation, with no teacher. Gate 2 is on the B2 pool, with ADD > 2 SD and SWAP > −1 SD.
+
+| Tag | Config (strict twin of T1) | Prediction |
+|---|---|---|
+| V2 | T1 + `learner: xgb` | borderline, ADD about +0.00001 to +0.00003 (xgb added least on view 1) |
+| V3 | T1 + `learner: cat` | **passes**, ADD > 2 SD (cat is the strongest family and shares no teacher) |
+
+**Falsification:** if V3 fails too, a single leg (T1) saturates view 2, and B2 sits at the elbow for the representations we have. The next lever would then be a genuinely new view, not more families.
