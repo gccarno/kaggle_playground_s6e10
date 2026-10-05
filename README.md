@@ -536,3 +536,33 @@ The curve is flat. The original's function is learned almost perfectly at any ro
 The submit guards in `submit_run.py` were moved into a shared `eligible()` function, and `tests/test_submit_scheduler.py` covers the pick order. This is plumbing only: no probe or OOF changed.
 
 `scripts/sync_runs.py` (`pull` / `push <tag>`) merges runs.csv between the laptop and the VM by run_id, and copies the preds dirs along with their rows. Never scp one runs.csv over the other.
+
+### Phase 4: diversity and blending (from 2026-10-05)
+
+**Tooling.** `scripts/blend.py` builds fixed, unfitted `rank_mean` blends from archived OOF/test pairs.
+- Each leg's OOF is turned into ranks over the whole OOF, and the legs get equal weight.
+- AUC only sees order, so ranking removes each family's calibration scale without fitting anything.
+- `gate2` reports ADD and SWAP for a candidate leg, each with a paired-bootstrap SD over 200 resamples. Its O(n) weighted AUC matches `roc_auc_score` exactly, ties and weights included.
+- `write` archives a blend as an ordinary run (`learner=blend`, `manifest.json` listing the legs), so `submit_run.py` and the nightly scheduler treat it like any other run.
+
+**Gate 2, defined before any blend was scored.**
+- ADD(c | P) = AUC(P + c) − AUC(P).
+- SWAP(c | P) = AUC(P − w + c) − AUC(P), where w is P's weakest leave-one-out contributor. The pool size stays constant, so a gain can't come just from one more averaged member.
+- **A leg passes when ADD > 2 × its paired SD and SWAP > 0.**
+- **The shipping gate is unchanged:** a blend replaces the champion only at **≥ +0.00014 OOF over T8 (0.960590)**. It's also reported against the best single leg (T27, 0.960715).
+
+**Pre-registered, batch 9.** Laptop only, with no training, over legs that are already archived.
+
+| ID | Test | Prediction |
+|---|---|---|
+| B9a | `score` on {T8, T14, T15}, the 3-family rank_mean | OOF 0.96085–0.96092. That clears the shipping gate over T8 (+0.00025 or more) and beats T27 by +0.00014 or more. |
+| B9b | Leave-one-out within {T8, T14, T15} | All three contribute more than 0. lgb (T8) is the weakest. |
+| B9c | `gate2` with seed twins T16, T26, T27 as candidates | ADD is small (+0.00001 to +0.00005). SWAP is at most 0 except for a cat twin replacing lgb. **No twin passes** (seed noise isn't diversity). |
+| B9d | `gate2` with the representation near-twins T7, T9, T11, T13, T20–T25 and T28 as candidates | **None passes.** T24 (CatBoost teacher, a different teacher function) is the only one with a mechanism, and is borderline at best. |
+| B9e | `gate2` with weaker or other-representation legs T1, T2, A0, X1, K1 and G1 as candidates | None passes, with ADD ≤ 0. Each is below the pool floor (playbook §6). |
+| B9f | `stack` on {T8, T14, T15}: a nested-CV logit stack against rank_mean | The stack washes, \|Δ\| < 0.00003. That's the 5th S6E9-style wash; the legs are near-twins, so there's no correlated error to subtract. |
+| B9g | `disagree --ref T15 --all` | Spearman(solo, disagreement) ≤ −0.7. No leg is both strong (≥ 0.9605) and decorrelated (more than 2× the seed-twin disagreement). |
+
+**Falsification:**
+- If B9a lands under +0.00014 over T8, cross-family diversity on a single representation is too small to ship, and Phase 4 has to find a **second representation** rather than more learners.
+- If B9d finds a passing near-twin, solo-null representation probes carry blend value, and the closed axes have to be re-read as legs.
