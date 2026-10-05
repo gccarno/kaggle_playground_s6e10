@@ -566,3 +566,55 @@ The submit guards in `submit_run.py` were moved into a shared `eligible()` funct
 **Falsification:**
 - If B9a lands under +0.00014 over T8, cross-family diversity on a single representation is too small to ship, and Phase 4 has to find a **second representation** rather than more learners.
 - If B9d finds a passing near-twin, solo-null representation probes carry blend value, and the closed axes have to be re-read as legs.
+
+**Results, batch 9.** All are OOF; the paired SDs come from 200 bootstrap resamples.
+
+| ID | Result | Read |
+|---|---|---|
+| B9a | {T8, T14, T15} = **0.960889**: +0.000299 over T8, +0.000174 over T27 | **held**, archived as **B1** (`69b9c704`) |
+| B9b | Leave-one-out: T8 +0.000028, T14 +0.000056, T15 +0.000101 | held: lgb is the weakest |
+| B9c | Seed twins: T16 / T26 fail. T27 has ADD +0.000029 (sd 0.000008), but its SWAP is +0.000002 (sd 0.000017). | **failed by the letter** (T27 "passes"). In substance it's a seed-bag of the dominant cat leg, and its SWAP is 0.1 SD. |
+| B9d | Near-twins on the 3-pool: **T7 +0.000115, T9 +0.000095, T24 +0.000081, T23 +0.000046, T21 +0.000033 pass.** T11, T13, T20, T22, T25 and T28 fail. | **prediction failed** |
+| B9e | **T1 +0.000141 (7 SD, the largest of all)** and T2 +0.000102 pass. A0, X1, K1, G1 and T12 fail. | **failed for T1/T2**, held for the raw-feature legs |
+| B9f | Nested logit 0.960885 against rank_mean 0.960889 (Δ −0.000005, sd 0.000007). Weights 0.26 / 0.29 / 0.45. | held: the stack washes |
+| B9g | Spearman(solo, disagreement vs T15) = **−0.954** (n = 43) | held |
+
+**Why B9d and B9e failed, and the mechanism that replaces them.**
+- Every leg that passed represents the **route** differently from T8:
+  - T1: FD as a *label rate*, with no profile and no teacher;
+  - T2: the profile with no teacher;
+  - T7: profile plus TE;
+  - T9: profile with 4096 bins;
+  - T24: a *different teacher function*.
+- Legs that pass on the 3-pool differ from T8 only in what was added *beside* the route (T13 ratings, T20 shares, T28 age, T11 seeds), and they fail.
+- Different route representations make **different route errors**, and averaging cancels them.
+- **T1 is weaker solo (0.96014) but the best leg**, because its route errors are the least correlated with T8's (disagreement 0.036 against about 0.018).
+- This is playbook §7's "the representation is the unit of ensemble value". The **pool-floor rule** (§6: a leg below the pool's weakest solo contributes nothing) is **wrong here**. It holds for a weaker leg on the *same* representation (A0, X1, K1), not for a weaker leg on a different one.
+
+**Sequential Gate 2 (mechanical membership, not greedy):**
+- **{T8, T14, T15} + T1:** 0.961030.
+- **+ T24:** ADD +0.000043 (sd 0.000010), SWAP +0.000052, giving **0.961073**.
+- T7 also passed by the letter, but its SWAP was +0.000001.
+- **On the 5-pool nothing passes**: every candidate has ADD ≤ +0.000018.
+- **B2** (`ead789bd`) = rank_mean{T8, T14, T15, T1, T24} = **0.961073, which is +0.000483 over T8 and clears the shipping gate.**
+
+**Gate 2 weakness, noted and not changed mid-batch:**
+- "SWAP > 0" lets through a SWAP of 0.1 SD (T27, T7).
+- From batch 10 on, **SWAP must also exceed −1 SD and ADD must exceed 2 SD.** Both have to hold, so a pure noise SWAP can't carry a leg that has no real ADD.
+- In practice ADD > 2 SD did the work in every batch 9 decision.
+
+**Pre-registered, batch 10: the TE route representation, built out across families** (`oci-free`, banked). Batch 9 found that the TE route representation is the most valuable second view. But it exists only as T1: lgb, no teacher. Every leg below is gated by Gate 2 on the B2 pool {T8, T14, T15, T1, T24}. Gate 1 (solo against its strict twin) is reported for information.
+
+| Tag | Config (strict twin of) | Mechanism | Prediction |
+|---|---|---|---|
+| U1 | `te_cols:[FD], teacher:true` (T1 + teacher) | The teacher interacts with route knowledge (T3 +0.00010 raw, T8 +0.00021 next to the profile) | solo ≈ 0.9603–0.9604. On the B2 pool: **SWAP for T1 > 0**, a stronger leg on the same view. |
+| U2 | U1 + `learner: xgb` | A family leg on the second view, as T14 was on the first | solo ≥ U1. **Passes** Gate 2. |
+| U3 | U1 + `learner: cat` | Same, with cat. cat was the strongest contributor on view 1. | solo ≥ U1 + 0.00005. **Passes.** |
+| U4 | T15 + `num_as_cat:[FD]` | A third route view: CatBoost's ordered target statistics and FD×category CTRs, inside the booster | borderline. Solo T15 ± 0.00005, ADD about +0.00002 to +0.00005. |
+| U5 | U1 + `te_pseudo: true` | Test-row soft labels added to the per-route TE support. A variance cut for the route rate. | solo within ±0.00005 of U1. **Fails** Gate 2 next to U1 (a near-twin). |
+
+**Falsification:**
+- If U2 and U3 fail with U1 in the pool, the second view's value is saturated by one leg, and the next lever is a **third view** (U4), not more families.
+- If U1 doesn't beat T1 in the blend, the teacher's value is already carried by the view-1 legs.
+
+**Slots tonight:** B2 and B1 go first in the queue. They're the first public read on blending. Auto-fill takes the 8 remaining slots.
