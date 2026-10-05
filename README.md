@@ -489,6 +489,45 @@ The curve is flat. The original's function is learned almost perfectly at any ro
 
 **Falsification:** if T28 clears, the gain from removing residual χ² is not proportional to the excess. The sizing rule would then be wrong, and age becomes a Phase 3 axis worth building out.
 
+**Results, batch 8** (banked). Δ is against T8 (0.960590).
+
+| Tag | run_id | OOF | ΔOOF | Age χ²/df | Read |
+|---|---|---|---|---|---|
+| T28 age TE | f29ba752 | 0.960557 | −0.000033 | 2.77 → 1.99 | held: below the gate |
+| T29 age as categorical | 757b4901 | 0.960244 | **−0.000346** | 2.77 → **0.05** | held, and it **erased** the age residual while *losing* AUC. FD residuals rose to 1.24. |
+
+**T29's lesson:** the residual χ² measures *per-group calibration in the mean*. A model can drive it to zero, here with 69 categorical age levels, and still rank worse, because those splits cost it elsewhere. A high residual χ² is a candidate signal, not a promised AUC gain. The sizing rule (excess χ² → expected gain) held: about +0.00005 was predicted, and ≤ 0 is what came back.
+
+### Checkpoint 3 (2026-10-05): the champion recipe and the closed axes
+
+**Champion recipe: the T8 representation.**
+- **Config:** `{"profile_keys":["flight_distance"],"teacher":true}`. That's the FD route profile (means of the 16 other numerics plus log size, over train+test) and a LightGBM teacher fit on the original dataset.
+- **Scores:** OOF 0.960590 with lgb; public 0.96022, with seed twins spanning 0.96022–0.96033.
+- **Best singles on this representation:**
+  - cat legs T15/T27: 0.960683 / 0.960715 OOF, public 0.96040;
+  - xgb legs T14/T26: 0.960678 / 0.960672 OOF, public 0.96039.
+
+**Evidence that representation is done, not just stalled:** under the champion, `residual_lookup.py` puts FD and every FD pair at χ²/df ≈ 1.0 (A0: 2.9). The only residual left is age, a calibration-type signal that two probes showed is not worth AUC.
+
+**Closed axes:**
+
+| Axis | Probes | Why it's closed |
+|---|---|---|
+| Profile variants (categorical shares, std, route × class) | T20–T22 | Stop rule. The categorical mix is a smooth function of distance plus the means (R² 0.97). |
+| Teacher (route-aware, CatBoost teacher, rounds) | T23–T25 + diagnostic | Stop rule. The original's function is learned at CV AUC 0.995 at any setting. |
+| FD TE family (TE, multi-smoothing, ladders, digits, window) | T7, T9 + residual test | FD residual χ²/df ≈ 1 under the champion |
+| Original dataset as labels (rows, key matching, TE support) | T12, Phase 1, T19 | Only the teacher channel carries it |
+| Age (TE, categorical) | T6, T28, T29 | A calibration residual; no AUC |
+| Rating aggregates | T13 | null |
+
+**Carried to Phase 4:**
+- **Family legs:** cat and xgb are above lgb on this representation. Their seed floors are about 0.00003 (cat) and about 0.00001 (xgb).
+- **Early read:** a 3-family rank-mean gave +0.000155 over T11 at the same pool size. It has to pass Gate 2 (ADD/SWAP) properly.
+- **seed_bag (T11)** is +0.000144 on OOF but unconfirmed on public.
+- **RealMLP**, which public notebooks report at +0.0003 in stacks, is an untested neural leg.
+
+**Slots:** tonight sends T29, T28, T27, T26, T25, T24, T23, T13, T12 and T10, filling 10 of 10.
+
 **Tooling (Oct 4).** Three new skills:
 - `kaggle-cli` (this repo);
 - `oci-vm` (user-level);
