@@ -455,6 +455,40 @@ The curve is flat. The original's function is learned almost perfectly at any ro
 
 **Falsification:** if T23 is null, the teacher-route interaction is already fully formed downstream (the competition model combines the teacher logit with the route profile itself), and the teacher axis is done.
 
+**Results, batch 7** (banked). Δ is against T8 (0.960590) unless noted; the gate is +0.00014.
+
+| Tag | run_id | OOF | ΔOOF | Read |
+|---|---|---|---|---|
+| T8r2 parity | 8af8446e | 0.960590 | 0 | bit-identical OOF (NOSUBMIT) |
+| T23 route-aware teacher | 1af30fff | 0.960558 | −0.000032 | **prediction failed**: null. The teacher × route interaction already forms downstream. |
+| T24 CatBoost teacher | 6363a28e | 0.960650 | +0.000060 | held: below the gate |
+| T25 500-round teacher | 81ae7cd7 | 0.960580 | −0.000010 | held: null |
+| T26 xgb seed twin | 9ed7ebee | 0.960672 | −0.000006 vs T14 | held: xgb seed floor about 0.00001 |
+| T27 cat seed twin | f9677b17 | 0.960715 | +0.000032 vs T15 | held: cat seed floor about 0.00003 |
+
+**Stop rule fired: the teacher axis is CLOSED** (T23, T24 and T25 failed the gate in a row).
+
+**The conditioned residual test** (`scripts/residual_lookup.py`, new). It computes χ²/df of per-value OOF residuals against calibrated noise, for each column and for FD pairs.
+
+| Key | A0 | T6 (A0 + age TE) | T3 (teacher) | T2 (profile) | T8 | T14 xgb | T15 cat |
+|---|---|---|---|---|---|---|---|
+| `flight_distance` | **2.91** | 2.95 | 3.01 | 0.84 | 0.97 | 0.88 | 1.01 |
+| FD × class/type/customer | 2.4–2.6 | 2.5–2.6 | 2.5–2.6 | 0.84–0.91 | 0.98–1.02 | 0.90–0.95 | 1.02–1.07 |
+| `age` | 1.77 | **1.12** | 2.50 | 2.55 | **2.77** | 2.53 | 2.39 |
+
+- **The route lookup is fully used.** FD and every FD pair sit at about 1.0 under the champion. That's evidence that the FD representation is complete, not just that the later probes missed. It's also why the TE family on FD (multi-smoothing, ladders, digits, window) is not run.
+- **Age is the only signal left.** χ² ≈ 191 on 69 df (p ≈ 1e-13). Removing a smooth trend only takes it to 2.66, so it's value-specific: a sawtooth, sharpest above age 60 (61 +, 62 −, 63 +, 64 +, 65 −, 66 +, 67 −, 68 +, 69 −).
+- **Where it comes from:** it **surfaces as the model gets stronger elsewhere** (A0 1.77 → T2 2.55 → T8 2.77). The teacher doesn't create it.
+
+**Pre-registered, batch 8** (`oci-free`, banked). Strict twins of T8, gate +0.00014.
+
+| Tag | Change | Prediction |
+|---|---|---|
+| T28 | `te_cols: [age]` | **below the gate** (excess χ² is about 120, against FD's 4,300 at A0, which bought +0.0016, so expect about +0.00005). Age χ²/df should fall to about 1. |
+| T29 | `num_as_cat: [age]` | below the gate, at most T28 |
+
+**Falsification:** if T28 clears, the gain from removing residual χ² is not proportional to the excess. The sizing rule would then be wrong, and age becomes a Phase 3 axis worth building out.
+
 **Tooling (Oct 4).** Three new skills:
 - `kaggle-cli` (this repo);
 - `oci-vm` (user-level);
