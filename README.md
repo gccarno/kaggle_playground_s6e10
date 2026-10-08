@@ -714,3 +714,7 @@ The submit guards in `submit_run.py` were moved into a shared `eligible()` funct
 - If B4 doesn't beat B3 + U9 (0.961158), T8 still carries something, and B5 keeps it.
 
 **Slots:** B4 goes first in tonight's queue and displaces U4s2 to Oct 9. On Oct 9: U4s2, plus B4x, B5 and the seven probes.
+
+**Batch 13, first results** (laptop, no training).
+- **B4** (`fb906814`) = **0.961173**. That's +0.000067 over B3, +0.000583 over T8, and above B3 + U9 (0.961158). The prediction (≈ 0.96117) held. **B4 is the champion blend**, and it's queued first for tonight.
+- On the B4 pool, U4s (ADD +0.000005), U4s2 (+0.000001) and T8 (−0.000015) all **fail**. U9 already gives the pool a second cat leg, so the seed-bag value the twins had on B3 is used up. **B4x is not built**, and its slot goes to the next leg from batch 13 that passes. The falsification for B4 didn't trigger: T8 stays out.
