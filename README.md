@@ -643,3 +643,30 @@ The submit guards in `submit_run.py` were moved into a shared `eligible()` funct
 | V3 | T1 + `learner: cat` | **passes**, ADD > 2 SD (cat is the strongest family and shares no teacher) |
 
 **Falsification:** if V3 fails too, a single leg (T1) saturates view 2, and B2 sits at the elbow for the representations we have. The next lever would then be a genuinely new view, not more families.
+
+**Results, batches 10–11** (complete). Gate 2 is on the B2 pool, or on B2 with U4 in place of T15 where noted.
+
+| Tag | run_id | Solo | Public | Gate 2 | Read |
+|---|---|---|---|---|---|
+| U2 xgb on U1 | 94b087c0 | 0.960333 | 0.95960 | ADD −0.000009: fail | held (shared teacher) |
+| U3 cat on U1 | 1c1c3d66 | 0.960354 | 0.95974 | ADD −0.000003: fail | **prediction failed** (prediction was pass). Explained by the U1 mechanism. |
+| **U4** T15 + FD categorical | 17c85549 | **0.960835** (Gate 1 **+0.000152** vs T15) | **0.96056** | ADD +0.000030 (4 SD), SWAP +0.000043 (4 SD): **PASS** | prediction failed **upward**. **Best single.** |
+| V2 xgb on T1 | 2ef8460b | 0.960135 | 0.95962 | on the U4 pool: ADD −0.000004: fail | held |
+| V3 cat on T1 | 9f93364b | 0.959894 | 0.95959 | ADD +0.000016 (1.3 SD): fail | **prediction failed.** Falsification branch: **T1 alone saturates view 2.** |
+
+**Public read on blending** (Oct 5 slots): B1 0.96044 and **B2 0.96053**, against T8 0.96022 (+0.00031, same direction as OOF +0.00048). U4 0.96056.
+
+**U4's mechanism.** CatBoost turns a categorical into ordered target statistics *and* builds combination CTRs (FD × class, FD × travel type) on the fly. That's the route × class lookup T22 tried to build as an lgb profile, which failed. The difference is that CatBoost estimates it with ordered (leak-free) statistics, inside the booster.
+
+**B3** = rank_mean{T8, T14, **U4**, T1, T24} = **0.961106**. It's B2 with T15 swapped for U4 (+0.000033, sd 0.000008). This is the **champion blend**. No remaining candidate passes on it (T15 and T27 fail as well).
+
+**Pre-registered, batch 12: FD as a native categorical, across families and as its own view** (`oci-free`, banked). Gate 2 is on the B3 pool (ADD > 2 SD, SWAP > −1 SD), and Gate 1 is against the strict twin named.
+
+| Tag | Config (strict twin of) | Mechanism | Prediction |
+|---|---|---|---|
+| U6 | T14 + `num_as_cat:[FD]` | xgb's partition-based categorical splits as the route identity | Gate 1 null (xgb has no CTRs; FD identity is already in the profile). Fails Gate 2. |
+| U7 | T8 + `num_as_cat:[FD]` | lgb gradient-grouped categorical | Gate 1 null to negative (T29 lesson: high-cardinality categoricals overfit in lgb). Fails. |
+| U9 | U4 − `profile_keys` | CatBoost's CTRs as the *only* route knowledge: a third view, without the profile | solo below U4 (about 0.9605). Gate 2 borderline: **passes only if CTR route errors differ from profile route errors.** |
+| U4s / U4s2 | U4 + `model_seed` 7 / 1337 | cat seed floor at the new best leg | \|Δ\| < 0.00005 vs U4. As blend legs, they fail Gate 2 (B9c). |
+
+**Falsification:** if U6 or U7 clears Gate 1, FD-as-categorical is a family-general representation gain, not a CatBoost-CTR effect. Phase 3's "representation done" call would then be wrong for categorical encodings.
