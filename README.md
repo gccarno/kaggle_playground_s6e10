@@ -670,3 +670,11 @@ The submit guards in `submit_run.py` were moved into a shared `eligible()` funct
 | U4s / U4s2 | U4 + `model_seed` 7 / 1337 | cat seed floor at the new best leg | \|Δ\| < 0.00005 vs U4. As blend legs, they fail Gate 2 (B9c). |
 
 **Falsification:** if U6 or U7 clears Gate 1, FD-as-categorical is a family-general representation gain, not a CatBoost-CTR effect. Phase 3's "representation done" call would then be wrong for categorical encodings.
+
+**Oct 8 slots.**
+- **B3 submitted: public 0.96056.** B2 was 0.96053, so +0.00003 is unreadable, consistent with the +0.000033 OOF.
+- **The Oct 7 slots were lost (0 of 10).** No runs were banked while Phase 4 was paused, and the scheduler correctly had nothing to send. **Lesson: bank filler before any pause.**
+- Banked near-twin blends of B3 (OOF): **B3s** 0.961101 (seed-twin legs), **B3c** 0.961102 (+T15), **B3m** 0.961121 (−T8), **B3x** 0.961083 (+3 seed twins). All are within ±0.00002 of B3, so their public spread measures blend noise.
+- Batch 12's 5 runs, plus these 4, fill the 9 slots that are left.
+
+**Batch 12, first result:** U7 (`f1290490`, T8 + FD as an lgb categorical) = **0.959408, −0.00118 against T8.** That matches the prediction: lgb overfits a 3.5k-level categorical, the same failure as T29.
