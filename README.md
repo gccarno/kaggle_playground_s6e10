@@ -678,3 +678,39 @@ The submit guards in `submit_run.py` were moved into a shared `eligible()` funct
 - Batch 12's 5 runs, plus these 4, fill the 9 slots that are left.
 
 **Batch 12, first result:** U7 (`f1290490`, T8 + FD as an lgb categorical) = **0.959408, −0.00118 against T8.** That matches the prediction: lgb overfits a 3.5k-level categorical, the same failure as T29.
+
+**Results, batch 12** (complete). Gate 2 is on the B3 pool {T8, T14, U4, T1, T24} = 0.961106.
+
+| Tag | run_id | Solo | Gate 1 | ADD (sd) | SWAP (sd) | Read |
+|---|---|---|---|---|---|---|
+| U7 lgb FD-cat | f1290490 | 0.959408 | −0.00118 vs T8 | −0.000018 (0.000013) | −0.000009 | held (fails) |
+| U6 xgb FD-cat | f86c8c1f | 0.958229 | −0.00245 vs T14 | −0.000036 (0.000016) | −0.000043 | held (fails; worse than predicted) |
+| **U9** CTR-only route | cbf31660 | **0.960831** | −0.000004 vs U4 | **+0.000052 (0.000008)** | **+0.000067** | **PASS, 6.5 SD.** Prediction (borderline, solo ≈ 0.9605) failed **upward**. |
+| U4s seed 7 | 2c7c01dc | 0.960849 | +0.000014 | +0.000024 (0.000007) | +0.000040 | passes by the letter |
+| U4s2 seed 1337 | 9399f1b0 | 0.960801 | −0.000034 | +0.000019 (0.000007) | +0.000036 | passes by the letter |
+
+**Read.**
+- U9 matches U4's solo score with no profile at all. CatBoost's CTRs fully replace the hand-built route profile. Its disagreement with U4 is 0.0147, against 0.0071 for the seed twin U4s. **The CTR route view and the profile route view make different errors.** That's a third route view.
+- The seed twins of U4 pass (B9c said they wouldn't). U4 is now the dominant leg, so seed-bagging it is a variance cut on the leg that carries the most weight. They are recorded as a seed bag, not as diversity.
+- T8's leave-one-out in B3 is now −0.000016: it's the weakest leg, and it's the SWAP target. B3 + U9 (6 legs) = 0.961158.
+
+**Pre-registered, batch 13: the CTR route view** (blends on the laptop; U10, U13, U14, U11 on `oci-free`; U15, U16, U17 on Kaggle kernels). Gate 2 is on the **B4 pool {T14, U4, U9, T1, T24}** (ADD > 2 SD, SWAP > −1 SD). Gate 1 is against the strict twin named.
+
+| Tag | Config (strict twin of) | Mechanism | Prediction |
+|---|---|---|---|
+| **B4** | blend {T14, U4, U9, T1, T24} | B3 with U9 in place of T8 (the SWAP that passed) | OOF ≈ 0.96117. Public within the noise of B3. |
+| B4x | B4 + U4s + U4s2, if both pass on the B4 pool | Seed bag of the dominant cat leg | ADD ≈ +0.00002 |
+| U10 | U9 − `teacher` | The pure CTR view. The U1 lesson says the shared teacher costs diversity. | solo about 0.0002 below U9. Gate 2 ADD ≥ U9's on B3 if the teacher was the shared part. |
+| U13 | U9 + `teacher_learner: cat` | A different teacher function on the CTR view (T24 analogue) | solo ±0.00005. Fails Gate 2 next to U9. |
+| U14 | U9 + `model_seed: 7` | Seed floor at the new leg; seed-bag material | \|Δ\| < 0.00005 vs U9 |
+| U11 | U4 + `num_as_cat: [FD, age]` | Age CTRs inside CatBoost (T29 failed only in lgb) | Gate 1 null (age residual χ² 0.52) |
+| U15 | U4 + `cat_params.depth: 8` | More capacity for CTR combinations at the best leg | Gate 1 ±0.0001 |
+| U16 | U4 + `seed_bag: 3` | In-leg seed bag at the best single (T11 analogue) | +0.00003 to +0.00005 over U4 |
+| U17 | U4 + `cat_params` lr 0.04, 6000 iterations | A lower learning rate at the best leg (best_iter 520–1030, far from the cap) | Gate 1 +0.00002 to +0.00008 |
+| B5 | Sequential Gate 2 over the batch-13 legs on the B4 pool | Mechanical membership | ≥ B4 |
+
+**Falsification:**
+- If U10 passes Gate 2 with a larger ADD than U9, the "teacher is shared" rule generalises across views, and diversity legs drop the teacher.
+- If B4 doesn't beat B3 + U9 (0.961158), T8 still carries something, and B5 keeps it.
+
+**Slots:** B4 goes first in tonight's queue and displaces U4s2 to Oct 9. On Oct 9: U4s2, plus B4x, B5 and the seven probes.
