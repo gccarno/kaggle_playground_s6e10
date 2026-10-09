@@ -102,6 +102,27 @@ def archive(workdir, run_id):
     return dest
 
 
+def adopt(override):
+    """Recover the identity of an already-pushed kernel from the notebook make() wrote.
+    The --cfg must equal the cfg baked into that notebook, and the same run_id/code_sha
+    echo checks as a fresh run still apply after the pull."""
+    from make_probe_kernel import slug_for
+    from config import KAGGLE_USER
+    nb_path = REPO_ROOT / ".kaggle_output" / f"_push_{slug_for(override['run_tag'])}" / "kernel.ipynb"
+    src = "".join(json.loads(nb_path.read_text(encoding="utf-8"))["cells"][0]["source"])
+    sha = re.search(r"^EXPECTED_SHA = '([0-9a-f]+)'", src, re.M).group(1)
+    run_id = re.search(r"^RUN_ID = '([0-9a-f]+)'", src, re.M).group(1)
+    baked = json.loads(eval(re.search(r"^cfg = json.loads\((.*)\)$", src, re.M).group(1)))
+    if baked != override:
+        raise SystemExit(f"--cfg differs from the kernel's baked cfg: {baked}")
+    ref = f"{KAGGLE_USER}/{slug_for(override['run_tag'])}"
+    out = kaggle_io.kaggle("kernels", "status", ref)
+    m = re.search(r"KernelWorkerStatus\.(\w+)", out.stdout + out.stderr)
+    status = m.group(1) if m else (out.stdout + out.stderr).strip()
+    print(f"adopting run_id={run_id}  kernel={ref}  code={sha[:10]}  status={status}")
+    return sha, run_id, ref, status
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -114,6 +135,9 @@ def main():
     ap.add_argument("--accelerator", default=None, choices=["NvidiaTeslaT4", "NvidiaTeslaP100"])
     ap.add_argument("--poll-interval", type=int, default=60)
     ap.add_argument("--timeout-min", type=int, default=240)
+    ap.add_argument("--adopt", action="store_true",
+                    help="log a kernel that already ran (its poller died): no push or poll; "
+                         "run_id, sha and cfg come from the existing _push_<slug>/kernel.ipynb")
     args = ap.parse_args()
 
     override = read_json_arg(args.cfg)
@@ -125,18 +149,22 @@ def main():
     if cfg["sample_frac"] < 1.0 and args.submit:
         raise SystemExit("refusing to submit a sample_frac < 1 smoke run")
 
-    sha = head_sha()
-    if pushed_sha() != sha:
-        raise SystemExit(f"Kaggle code dataset is at {pushed_sha() or '(never pushed)'}, "
-                         f"HEAD is {sha}. Run scripts/push_code.py first.")
+    if args.adopt:
+        sha, run_id, ref, status = adopt(override)
+        version = ""
+    else:
+        sha = head_sha()
+        if pushed_sha() != sha:
+            raise SystemExit(f"Kaggle code dataset is at {pushed_sha() or '(never pushed)'}, "
+                             f"HEAD is {sha}. Run scripts/push_code.py first.")
 
-    run_id = uuid.uuid4().hex[:8]
-    push_dir, ref = make(override["run_tag"], override, sha, run_id,
-                         gpu=bool(args.accelerator))
-    print(f"run_id={run_id}  kernel={ref}  code={sha[:10]}")
-    version = push(push_dir, args.accelerator)
-    time.sleep(15)       # let the new version register before the first status call
-    status = poll(ref, args.poll_interval, args.timeout_min)
+        run_id = uuid.uuid4().hex[:8]
+        push_dir, ref = make(override["run_tag"], override, sha, run_id,
+                             gpu=bool(args.accelerator))
+        print(f"run_id={run_id}  kernel={ref}  code={sha[:10]}")
+        version = push(push_dir, args.accelerator)
+        time.sleep(15)       # let the new version register before the first status call
+        status = poll(ref, args.poll_interval, args.timeout_min)
 
     workdir = REPO_ROOT / ".kaggle_output" / f"{run_id}_{datetime.now(timezone.utc):%Y%m%dT%H%M%SZ}"
     metrics, log_text = pull(ref, workdir)

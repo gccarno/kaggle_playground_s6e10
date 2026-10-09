@@ -718,3 +718,39 @@ The submit guards in `submit_run.py` were moved into a shared `eligible()` funct
 **Batch 13, first results** (laptop, no training).
 - **B4** (`fb906814`) = **0.961173**. That's +0.000067 over B3, +0.000583 over T8, and above B3 + U9 (0.961158). The prediction (≈ 0.96117) held. **B4 is the champion blend**, and it's queued first for tonight.
 - On the B4 pool, U4s (ADD +0.000005), U4s2 (+0.000001) and T8 (−0.000015) all **fail**. U9 already gives the pool a second cat leg, so the seed-bag value the twins had on B3 is used up. **B4x is not built**, and its slot goes to the next leg from batch 13 that passes. The falsification for B4 didn't trigger: T8 stays out.
+
+**Results, batch 13** (complete; Gate 2 on the B4 pool {T14, U4, U9, T1, T24} = 0.961173). U16 and U17 finished on Kaggle but their pollers died. They were logged with the new `collect_run.py --adopt`, which runs the same run_id/code_sha echo checks but skips the push.
+
+| Tag | run_id | Solo | Gate 1 | Public | ADD (sd) | SWAP (sd) | Read |
+|---|---|---|---|---|---|---|---|
+| U10 pure CTR (no teacher) | b7f0c8a9 | 0.960278 | −0.000553 vs U9 | 0.96014 | +0.000030 (0.000012) | −0.000003 | fails on B4. Prediction (solo about 0.0002 below U9) failed: it's 0.00055 below. |
+| **U11** U4 + age as cat | 00a6fe3c | **0.961009** | **+0.000174 vs U4** | **0.96066** | **+0.000040 (0.000007)** | +0.000039 | **PASS.** Prediction (Gate 1 null) **failed upward**. It's the best single, and it clears the shipping gate on its own. |
+| U13 U9 + cat teacher | 6ea54be6 | 0.960881 | +0.000050 vs U9 | 0.96027 | +0.000039 (0.000007) | +0.000017 | **PASS.** Prediction (fails next to U9) failed. |
+| U14 U9 seed 7 | fc4a9df0 | 0.960867 | +0.000036 | 0.96036 | +0.000017 | −0.000001 | held (seed floor; fails) |
+| U15 U4 depth 8 | cd1698fa | 0.960762 | −0.000073 | 0.96060 | −0.000001 | −0.000010 | held (±0.0001); fails |
+| U16 U4 seed_bag 3 | dfa83498 | 0.960951 | +0.000116 | pending | +0.000008 | +0.000003 | the bag gain is above the predicted range, but it fails Gate 2: B4 already averages two cat legs |
+| U17 U4 lr 0.04 | 2222cda3 | 0.960889 | +0.000054 | pending | +0.000002 | −0.000006 | held (+0.00002 to +0.00008); fails |
+
+**Public, Oct 8:** B4 **0.96064** (B3 0.96056: +0.00008, same sign as OOF +0.000067). U11 **0.96066**, the best public score (U4 0.96056: +0.00010, same sign as OOF).
+
+**Why U11 works (mechanism, provisional).** Age's residual χ²/df was 0.52, so the model wasn't missing any *per-value* age information. The gain has to come from what CatBoost does with a categorical beyond its own target statistic: **combination CTRs** (age × class, age × travel type, age × FD). That's the same mechanism U4 found for FD. It also explains why T29 (age as an lgb categorical) failed: lgb gets the identity but not the combinations. The residual-χ² diagnostic tests only marginal lookups, so it **can't see interaction lookups**. A null χ² doesn't close a column for CatBoost.
+
+**B5, sequential Gate 2 on the B4 pool.** U11 passes, ADD +0.000040 (5.7 SD). With U11 in, U4's leave-one-out is −0.000005, so U11 **replaces** U4 (it's U4 plus age). On {T14, U11, U9, T1, T24}, U13 passes (ADD +0.000031, 4.4 SD, SWAP +0.000017). After that, nothing passes: U4, U10, U14, U16 and U17 all fail. **B5** (`d2de2320`) = rank_mean{T14, U11, U9, T1, T24, U13} = **0.961249**, +0.000076 over B4. That's under the shipping gate against B4, so B5 is a candidate, not yet a confirmed champion.
+
+**Pre-registered, batch 14: other numerics as CatBoost categoricals** (Kaggle kernels, banked). Gate 2 is on the **B5 pool** (ADD > 2 SD, SWAP > −1 SD). Gate 1 is against the strict twin named.
+
+| Tag | Config (strict twin of) | Mechanism | Prediction |
+|---|---|---|---|
+| U18 | U9 + `num_as_cat: [FD, age]` | Age CTRs on the CTR-only view: does U11's gain carry to the other cat leg? | Gate 1 +0.0001 to +0.0002 vs U9. On B5, a SWAP for U9 > 0. |
+| U19 | U11 + `seed_bag: 3` | The two batch-13 gains combined (U16's bag gain was +0.000116 at U4) | +0.00005 to +0.00012 over U11. Fails Gate 2 next to U11 (U16 did next to U4). |
+| U20 | U11 + `dep_delay` in num_as_cat (167 levels) | Delay × class CTRs | Gate 1 ±0.00005. Delay is monotone in satisfaction, so there's little interaction left to find. |
+| U21 | U11 + `arr_delay` in num_as_cat (168 levels, 292 NaN) | Same | ±0.00005, and redundant with U20 |
+| U22 | U11 + the 13 RATINGS in num_as_cat | Rating × class / rating × travel-type CTRs. Ratings are the strongest features. | Gate 1 +0.00005 to +0.00015. **The largest open question.** |
+| U23 | U11 + `model_seed: 7` | Seed floor at the new best single | \|Δ\| < 0.00005 vs U11 |
+| B6 | Sequential Gate 2 of U18–U23 on the B5 pool | Mechanical membership | ≥ B5 |
+
+**Falsification:**
+- If U20, U21 and U22 are all null, the CTR gain is specific to columns with **many levels and non-monotone effects** (FD, age), not to "numerics as categoricals".
+- If U18 fails Gate 1, age's CTRs need the profile beside them, so the gain isn't independent of view 1.
+
+**Oct 9 slots (queue order):** B5, U16, U17, U18–U23, B6. Unqueued auto-fill (B3 near-twins, U6, U7) is the fallback for any kernel that fails.
