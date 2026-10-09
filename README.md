@@ -744,7 +744,7 @@ The submit guards in `submit_run.py` were moved into a shared `eligible()` funct
 | U18 | U9 + `num_as_cat: [FD, age]` | Age CTRs on the CTR-only view: does U11's gain carry to the other cat leg? | Gate 1 +0.0001 to +0.0002 vs U9. On B5, a SWAP for U9 > 0. |
 | U19 | U11 + `seed_bag: 3` | The two batch-13 gains combined (U16's bag gain was +0.000116 at U4) | +0.00005 to +0.00012 over U11. Fails Gate 2 next to U11 (U16 did next to U4). |
 | U20 | U11 + `dep_delay` in num_as_cat (167 levels) | Delay × class CTRs | Gate 1 ±0.00005. Delay is monotone in satisfaction, so there's little interaction left to find. |
-| U21 | U11 + `arr_delay` in num_as_cat (168 levels, 292 NaN) | Same | ±0.00005, and redundant with U20 |
+| ~~U21~~ → **U24** | U11 + `teacher_learner: cat` | U21 dropped before launch: a NaN `arr_delay` level crashes CatBoost (the cat branch passes NaN categories through, and fixing it is a learner edit that needs a bit-identity re-check). U24 applies U13's passing change (a cat teacher) to the best single. | Gate 1 ±0.00005 vs U11 (T24 was −0.00002 vs T8). On B5, it's a SWAP for U11 that passes only if the teacher function, not the age CTRs, made U13's errors different. |
 | U22 | U11 + the 13 RATINGS in num_as_cat | Rating × class / rating × travel-type CTRs. Ratings are the strongest features. | Gate 1 +0.00005 to +0.00015. **The largest open question.** |
 | U23 | U11 + `model_seed: 7` | Seed floor at the new best single | \|Δ\| < 0.00005 vs U11 |
 | B6 | Sequential Gate 2 of U18–U23 on the B5 pool | Mechanical membership | ≥ B5 |
@@ -753,4 +753,4 @@ The submit guards in `submit_run.py` were moved into a shared `eligible()` funct
 - If U20, U21 and U22 are all null, the CTR gain is specific to columns with **many levels and non-monotone effects** (FD, age), not to "numerics as categoricals".
 - If U18 fails Gate 1, age's CTRs need the profile beside them, so the gain isn't independent of view 1.
 
-**Oct 9 slots (queue order):** B5, U16, U17, U18–U23, B6. Unqueued auto-fill (B3 near-twins, U6, U7) is the fallback for any kernel that fails.
+**Oct 9 slots (queue order):** B5, U16, U17, U18, U19, U20, U22, U23, U24, B6 (11 candidates for 10 slots; the last probe to bank goes to Oct 10). Unqueued auto-fill (B3 near-twins, U6, U7) is the fallback for any kernel that fails.
