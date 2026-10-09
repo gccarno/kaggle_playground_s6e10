@@ -754,3 +754,28 @@ The submit guards in `submit_run.py` were moved into a shared `eligible()` funct
 - If U18 fails Gate 1, age's CTRs need the profile beside them, so the gain isn't independent of view 1.
 
 **Oct 9 slots (queue order):** B5, U16, U17, U18, U19, U20, U22, U23, U24, B6 (11 candidates for 10 slots; the last probe to bank goes to Oct 10). Unqueued auto-fill (B3 near-twins, U6, U7) is the fallback for any kernel that fails.
+
+**Results, batch 14** (complete; Kaggle kernels). The local pollers for U18–U22 and U24 were killed by laptop memory pressure while the kernels kept running. All six were logged with `collect_run.py --adopt`, and all echo run_id and code_sha `3bd80b4`. Gate 2 on the B5 pool {T14, U11, U9, T1, T24, U13} = 0.961249.
+
+| Tag | run_id | Solo | Gate 1 | ADD on B5 (sd) | SWAP (sd) | Read |
+|---|---|---|---|---|---|---|
+| U18 U9 + age cat | beb81d09 | 0.960998 | **+0.000167 vs U9** | +0.000019 (0.000005) | +0.000031 | **held** (+0.0001 to +0.0002). PASS, SWAP for U9. |
+| U19 U11 seed_bag 3 | 0b12edd1 | **0.961090** | +0.000081 | +0.000020 (0.000005) | +0.000021 | held (+0.00005 to +0.00012). Best single. Fails sequentially (next to U11 + U22). |
+| U20 U11 + dep_delay cat | 35a4ace3 | 0.960962 | −0.000047 | +0.000014 (0.000006) | +0.000013 | held (±0.00005). Fails sequentially. |
+| U22 U11 + 13 ratings cat | f964e00c | 0.961084 | +0.000075 | **+0.000040 (0.000006)** | +0.000043 | held (+0.00005 to +0.00015). The strongest new leg. |
+| U23 U11 seed 7 | a8316f82 | 0.960907 | **−0.000102** | −0.000004 | −0.000000 | **prediction failed** (\|Δ\| < 0.00005). See below. |
+| U24 U11 + cat teacher | fa7bdc80 | 0.960992 | −0.000017 | +0.000028 (0.000006) | +0.000023 | held (±0.00005). PASS: the teacher function is a diversity axis at the best leg too. |
+
+**The U23 caveat.** The seed floor at the CatBoost legs is about 0.0001, not A0's 0.000039, so single-seed Gate 1 numbers for CatBoost are about ±0.0001. Compared seed-matched, age-as-cat is U23 − U4s = **+0.000058**. U11's +0.000174 was partly a lucky seed. The direction is confirmed (U18 repeats it at U9, and U11's public score is +0.00010 over U4), but the size is about +0.0001, not +0.00017.
+
+**B6, sequential Gate 2 on the B5 pool:**
+1. **+U22** (ADD +0.000040, 6.7 SD).
+2. U9's leave-one-out drops to −0.000003, so **U9 comes out**. U18, its age-CTR successor on the same view, comes in next (ADD +0.000022, 3.7 SD).
+3. **+U24** (ADD +0.000014, 2.8 SD).
+4. Closure: U9, U19, U20 and U23 all fail. T14's leave-one-out is −0.000002, which is noise, so it's kept (the batch-10 rule).
+
+**B6** (`c4086055`) = rank_mean{T14, U11, T1, T24, U13, U22, U18, U24} = **0.961328**: +0.000079 over B5 and **+0.000155 over B4**, which clears the shipping gate against B4.
+
+**Oct 9 slots (final):** B5, B6, U22, U19, U18, U24, U16, U17, U20, U23. The dry run confirms 10/10.
+
+**Oct 10 filler, banked:** the B6 near-twins **B6m** (−T14) 0.961330, **B6b** (U19 in place of U11) 0.961324 and **B6s** (+U23) 0.961318. Their public spread around B6 measures blend noise. Together with the 7 older unsubmitted runs, the auto-fill holds 10.
