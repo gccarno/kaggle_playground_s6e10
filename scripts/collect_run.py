@@ -138,6 +138,9 @@ def main():
     ap.add_argument("--adopt", action="store_true",
                     help="log a kernel that already ran (its poller died): no push or poll; "
                          "run_id, sha and cfg come from the existing _push_<slug>/kernel.ipynb")
+    ap.add_argument("--launch-only", action="store_true",
+                    help="push and exit; collect later with --adopt. Nothing idles on the laptop "
+                         "(background pollers were killed by memory pressure, Oct 9 and 10)")
     args = ap.parse_args()
 
     override = read_json_arg(args.cfg)
@@ -163,6 +166,9 @@ def main():
                              gpu=bool(args.accelerator))
         print(f"run_id={run_id}  kernel={ref}  code={sha[:10]}")
         version = push(push_dir, args.accelerator)
+        if args.launch_only:
+            print(f"launched {ref} (run_id {run_id}); collect with the same --cfg plus --adopt")
+            return
         time.sleep(15)       # let the new version register before the first status call
         status = poll(ref, args.poll_interval, args.timeout_min)
 
