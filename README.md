@@ -930,3 +930,28 @@ The user approved continuing the MLP axis at Checkpoint 3b. **Why bags first:** 
 **Falsification:**
 - If X1 ≤ W11 + 0.0001, the bag curve is flat after 3 seeds, and bag size stops being a lever.
 - If X3, X5 and X6 all fail both gates, the MLP representation axis is closed under the stop rule, and the MLP's blend value is just its family (W11 + W9).
+
+**A tag collision.** The tag "X1" had already been used on Oct 2 (`061c20f8`, xgb on raw features). The bag-10 run is logged as **X1m** (`cbd6a24f`); the rename was made in runs.csv and in its cfg.json. Check the tag namespace in runs.csv before pre-registering a new letter.
+
+**Results, batch 18.** Gate 2 is single-candidate on the B7 pool (0.961497).
+
+| Tag | run_id | Solo | Gate 1 (twin) | ADD (sd) | SWAP | Read |
+|---|---|---|---|---|---|---|
+| X1m bag 10 | cbd6a24f | **0.960892** | +0.000358 (W11) | +0.000012 (0.000004) | +0.000014 | **held** (+0.0001 to +0.0004). As a SWAP for W11 the blend is unchanged (0.961496). |
+| X2 bag 5 | 3bcd5d1c | 0.960702 | +0.000168 (W11) | +0.000009 (0.000005) | +0.000010 | held (between W11 and X1m). Fails Gate 2. |
+| X3 + rating embeddings | bd496856 | 0.960684 | −0.000018 | **+0.000016 (0.000005)** | +0.000019 | held (±0.0002): null solo, **the best ADD of the round** |
+| X4 without profile | 8832a8d6 | 0.960610 | −0.000092 | +0.000011 (0.000005) | +0.000012 | held. As a SWAP for W9: +0.000013. |
+| X5 + teacher | b9497ceb | 0.960584 | −0.000118 | −0.000002 | −0.000003 | **prediction failed again**: the teacher *lowers* the MLP's solo score (W14 too). The U1 half held. Closed. |
+| X6 10-epoch cycle | 1be77029 | 0.960797 | +0.000095 | +0.000013 (0.000005) | +0.000014 | short of Gate 1 (+0.00014), below the prediction. The best epoch is now the last one (9–10 of 10), and runtime fell only 6%. |
+
+**The bag curve: solo 0.959295 → 0.960534 → 0.960702 → 0.960892 at 1/3/5/10 seeds. The blend hardly moves.** The blend averages over legs, so it already averages the MLP's seed noise. A bagged leg is worth about +0.00001 to it.
+
+**B8, sequential Gate 2 on B7:**
+1. +X3 (ADD +0.000016) → 0.961514. After that, every other MLP candidate's ADD is +0.000004 (fail). Three MLP legs saturate.
+2. Swap the single-seed legs for their bags: X4 for W9 (+0.000010) and X1m for W11 (0). That gives 0.961524. X1m is kept as the more stable estimate of the same view.
+3. U13's ADD back is −0.000005, so **U13 comes out** (the T1 rule) → 0.961529.
+4. Closure: no remaining leg has a negative LOO.
+
+**B8** (`5f5eb27a`) = rank_mean{U11, T24, U22, U18, U24, X1m, X4, W5, W4, W14, X3} = **0.961529**, +0.000032 over B7. That's below the shipping gate, but it's queued first for Oct 11 as a read on public.
+
+**Oct 11 slots:** B8, X6, X3, X1m, X4, X2, W7, W12, W13, W15. W6 and X5 are banked for Oct 12.
