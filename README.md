@@ -841,3 +841,30 @@ So the round crosses **new representations × model families**, and judges every
 | W7 | U11 + `arr_delay` in num_as_cat (the old U21) | Delay × class CTRs on the other delay | Gate 1 ±0.00005 (U20, dep_delay, was −0.000047). Fails Gate 2. |
 | W9 | `learner: mlp`, `num_as_cat: [FD, age]`, raw columns (twin: A0 + num_as_cat as lgb is not meaningful; reported against A0 and T1) | An embedding route view | solo 0.9590–0.9600. **Gate 2 passes only if solo ≥ 0.9600** (T1 precedent: different but strong enough). |
 | W10 | W9 + `profile_keys: [FD]` | The MLP with the route profile | solo +0.0002 to +0.0005 over W9. Gate 2 as W9. |
+
+**Batch 15/16, first results** (Gate 2 on the B6 pool = 0.961328).
+
+| Tag | run_id | Solo | Gate 1 | ADD (sd) | SWAP (sd) | Read |
+|---|---|---|---|---|---|---|
+| W1 lgb + PAIRS7 | fd2029e9 | 0.960050 | **−0.000089** vs T1 | +0.000002 (0.000007) | −0.000002 | **prediction failed**: fails |
+| W2 xgb + PAIRS7 | a19789bf | 0.960197 | +0.000062 vs V2 | +0.000012 (0.000007) | +0.000010 | fails |
+| W3 xgb view 1 + PAIRS5 | c7dd9841 | 0.960692 | +0.000014 vs T14 | −0.000003 (0.000005) | +0.000006 | **prediction failed**: fails |
+| W6 glm + PAIRS7 | 1c181629 | 0.948634 | (vs W1 −0.0114) | −0.000241 | −0.000291 | held (fails) |
+| **W9** MLP, raw columns | 34748cd9 | 0.959085 | (A0 +0.000298) | **+0.000056 (0.000010)** | +0.000059 | **PASS, 5.6 SD.** Prediction (pass only if solo ≥ 0.9600) failed upward. |
+| **W10** MLP + FD profile | 4e0159fc | 0.959295 | +0.000210 vs W9 | **+0.000057 (0.000010)** | +0.000061 | **PASS** |
+
+**Explicit pair TE is closed** (stop rule: W1, W2, W3). The falsification arm triggered: the age, rating and route interactions pay **only when estimated inside the booster**, as CatBoost's ordered CTRs, even though the residual test shows them as left over in lgb/xgb. A plausible mechanism is that an inner-K-fold pair TE on 100–3,000 groups adds estimation noise of the same order as the interaction it carries. CatBoost's ordered statistics, recomputed per tree permutation, average that noise away.
+
+**The MLP is a new view.** It's 0.002 below the pool's legs and still has the largest ADD of any candidate on B6. It builds its own route representation, an FD embedding, and makes different errors. Its fold AUCs average 0.95958 against a pooled OOF of 0.95909, so per-fold calibration varies; rank-mean over the pooled OOF slightly understates it. The best epoch is 8–9 of 16 under OneCycle, so validation AUC falls in the last third.
+
+**Pre-registered, batch 17: the MLP axis** (T4 kernels, about 4 minutes each). These are strict twins of W10, with Gate 2 on the B6 pool and the B7 pool once that's built.
+
+| Tag | Change vs W10 | Mechanism | Prediction |
+|---|---|---|---|
+| W11 | `seed_bag: 3` | NN fitting variance is large; a bag averages it inside each fold | Gate 1 +0.0002 to +0.0005; ADD above W10's |
+| W12 | 13 ratings added to `num_as_cat` | Rating embeddings, the U22 analogue | Gate 1 ±0.0002 |
+| W13 | `mlp_params.dropout: 0.25` | Validation AUC peaks early and decays: more regularisation | Gate 1 +0.0001 to +0.0003 |
+| W14 | `teacher: true` | Tests the U1 rule on a new family: the shared teacher should raise solo and cut ADD | solo +0.0003 or more; ADD below W10's |
+| W15 | `te_cols: [FD]` | The TE route view inside the MLP | Gate 1 ±0.0001 |
+
+**Falsification:** if W14's ADD is at least W10's, the "shared teacher costs diversity" rule doesn't hold for a different family.
