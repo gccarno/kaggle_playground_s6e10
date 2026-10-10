@@ -13,6 +13,10 @@ about what is left after the model, not about raw variance (the T20 lesson, READ
 Phase 3).
 
     python scripts/residual_lookup.py experiments/preds/<run_id> [--min-n 30]
+    python scripts/residual_lookup.py <preds> --keys age*travel_class,wifi*online_boarding,RATINGS
+
+--keys replaces the default key list: comma-separated keys, components joined by '*'.
+RATINGS stands for the full 13-rating tuple as one key.
 """
 import argparse, sys
 from pathlib import Path
@@ -20,7 +24,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT / "src"))
 import numpy as np, pandas as pd  # noqa: E402
-from dataset import RAW_CAT, RAW_NUM, load_competition  # noqa: E402
+from dataset import RATINGS, RAW_CAT, RAW_NUM, load_competition  # noqa: E402
 
 PAIRS = [("flight_distance", c) for c in RAW_CAT] + [("flight_distance", "age")]
 
@@ -38,6 +42,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("preds_dir")
     ap.add_argument("--min-n", type=int, default=30)
+    ap.add_argument("--keys", default=None, help="custom keys, e.g. age*travel_class,RATINGS")
     a = ap.parse_args()
     tr, _, _, y = load_competition()
     oof = pd.read_csv(Path(a.preds_dir) / "oof_proba_lgb.csv") if \
@@ -47,12 +52,19 @@ def main():
     assert len(p) == len(y), (len(p), len(y))
     r, v = y - p, p * (1 - p)
     print(f"{a.preds_dir}: residual chi2/df by key (groups with n>={a.min_n})")
+    if a.keys:
+        keys = [[c for part in k.split("*") for c in (RATINGS if part == "RATINGS" else [part])]
+                for k in a.keys.split(",")]
+        names = [k.replace("*", " x ") for k in a.keys.split(",")]
+    else:
+        keys = [[c] for c in RAW_NUM + RAW_CAT] + [list(pr) for pr in PAIRS]
+        names = [" x ".join(k) for k in keys]
     rows = []
-    for c in RAW_NUM + RAW_CAT:
-        rows.append((c, *chi2_df(tr[c].to_numpy(), r, v, a.min_n)))
-    for k1, k2 in PAIRS:
-        key = tr[k1].astype(str) + "|" + tr[k2].astype(str)
-        rows.append((f"{k1} x {k2}", *chi2_df(key.to_numpy(), r, v, a.min_n)))
+    for name, cols in zip(names, keys):
+        key = tr[cols[0]].map(str)
+        for c in cols[1:]:
+            key = key + "|" + tr[c].map(str)
+        rows.append((name, *chi2_df(key.to_numpy(), r, v, a.min_n)))
     for name, n, x in sorted(rows, key=lambda t: -np.nan_to_num(t[2])):
         print(f"  {name:<34} groups {n:>6}  chi2/df {x:6.2f}")
 

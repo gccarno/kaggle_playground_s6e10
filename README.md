@@ -779,3 +779,51 @@ The submit guards in `submit_run.py` were moved into a shared `eligible()` funct
 **Oct 9 slots (final):** B5, B6, U22, U19, U18, U24, U16, U17, U20, U23. The dry run confirms 10/10.
 
 **Oct 10 filler, banked:** the B6 near-twins **B6m** (−T14) 0.961330, **B6b** (U19 in place of U11) 0.961324 and **B6s** (+U23) 0.961318. Their public spread around B6 measures blend noise. Together with the 7 older unsubmitted runs, the auto-fill holds 10.
+
+### Phase 3b: a second representation round, crossed with model families (from 2026-10-10)
+
+**Why reopen Phase 3.** We're about 8 days ahead of plan, and the user chose to spend that time on representations. Phase 3 called "representation done" on **lgb solo scores**. Phase 4 then found two things that call was blind to:
+- **Value comes from different views of the route.** T1 (TE), T8 (profile) and U9 (CatBoost CTRs) each make different errors.
+- **CatBoost's combination CTRs found interaction lookups** (age×class, rating×class) that a marginal residual test can't see (FINDINGS 10).
+
+So the round crosses **new representations × model families**, and judges every leg by Gate 1 (solo against its strict twin, +0.00014) *and* Gate 2 on the **B6 pool** {T14, U11, T1, T24, U13, U22, U18, U24} = 0.961328 (ADD > 2 SD, SWAP > −1 SD). The Phase 3 stop rule applies per axis.
+
+**Step 0: residual diagnostic on pair keys.** `residual_lookup.py --keys` now takes arbitrary keys. Values are χ²/df; ≈ 1 means nothing is left.
+
+| Key | T1 (lgb, TE view) | T14 (xgb, profile view) | U22 (cat, all CTRs) |
+|---|---|---|---|
+| age × customer_type | 1.92 | **2.50** | 1.59 |
+| age × travel_type | 1.56 | 2.10 | 1.47 |
+| age × travel_class | 1.60 | 1.94 | 1.40 |
+| age (marginal) | 1.79 | **2.53** | 1.44 |
+| wifi × entertainment | **2.35** | 1.60 | 1.11 |
+| online_boarding × wifi | 2.11 | 1.80 | 1.00 |
+| FD × travel_class / travel_type | 1.41 / 1.44 | 0.95 / 0.92 | 0.97 / 0.98 |
+| full 13-rating tuple | 1.04 | 1.03 | 1.04 |
+
+**What the diagnostic says.**
+- **The rating pairs are left over in lgb and xgb, and gone in CatBoost.** U22's rating CTRs drove wifi×entertainment from 2.35 to 1.11. That's U22's gain made visible, and it predicts lgb/xgb gain from explicit rating-pair encodings.
+- **Age pairs are the largest residual everywhere, even in U22 (1.4–1.6).** This is not the "calibration-type" age residual Phase 3 closed: T29 erased the *marginal* age χ² in lgb and lost AUC. The pairs are interactions.
+- **FD pairs are left over only in the TE view (T1)**, because the profile view already carries them.
+- **The rating tuple is not a lookup key.** 337,881 distinct tuples in 699,635 rows; only 18.7% of rows sit in a tuple seen at least 30 times; χ²/df = 1.04 under all three models. By the rule set in the plan (build only if > 1.3), **the rating-tuple feature (W8) is dropped before being built.**
+
+**Pre-registered, batch 15: explicit pair encodings for lgb/xgb/glm, and a pure all-categorical CatBoost view** (Kaggle kernels, config only). The pair encodings use the existing `te_pair_cols` (`encoders.apply_key_target_encoding`, in-fold with an inner K-fold), with `te_pair_bins: 4096` so FD and age stay exact keys and `te_pair_smooth: 50`. The baselines carry the same two keys, which are no-ops without pairs, so only `te_pair_cols` differs.
+- **PAIRS7** = age×{customer_type, travel_type, travel_class}, wifi×entertainment, online_boarding×wifi, FD×{travel_class, travel_type}.
+- **PAIRS5** = PAIRS7 without the FD pairs. The profile view has no FD residual.
+
+| Tag | Config (strict twin of) | Mechanism | Prediction |
+|---|---|---|---|
+| W1 | T1 + `te_pair_cols: PAIRS7` (lgb) | Hands lgb the combination statistics CatBoost builds internally | Gate 1 +0.0001 to +0.0003 vs T1. On B6, a SWAP for T1 passes. |
+| W2 | V2 + PAIRS7 (xgb, TE view) | The same, for xgb: is the gain family-general? | Gate 1 as W1. Gate 2 borderline (V2 failed next to T1). |
+| W3 | T14 + `te_pair_cols: PAIRS5` (xgb, profile + teacher) | Can view 1's xgb get the age/rating interactions? T14 has the largest age residual (2.5). | Gate 1 +0.00005 to +0.00015. A SWAP for T14 passes. |
+| W4 | U10 + `num_as_cat: [FD, age, 13 ratings]` (cat, no profile, no teacher) | The view least like the pool: all-CTR, sharing no teacher (U1 lesson) | Gate 1 +0.0003 to +0.0005 vs U10 (U10 is weak). ADD passes only if no-teacher errors differ. |
+| W5 | U18 + the 13 ratings in `num_as_cat` | U22's rating gain carried over to the CTR-only view | Gate 1 +0.00005 to +0.00015 vs U18. A SWAP for U18 passes. |
+| W6 | W1 + `learner: glm` | A linear family on explicit encodings | solo about 0.955. Gate 2 fails (G1 precedent) unless linear errors are uncorrelated. |
+
+**Falsification:**
+- If W1–W3 are all null on Gate 1, the combinations are only useful when estimated *inside* the booster (CatBoost's ordered statistics), and explicit pair TE is closed.
+- If W4 solo is below U9, the teacher plus profile aren't replaceable by CTRs alone.
+
+**Batch 16 (code, pre-registered with its commit):**
+- the CatBoost NaN-level fix, then W7 = U11 + arr_delay as a categorical;
+- an MLP learner (W9, W10).
