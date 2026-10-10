@@ -911,3 +911,22 @@ So the round crosses **new representations × model families**, and judges every
   - W7.
 
 **W7** (`12bedad2`, U11 + arr_delay as a CatBoost categorical, now possible after the NaN fix) = 0.960942: Gate 1 **−0.000067** vs U11, and Gate 2 on the B7 pool ADD −0.000009. **Held** (±0.00005, fails). Both delays are now null as CatBoost categoricals (U20, W7). That confirms the batch-14 reading: CTRs pay on **many-level, non-monotone** columns (FD, age, ratings), not on monotone magnitudes. Banked for Oct 11.
+
+### Phase 3c: the MLP axis, read through bags (2026-10-10)
+
+The user approved continuing the MLP axis at Checkpoint 3b. **Why bags first:** W11 (3 seeds) beat W10 (1 seed) by +0.0012. That's 9× the Gate 1 threshold, so a single-seed MLP's Gate 1 is mostly seed noise, and W12–W15 are unread rather than closed. This round reads every MLP variant from a 5-seed bag. The bag's `model_seed + 100·b` seeds differ by bag size only, so X1/X2 vs W11 is a strict twin. Config-only, no code change.
+
+**Pre-registered, batch 18** (T4 kernels, at most 2 at once; a 5-bag takes about 15 minutes). Gate 2 is on the **B7 pool** (0.961497). W11 and W9 are already in it, so an MLP candidate passes as an ADD or as a SWAP for the MLP leg it resembles.
+
+| Tag | Config (strict twin of) | Mechanism | Prediction |
+|---|---|---|---|
+| X1 | W11 with `seed_bag: 10` (W11) | The 1→3 gain is fitting variance, which shrinks like 1/n | Gate 1 +0.0001 to +0.0004; SWAP for W11 passes |
+| X2 | W10 with `seed_bag: 5` (W11) | The bag curve's midpoint, and the base for X3–X6 | between W11 and X1 |
+| X3 | X2 + 13 ratings in `num_as_cat` (X2) | W12 re-read: rating embeddings, the U22 analogue | Gate 1 ±0.0002 |
+| X4 | X2 without `profile_keys` (X2) | W9 bagged: the raw-column MLP view | solo −0.0002 vs X2; SWAP for W9 > 0 |
+| X5 | X2 + `teacher` (X2) | W14 re-read; the U1 rule | solo +0.0001 to +0.0003; ADD below X2's |
+| X6 | X2 with `mlp_params.epochs: 10` (X2) | The best epoch is 8–9 of 16, so validation AUC falls while the LR anneals; a shorter cycle finishes annealing near the peak | Gate 1 +0.0001 to +0.0003, at about 60% of the runtime |
+
+**Falsification:**
+- If X1 ≤ W11 + 0.0001, the bag curve is flat after 3 seeds, and bag size stops being a lever.
+- If X3, X5 and X6 all fail both gates, the MLP representation axis is closed under the stop rule, and the MLP's blend value is just its family (W11 + W9).
