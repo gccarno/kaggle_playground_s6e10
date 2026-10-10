@@ -909,3 +909,5 @@ So the round crosses **new representations × model families**, and judges every
 - **Open:**
   - **The MLP axis.** Bag size is the obvious lever: the 3-bag gave +0.0012 solo. Then MLP representation variants, each read only through bags.
   - W7.
+
+**W7** (`12bedad2`, U11 + arr_delay as a CatBoost categorical, now possible after the NaN fix) = 0.960942: Gate 1 **−0.000067** vs U11, and Gate 2 on the B7 pool ADD −0.000009. **Held** (±0.00005, fails). Both delays are now null as CatBoost categoricals (U20, W7). That confirms the batch-14 reading: CTRs pay on **many-level, non-monotone** columns (FD, age, ratings), not on monotone magnitudes. Banked for Oct 11.
