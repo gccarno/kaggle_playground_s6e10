@@ -868,3 +868,44 @@ So the round crosses **new representations × model families**, and judges every
 | W15 | `te_cols: [FD]` | The TE route view inside the MLP | Gate 1 ±0.0001 |
 
 **Falsification:** if W14's ADD is at least W10's, the "shared teacher costs diversity" rule doesn't hold for a different family.
+
+**Results, batch 17 and the round's close.** Gate 2 on the B6 pool, single-candidate.
+
+| Tag | run_id | Solo | Gate 1 vs W10 | ADD on B6 (sd) | Read |
+|---|---|---|---|---|---|
+| W11 seed_bag 3 | f8520c7f | **0.960534** | **+0.001239** | **+0.000069 (0.000008)** | prediction (+0.0002 to +0.0005) failed **upward**. The single-seed MLP is very noisy. |
+| W12 rating embeddings | dcd70b08 | 0.958551 | −0.000744 | +0.000044 | fails Gate 1 (single seed; unreadable at this noise level) |
+| W13 dropout 0.25 | 08c3738f | 0.959338 | +0.000043 | +0.000049 | null |
+| W14 + teacher | 7a185d50 | 0.959247 | −0.000048 | +0.000034 | **prediction failed**: solo didn't rise. ADD is below W10's, as the U1 rule predicts. |
+| W15 + FD TE | a7efacb6 | 0.958979 | −0.000316 | +0.000045 | null to negative |
+| W4 all-CTR cat, no teacher | 41d4d547 | 0.960703 | +0.000425 vs U10 | +0.000048 (0.000007) | **held** (+0.0003 to +0.0005) |
+| W5 CTR view + ratings | f5df566f | **0.961140** | +0.000142 vs U18 | +0.000029 (0.000005) | **held.** Best single. |
+
+**The bit-identity check for the NaN fix.** U18r (`17c0bc5a`, a replay of the Kaggle-run U18 at `18e4f7ad`) reproduces U18's OOF and test **exactly** (max \|Δ\| = 0.0). The first replay, U10r, was an invalid check: U10 had run on oci-free (aarch64, a different CatBoost build), and the cross-platform replay differs (OOF 0.960303 vs 0.960278). That's a reminder that **runs are bit-reproducible only on the same platform**. W7 (U11 + arr_delay) is running.
+
+**B7, sequential Gate 2 on the B6 pool:**
+1. **+W11** (ADD +0.000069).
+2. **+W9** (+0.000031).
+3. The other MLP variants now fail (ADD ≤ +0.000013). **Two MLP legs saturate the view.**
+4. **+W5** (+0.000020).
+5. **+W4** (+0.000025, 5 SD).
+6. **+W14** (+0.000014, 2.0 SD).
+7. With W4 in, T1's ADD back is −0.000004, so **T1 comes out**. T14's ADD back is −0.000015, so **T14 comes out**.
+8. Closure: nothing passes. U13's leave-one-out of −0.000004 is noise, so it's kept.
+
+**B7** (`be455188`) = rank_mean{U11, T24, U13, U22, U18, U24, W11, W9, W5, W4, W14} = **0.961497**: **+0.000169 over B6**, which clears the shipping gate.
+
+**Oct 10 slots:** B7, W5, W11, W4, W9, W14, W10, W2, W3, W1 (dry run 10/10). **Oct 11 is banked:** W12, W13, W15, W6, plus W7 and the B6 near-twins.
+
+### Checkpoint 3b (2026-10-10)
+- **Done:**
+  - 15 probes across 3 new axes, plus the CatBoost NaN fix (bit-identical) and an MLP learner;
+  - `collect_run --launch-only`: the laptop never idles a poller, so memory pressure can't lose a run.
+- **Learned:**
+  - A new family (the MLP) is a new view. A new encoding for an old family (explicit pair TE) isn't.
+  - Interactions pay only inside CatBoost's ordered CTRs.
+  - The champion moved +0.000169 (B7 0.961497).
+- **Closed:** explicit pair TE (W1–W3), glm (W6), and the rating-tuple key (dropped by the diagnostic before it was built).
+- **Open:**
+  - **The MLP axis.** Bag size is the obvious lever: the 3-bag gave +0.0012 solo. Then MLP representation variants, each read only through bags.
+  - W7.
