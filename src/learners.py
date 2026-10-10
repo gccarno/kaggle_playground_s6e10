@@ -51,7 +51,11 @@ def fit_predict(cfg, Xtr, ytr, Xva, yva, Xte, feats_cat):
         A, B, C = Xtr.copy(), Xva.copy(), Xte.copy()
         for c in feats_cat:
             if c in A.columns:
-                A[c], B[c], C[c] = A[c].astype(str), B[c].astype(str), C[c].astype(str)
+                # A NaN level must become an explicit string: categorical .astype(str) can keep
+                # it as float NaN, which CatBoost rejects (U21, arr_delay). Columns without NaN
+                # convert exactly as before, so earlier runs are bit-identical.
+                A[c], B[c], C[c] = (X[c].astype(object).where(X[c].notna(), "nan").astype(str)
+                                    for X in (A, B, C))
         m = CatBoostClassifier(random_seed=cfg["model_seed"], eval_metric="AUC", verbose=0,
                                early_stopping_rounds=esr, **p)
         m.fit(Pool(A, ytr, cat_features=cat_idx), eval_set=Pool(B, yva, cat_features=cat_idx))
@@ -74,4 +78,111 @@ def fit_predict(cfg, Xtr, ytr, Xva, yva, Xte, feats_cat):
         return (m.predict_proba(sc.transform(B))[:, 1],
                 m.predict_proba(sc.transform(C))[:, 1], 0)
 
+    if name == "mlp":
+        return _fit_predict_mlp(cfg, Xtr, ytr, Xva, yva, Xte, feats_cat)
+
     raise ValueError(f"unknown learner {name!r}")
+
+
+def _fit_predict_mlp(cfg, Xtr, ytr, Xva, yva, Xte, feats_cat):
+    """A RealMLP-lite: PLR (periodic) embeddings for every numeric, learned embeddings for
+    every categorical (incl. num_as_cat identities such as cat_flight_distance), 3 SiLU
+    layers. Phase 3b (README): the one family that builds its OWN representation of the
+    route, from an embedding, instead of reading one we engineered.
+
+    Numerics: train-fold median fill, then a rank-gauss QuantileTransformer fit on the
+    training fold only. Early stopping on the validation fold's AUC picks the epoch, the
+    same use of the validation fold as GBDT early stopping. torch is in the Kaggle image;
+    it is imported here so the other learners never need it."""
+    import torch
+    from torch import nn
+    from sklearn.metrics import roc_auc_score
+    from sklearn.preprocessing import QuantileTransformer
+    p = cfg["mlp_params"]
+    seed = cfg["model_seed"]
+    torch.manual_seed(seed)
+    np.random.seed(seed)
+    dev = "cuda" if torch.cuda.is_available() else "cpu"
+
+    cats = [c for c in feats_cat if c in Xtr.columns]
+    nums = [c for c in Xtr.columns if c not in cats]
+    med = Xtr[nums].median()
+    qt = QuantileTransformer(n_quantiles=1000, output_distribution="normal",
+                             subsample=200_000, random_state=seed)
+    qt.fit(Xtr[nums].fillna(med).to_numpy(np.float64))
+
+    def tensors(X):
+        xn = qt.transform(X[nums].fillna(med).to_numpy(np.float64)).astype(np.float32)
+        # Category codes over the train+test vocabulary (base_features); NaN -> 0.
+        xc = np.stack([X[c].cat.codes.to_numpy(np.int64) + 1 for c in cats], 1) if cats \
+            else np.zeros((len(X), 0), np.int64)
+        return torch.from_numpy(xn), torch.from_numpy(xc)
+    card = [len(Xtr[c].cat.categories) + 1 for c in cats]
+
+    class PLR(nn.Module):
+        def __init__(self, n, k, d):
+            super().__init__()
+            self.c = nn.Parameter(torch.randn(n, k) * p["plr_sigma"])
+            self.w = nn.Parameter(torch.randn(n, 2 * k, d) / np.sqrt(2 * k))
+            self.b = nn.Parameter(torch.zeros(n, d))
+
+        def forward(self, x):                      # (B, n) -> (B, n * d)
+            v = 2 * np.pi * self.c[None] * x[..., None]
+            v = torch.cat([torch.sin(v), torch.cos(v)], -1)
+            return torch.relu(torch.einsum("bnk,nkd->bnd", v, self.w) + self.b).flatten(1)
+
+    class Net(nn.Module):
+        def __init__(self):
+            super().__init__()
+            self.plr = PLR(len(nums), p["plr_freq"], p["plr_dim"])
+            self.emb = nn.ModuleList(nn.Embedding(k, min(p["emb_dim"], k)) for k in card)
+            width = len(nums) * p["plr_dim"] + sum(min(p["emb_dim"], k) for k in card)
+            layers = []
+            for _ in range(p["layers"]):
+                layers += [nn.Linear(width, p["hidden"]), nn.SiLU(), nn.Dropout(p["dropout"])]
+                width = p["hidden"]
+            self.mlp = nn.Sequential(*layers, nn.Linear(width, 1))
+
+        def forward(self, xn, xc):
+            parts = [self.plr(xn)] + [e(xc[:, i]) for i, e in enumerate(self.emb)]
+            return self.mlp(torch.cat(parts, 1)).squeeze(1)
+
+    tr_n, tr_c = tensors(Xtr)
+    sets = [tensors(Xva), tensors(Xte)]
+    yt = torch.from_numpy(np.asarray(ytr, np.float32))
+    net = Net().to(dev)
+    opt = torch.optim.AdamW(net.parameters(), lr=p["lr"], weight_decay=p["weight_decay"])
+    steps = p["epochs"] * int(np.ceil(len(yt) / p["batch_size"]))
+    sched = torch.optim.lr_scheduler.OneCycleLR(opt, max_lr=p["lr"], total_steps=steps)
+    loss_fn = nn.BCEWithLogitsLoss()
+    gen = torch.Generator().manual_seed(seed)
+
+    def predict(xn, xc):
+        net.eval()
+        out = []
+        with torch.no_grad():
+            for s in range(0, len(xn), 16384):
+                out.append(torch.sigmoid(net(xn[s:s + 16384].to(dev), xc[s:s + 16384].to(dev))).cpu())
+        net.train()
+        return torch.cat(out).numpy().astype(np.float64)
+
+    best, best_ep, best_va, best_te, bad = -1.0, 0, None, None, 0
+    for ep in range(p["epochs"]):
+        perm = torch.randperm(len(yt), generator=gen)
+        for s in range(0, len(perm), p["batch_size"]):
+            idx = perm[s:s + p["batch_size"]]
+            opt.zero_grad()
+            loss = loss_fn(net(tr_n[idx].to(dev), tr_c[idx].to(dev)), yt[idx].to(dev))
+            loss.backward()
+            opt.step()
+            sched.step()
+        pv = predict(*sets[0])
+        auc = roc_auc_score(yva, pv)
+        print(f"    mlp epoch {ep + 1}: val auc {auc:.6f}", flush=True)
+        if auc > best:
+            best, best_ep, best_va, best_te, bad = auc, ep + 1, pv, predict(*sets[1]), 0
+        else:
+            bad += 1
+            if bad >= p["patience"]:
+                break
+    return best_va, best_te, best_ep

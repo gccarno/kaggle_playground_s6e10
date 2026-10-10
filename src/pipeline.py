@@ -44,7 +44,7 @@ OUT_DIR = Path(os.environ.get("KOUT", "/kaggle/working" if ON_KAGGLE else
 # ---------------------------------------------------------------------- config
 DEFAULTS = {
     "run_tag": "baseline",
-    "learner": "lgb",                # lgb | xgb | cat | glm
+    "learner": "lgb",                # lgb | xgb | cat | glm | mlp
     "model_seed": SEED,
     "seed_bag": 1,                   # average this many model seeds inside each fold
     "n_folds": N_FOLDS,
@@ -158,9 +158,14 @@ DEFAULTS = {
     },
     "cat_params": {"iterations": 3000, "learning_rate": 0.08, "depth": 6, "l2_leaf_reg": 3.0},
     "glm_params": {"C": 1.0},
+    # Phase 3b MLP (learners._fit_predict_mlp). OneCycle over `epochs`; the best epoch by
+    # validation AUC is kept, with `patience` epochs of no improvement ending the fold.
+    "mlp_params": {"epochs": 16, "batch_size": 1024, "lr": 2e-3, "weight_decay": 1e-5,
+                   "hidden": 256, "layers": 3, "dropout": 0.1, "emb_dim": 16,
+                   "plr_freq": 16, "plr_dim": 8, "plr_sigma": 0.1, "patience": 4},
 }
 DICT_KEYS = ["lgb_params", "xgb_params", "cat_params", "glm_params", "teacher_params",
-             "teacher_cat_params"]
+             "teacher_cat_params", "mlp_params"]
 
 
 def load_cfg(override=None):

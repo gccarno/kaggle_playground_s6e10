@@ -827,3 +827,17 @@ So the round crosses **new representations × model families**, and judges every
 **Batch 16 (code, pre-registered with its commit):**
 - the CatBoost NaN-level fix, then W7 = U11 + arr_delay as a categorical;
 - an MLP learner (W9, W10).
+
+**Pre-registered, batch 16: two code additions, each defaulting to off.**
+- **The CatBoost NaN level** (`learners.py`, cat branch). A categorical NaN now becomes the string level `"nan"`. Before, `.astype(str)` on a pandas categorical left it as float NaN, and CatBoost rejected it (U21). Columns without NaN convert to exactly the same strings.
+  - **Bit-identity check:** U10r, a replay of U10's cfg (NOSUBMIT), must reproduce U10's OOF exactly.
+- **An MLP learner** (`learner: "mlp"`, `mlp_params`; torch from the Kaggle image, T4 GPU).
+  - **Architecture:** PLR periodic embeddings per numeric, learned embeddings per categorical (including `num_as_cat` identities), 3 × 256 SiLU layers, AdamW with OneCycle, and the best epoch chosen by validation AUC.
+  - **Why:** it's the only family that builds its own route representation from an embedding. Public notebooks report RealMLP at +0.0003 in stacks; S6E9 found neural legs null.
+  - **Smoke test first:** W9s (`sample_frac 0.05`, 2 folds), never submitted.
+
+| Tag | Config (strict twin of) | Mechanism | Prediction |
+|---|---|---|---|
+| W7 | U11 + `arr_delay` in num_as_cat (the old U21) | Delay × class CTRs on the other delay | Gate 1 ±0.00005 (U20, dep_delay, was −0.000047). Fails Gate 2. |
+| W9 | `learner: mlp`, `num_as_cat: [FD, age]`, raw columns (twin: A0 + num_as_cat as lgb is not meaningful; reported against A0 and T1) | An embedding route view | solo 0.9590–0.9600. **Gate 2 passes only if solo ≥ 0.9600** (T1 precedent: different but strong enough). |
+| W10 | W9 + `profile_keys: [FD]` | The MLP with the route profile | solo +0.0002 to +0.0005 over W9. Gate 2 as W9. |
