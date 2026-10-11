@@ -955,3 +955,20 @@ The user approved continuing the MLP axis at Checkpoint 3b. **Why bags first:** 
 **B8** (`5f5eb27a`) = rank_mean{U11, T24, U22, U18, U24, X1m, X4, W5, W4, W14, X3} = **0.961529**, +0.000032 over B7. That's below the shipping gate, but it's queued first for Oct 11 as a read on public.
 
 **Oct 11 slots:** B8, X6, X3, X1m, X4, X2, W7, W12, W13, W15. W6 and X5 are banked for Oct 12.
+
+**Pre-registered, batch 19: MLP architecture** (Oct 11, filling the Oct 12 slots; plan "10 more submissions"). These are 5-seed bags on T4 kernels. Y1–Y3 and Y5 are strict twins of X3; Y4 is a strict twin of X4. Gate 2 is on the **B8 pool** (0.961529).
+
+| Tag | Change | Mechanism | Prediction |
+|---|---|---|---|
+| Y1 | `mlp_params.epochs: 10` | X6's shorter cycle (+0.000095), carried onto the best-ADD MLP | Gate 1 +0.00005 to +0.00015 |
+| Y2 | `mlp_params.emb_dim: 32` | A 16-dim route embedding may be too small for thousands of FD levels | Gate 1 ±0.0001; ADD > X3's if the embedding is the bottleneck |
+| Y3 | `mlp_params.plr_sigma: 1.0` | Higher-frequency periodic features resolve age and delays more finely | Gate 1 ±0.0002 |
+| Y4 | X4 + 13 ratings in `num_as_cat` | The all-embedding MLP, the analogue of W4 | solo ±0.0002 vs X4; an ADD candidate next to X3 |
+| Y5 | `mlp_params.hidden: 512` | A capacity probe | null (S6E9: capacity is null) |
+
+**Stop rule:** if Y1–Y5 all fail Gate 2 on B8, the MLP axis is closed.
+
+**Also for Oct 12:**
+- **B9:** the sequential Gate 2 build of the Y-runs on B8.
+- **B8st:** a nested-CV logit stack on B8's legs (`blend.py stack --write`). B9f washed on near-twin legs (Δ −0.000005). B8's legs differ in family and calibration. Prediction: Δ vs rank_mean ±0.00005; it's submitted only if the nested OOF is at least rank_mean's.
+- **Why these slots:** the public paired SD is 0.000152, so single-leg probes are record entries. Blends are where public can tell us something (B7: +0.00024 public).
