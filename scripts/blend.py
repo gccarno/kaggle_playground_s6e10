@@ -15,6 +15,7 @@ test the same way.
     python scripts/blend.py gate2 --pool T8 T14 T15 --cand T27 T24
     python scripts/blend.py curve T15 T14 T8 T27 T26 T16      # AUC vs pool size, in order
     python scripts/blend.py stack T8 T14 T15                  # nested-CV logit control
+    python scripts/blend.py stack T8 T14 T15 --write B1st --description "..."   # ...archived
     python scripts/blend.py disagree --ref T15 --all          # strength vs disagreement
     python scripts/blend.py write T8 T14 T15 --tag B1 --description "..." --notes "..."
 
@@ -207,26 +208,40 @@ def cmd_curve(keys):
         prev = a
 
 
-def cmd_stack(keys):
+def logit(p):
+    return np.log(np.clip(p, 1e-7, 1 - 1e-7) / np.clip(1 - p, 1e-7, 1))
+
+
+def cmd_stack(keys, write=None):
     """Control: a logistic stack on leg logits, fit on 4 folds and scored on the 5th, so
-    its OOF is honest. Compared against the unfitted rank_mean on the same rows."""
+    its OOF is honest. Compared against the unfitted rank_mean on the same rows.
+    With write=(tag, description, notes) the nested OOF is archived as a run; its test
+    prediction is the full-data fit applied to each leg's test logits."""
     from sklearn.linear_model import LogisticRegression
     check_aligned(keys)
     _, y = truth()
     fold = leg(keys[0])[3]
-    X = np.column_stack([np.log(np.clip(leg(k)[2], 1e-7, 1 - 1e-7)
-                                / np.clip(1 - leg(k)[2], 1e-7, 1)) for k in keys])
+    X = np.column_stack([logit(leg(k)[2]) for k in keys])
     out = np.zeros(len(y))
     for f in np.unique(fold):
         tr, va = fold != f, fold == f
         m = LogisticRegression(C=1.0, max_iter=1000).fit(X[tr], y[tr])
         out[va] = m.decision_function(X[va])
-    w = LogisticRegression(C=1.0, max_iter=1000).fit(X, y).coef_[0]
+    full = LogisticRegression(C=1.0, max_iter=1000).fit(X, y)
+    w = full.coef_[0]
     rm = blend_oof(keys)
     d, sd = paired_delta(rm, out)
     print(f"rank_mean       {auc(rm):.6f}")
     print(f"nested logit    {auc(out):.6f}   delta {d:+.6f}  (paired sd {sd:.6f})")
     print("full-data weights: " + "  ".join(f"{leg(k)[0]} {v:+.3f}" for k, v in zip(keys, w)))
+    if write:
+        test = full.decision_function(np.column_stack([logit(leg(k)[5]) for k in keys]))
+        # Squash to (0, 1) for the submission file; AUC only sees the order.
+        archive(keys, *write, oof=1 / (1 + np.exp(-out)), test=1 / (1 + np.exp(-test)),
+                method="nested_logit_stack",
+                extra={"full_data_weights": {leg(k)[0]: round(float(v), 6)
+                                             for k, v in zip(keys, w)},
+                       "intercept": round(float(full.intercept_[0]), 6)})
 
 
 def cmd_disagree(ref, keys):
@@ -253,12 +268,16 @@ def cmd_disagree(ref, keys):
 
 def cmd_write(keys, tag, description, notes):
     check_aligned(keys)
+    archive(keys, tag, description, notes, oof=blend_oof(keys), test=blend_test(keys),
+            method="rank_mean")
+
+
+def archive(keys, tag, description, notes, oof, test, method, extra=None):
     if any(r.get("run_tag") == tag for r in runlog.read_rows()):
         raise SystemExit(f"run_tag {tag!r} already exists")
     ids, y = truth()
-    oof = blend_oof(keys)
     fold = leg(keys[0])[3]
-    test_ids, test = leg(keys[0])[4], blend_test(keys)
+    test_ids = leg(keys[0])[4]
     fold_aucs = [AUC(oof[fold == f], y[fold == f])() for f in np.unique(fold)]
 
     run_id = uuid.uuid4().hex[:8]
@@ -269,7 +288,7 @@ def cmd_write(keys, tag, description, notes):
     pd.DataFrame({"id": test_ids, "proba": test}).to_csv(out / "test_proba_blend.csv",
                                                          index=False)
     pd.DataFrame({ID: test_ids, TARGET: test}).to_csv(out / "submission.csv", index=False)
-    manifest = {"method": "rank_mean", "legs": {leg(k)[0]: leg(k)[1] for k in keys}}
+    manifest = {"method": method, "legs": {leg(k)[0]: leg(k)[1] for k in keys}, **(extra or {})}
     (out / "manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
 
     git = lambda *a: __import__("subprocess").run(["git", *a], capture_output=True,
@@ -288,7 +307,7 @@ def cmd_write(keys, tag, description, notes):
         public_lb_score="", private_lb_score="", submission_msg="",
         preds_dir=out.relative_to(REPO_ROOT).as_posix(), notes=notes)
     runlog.append_run_row(row)
-    print(f"{tag} -> {run_id}: rank_mean of {len(keys)} legs, OOF {metrics['final_oof_auc']}")
+    print(f"{tag} -> {run_id}: {method} of {len(keys)} legs, OOF {metrics['final_oof_auc']}")
 
 
 def main():
@@ -302,6 +321,9 @@ def main():
     p.add_argument("--n-boot", type=int, default=N_BOOT)
     p = sub.add_parser("curve"); p.add_argument("legs", nargs="+")
     p = sub.add_parser("stack"); p.add_argument("legs", nargs="+")
+    p.add_argument("--write", metavar="TAG", help="archive the nested stack as a run")
+    p.add_argument("--description", default="")
+    p.add_argument("--notes", default="")
     p = sub.add_parser("disagree")
     p.add_argument("--ref", required=True)
     p.add_argument("legs", nargs="*")
@@ -320,7 +342,7 @@ def main():
     elif a.cmd == "curve":
         cmd_curve(a.legs)
     elif a.cmd == "stack":
-        cmd_stack(a.legs)
+        cmd_stack(a.legs, (a.write, a.description, a.notes) if a.write else None)
     elif a.cmd == "disagree":
         keys = a.legs
         if a.all:
