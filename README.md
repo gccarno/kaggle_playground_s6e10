@@ -972,3 +972,19 @@ The user approved continuing the MLP axis at Checkpoint 3b. **Why bags first:** 
 - **B9:** the sequential Gate 2 build of the Y-runs on B8.
 - **B8st:** a nested-CV logit stack on B8's legs (`blend.py stack --write`). B9f washed on near-twin legs (Δ −0.000005). B8's legs differ in family and calibration. Prediction: Δ vs rank_mean ±0.00005; it's submitted only if the nested OOF is at least rank_mean's.
 - **Why these slots:** the public paired SD is 0.000152, so single-leg probes are record entries. Blends are where public can tell us something (B7: +0.00024 public).
+
+**Results, batch 19** (Gate 2 single-candidate on the B8 pool, 0.961529).
+
+| Tag | run_id | Solo | Gate 1 | ADD (sd) | Read |
+|---|---|---|---|---|---|
+| Y1 10-epoch cycle | cdb0b9e7 | 0.960695 | +0.000011 vs X3 | −0.000004 (0.000005) | **prediction failed** (+0.00005 to +0.00015). As a SWAP for X3: 0.961525. |
+| Y2 emb_dim 32 | 22e5a5c4 | 0.960541 | −0.000143 vs X3 | −0.000004 | the route embedding isn't the bottleneck |
+| Y3 plr_sigma 1.0 | 614a47ec | 0.960442 | −0.000242 vs X3 | −0.000014 | held (±0.0002) at its edge: negative |
+| Y4 all-embedding, no profile | a73476b5 | 0.960626 | +0.000016 vs X4 | +0.000004 | null. As a SWAP for X4: 0.961529, unchanged. |
+| Y5 hidden 512 | 292f2bdb | 0.960622 | −0.000062 vs X3 | −0.000010 (0.000004) | held: capacity is null |
+
+**B8st** (`8ad571dd`, NOSUBMIT): a nested-CV logit stack on B8's legs scored 0.961519 against rank_mean 0.961529 (Δ −0.000010, SD 0.000012). That's the sixth stack wash, and the first on a diverse pool. The fitted weights favour W5 (0.22), X3 (0.18) and W4 (0.14), and give X1m and U11 about 0. That's the same ordering as the leave-one-out contributions, so the equal-weight rank_mean already captures it. `blend.py stack --write` now archives stacks.
+
+**The MLP axis is closed** (stop rule: Y1–Y5 all fail Gate 2). No B9 was built; **B8 stays the champion candidate.** The MLP's value lives in three views: the profile MLP (X1m), the raw-column MLP (X4), and the rating-embedding MLP (X3). Schedule, embedding width, PLR frequency and capacity don't add a view.
+
+**Oct 12 slots:** W6, X5, Y4, Y1, Y2, Y3, Y5, plus three auto-fill near-twins. Oct 11 (tonight) is B8 first.
