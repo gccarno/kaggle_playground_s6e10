@@ -1101,3 +1101,9 @@ No public OOF or test artifact is used.
 - Fold 1 ran out of memory in every fallback, including `keep_cache_on_device: False`, so fold 0's model and cache had not been freed. The allocator also showed 2.7 GB reserved but unused.
 - **Fix** (`learners._fit_predict_tabpfn`): `del clf`, `gc.collect()` and `torch.cuda.empty_cache()` around each fit, plus `PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True`. The config is unchanged, so Z1 is relaunched under its own tag. Nothing else moves.
 - **Cost revised:** about 104 min per fold, so **about 9 GPU-hours per 5-fold run**, not 2.5 (the public notebooks' 28 min/fold doesn't hold on our kernel). That fits the 12 h session limit, but the weekly GPU quota (about 30 h) now covers about 3 runs. Z1 and Z2 go now. Z3 and any bag wait for the Gate 2 reading.
+
+**Batch 20 public (Oct 12 slots): B8R 0.96101, against B8's 0.96105 (Δ −0.00004; OOF Δ −0.000009).**
+- The gap is a quarter of the public paired SD (0.000152), so B8's public score is the recipe's, not a lucky seed. For final selection, a B8-recipe blend is worth 0.9610 ± noise on public.
+- The replicate legs land where their originals did: U22R 0.96067 against 0.96064, and W5R 0.96059 against 0.96059.
+- **Other Oct 12 public scores:** X5 0.96042, Y1 0.96075, Y2 0.96068, Y3 0.96063, Y4 0.96070, Y5 0.96065, W6 0.94847.
+- **Y1 (10-epoch OneCycle) is the best public MLP so far**, but it failed Gate 2 on OOF (ADD −0.000004). A public-only effect with no OOF movement is provisional (§5), so the MLP axis stays closed.
