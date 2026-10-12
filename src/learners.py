@@ -81,7 +81,88 @@ def fit_predict(cfg, Xtr, ytr, Xva, yva, Xte, feats_cat):
     if name == "mlp":
         return _fit_predict_mlp(cfg, Xtr, ytr, Xva, yva, Xte, feats_cat)
 
+    if name == "tabpfn":
+        return _fit_predict_tabpfn(cfg, Xtr, ytr, Xva, yva, Xte, feats_cat)
+
     raise ValueError(f"unknown learner {name!r}")
+
+
+def _fit_predict_tabpfn(cfg, Xtr, ytr, Xva, yva, Xte, feats_cat):
+    """TabPFN-3.5 in-context learner: the whole training fold (~560k rows) is the context,
+    with no subsampling and no gradient fitting. Phase 4b (README): the tabular foundation
+    model view that every top public stack carries. The recipe (full context, KV cache,
+    int8 cache, autocast, lean cache build) follows hemingweb's public notebook.
+
+    Needs internet on the kernel: tabpfn==9.0.0 is pip-installed by the kernel cell (with a
+    version guard), and the checkpoint is downloaded from Hugging Face once per process.
+    TabPFN-3.5 carries Prior Labs' non-commercial licence, which permits Kaggle use."""
+    import os, time
+    import torch
+    from huggingface_hub import hf_hub_download
+    from tabpfn import TabPFNClassifier
+    import tfm_lean
+    p = cfg["tabpfn_params"]
+    tfm_lean.apply(p["chunk"])
+    ckpt = hf_hub_download("Prior-Labs/tabpfn_3_5", p["ckpt"], local_dir="/tmp/tabpfn_ckpt")
+    dev = "cuda" if torch.cuda.is_available() else "cpu"
+
+    cats = [c for c in feats_cat if c in Xtr.columns]
+
+    def arr(X):
+        # Category codes (NaN stays NaN); numerics as float32.
+        D = X.copy()
+        for c in cats:
+            codes = D[c].cat.codes.astype("float32")
+            D[c] = codes.where(codes >= 0)
+        return D.to_numpy(np.float32)
+    cat_idx = [Xtr.columns.get_loc(c) for c in cats]
+
+    def oom(e):
+        return isinstance(e, torch.cuda.OutOfMemoryError) or "out of memory" in str(e).lower()
+
+    t0 = time.time()
+    clf = None
+    for extra in ({"memory_saving_mode": "auto", "keep_cache_on_device": True},
+                  {"memory_saving_mode": True, "keep_cache_on_device": True},
+                  {"memory_saving_mode": True, "keep_cache_on_device": False}):
+        try:
+            if dev == "cuda":
+                torch.cuda.empty_cache()
+                torch.cuda.reset_peak_memory_stats()
+            clf = TabPFNClassifier(model_path=ckpt, n_estimators=1, random_state=cfg["model_seed"],
+                                   device=dev, ignore_pretraining_limits=True,
+                                   fit_mode="fit_with_cache", kv_cache_precision="int8",
+                                   inference_precision="autocast",
+                                   categorical_features_indices=cat_idx, **extra)
+            clf.fit(arr(Xtr), np.asarray(ytr))
+            break
+        except Exception as e:
+            if not oom(e) or extra["keep_cache_on_device"] is False:
+                raise
+            print(f"    tabpfn OOM in fit with {extra}; next fallback", flush=True)
+            clf = None
+    peak = torch.cuda.max_memory_allocated() / 2**30 if dev == "cuda" else 0.0
+    print(f"    tabpfn fit {(time.time() - t0) / 60:.1f} min, context {len(Xtr):,}, "
+          f"peak {peak:.1f} GB", flush=True)
+
+    def predict(X, name):
+        A = arr(X)
+        out = np.empty(len(A))
+        bs, i, t = p["batch"], 0, time.time()
+        while i < len(A):
+            j = min(i + bs, len(A))
+            try:
+                out[i:j] = clf.predict_proba(A[i:j])[:, 1]
+            except Exception as e:
+                if oom(e) and bs > 1024:
+                    bs //= 2
+                    torch.cuda.empty_cache()
+                    continue
+                raise
+            i = j
+        print(f"    tabpfn {name}: {len(A):,} rows in {(time.time() - t) / 60:.1f} min", flush=True)
+        return out
+    return predict(Xva, "val"), predict(Xte, "test"), 0
 
 
 def _fit_predict_mlp(cfg, Xtr, ytr, Xva, yva, Xte, feats_cat):

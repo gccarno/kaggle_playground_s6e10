@@ -1041,3 +1041,50 @@ Single-seed MLPs run +0.0006 to +0.0015; bagged MLPs about 0.
 - **Price of the ours-only policy:** 0.96105 against 0.96184 is **about 0.0008, or about 440 places** today. On Oct 2 it was about 30 places.
   - The gap is now 5× the public paired SD and about 2× the OOF gap of any leg we've found.
   - It isn't shakeup noise. It's a missing model family, plus 100+ diverse members.
+
+### Phase 4b: our own tabular-foundation-model leg (2026-10-12)
+
+On Oct 12 the user chose to train our own TFM leg now, keeping Final A ours-only, with the Oct 18 review unchanged. The *recipe* comes from public notebooks (ideas are allowed), with credit:
+- **hemingweb, "S6E10 EXP01 TabPFN35 Full Context":** the full-context, KV-cache, int8, lean-cache-build recipe.
+- **goodpjw2008:** route categories.
+- **samanyu1808:** the `orig_pred` input.
+
+No public OOF or test artifact is used.
+
+**Code (each piece defaults to off):**
+- `src/tfm_lean.py`: the memory-lean KV-cache build, ported with attribution.
+- `learners._fit_predict_tabpfn`:
+  - TabPFN-3.5 (`tabpfn==9.0.0`, checkpoint `Prior-Labs/tabpfn_3_5`), with the full fold context (about 560k rows) and `n_estimators=1`;
+  - `fit_with_cache`, an int8 KV cache, and autocast;
+  - an OOM fallback chain, and batched prediction with a halving back-off.
+- `tabpfn_params` in DEFAULTS.
+- `make_probe_kernel`: only a learner that needs a pip package gets internet and an install cell. That cell **aborts if numpy, pandas, scikit-learn or torch change**, the S6E9 shap lesson.
+- **Bit-identity:** an archived kernel (U18r) regenerates **byte-identical**, both ipynb and metadata. The change is purely additive, so no training replay is needed.
+- **Licence:** TabPFN-3.5 has Prior Labs' non-commercial licence; its authors state it permits Kaggle competitions.
+- **Cost:** about 2.5 T4-hours per single-seed run.
+
+**Pre-registered, batch 21** (`scripts/batch21_tfm.sh`; Gate 2 on the B8 pool):
+
+| Tag | Config (twin) | Mechanism | Prediction |
+|---|---|---|---|
+| Z0s | `learner: tabpfn`, 5% of rows, 2 folds (NOSUBMIT) | smoke test of install, weights, patch and code path | runs; AUC about 0.95 |
+| Z1 | `learner: tabpfn`, raw columns | in-context learning over the full fold: a new family view | solo 0.9600–0.9608; **ADD > +0.00005** |
+| Z2 | Z1 + `num_as_cat: [FD, age]` (Z1) | route identity as a categorical | Gate 1 +0.0002 to +0.0006 |
+| Z3 | Z2 + `teacher` (Z2) | the original's function as an input | solo +0.0001 or more; U1 says ADD falls |
+
+**Stop rule:** if Z1–Z3 all fail Gate 2, the TFM axis is closed. The public TFMs' value would then be in stacking 100+ members, not in the view itself, which is evidence for the Oct 18 review. Passing legs go into **B10**; the tag "B9" is skipped to avoid confusion with B9f.
+
+**B8 replicate (batch 20), first legs.** Each is at `model_seed` 43, compared with its original:
+
+| Replicate | Δ OOF |
+|---|---|
+| U11R | −0.000062 |
+| U22R | +0.000044 |
+| U18R | −0.000032 |
+| U24R | −0.000051 |
+| W5R | +0.000054 |
+| T24R | +0.000007 |
+| X3R | −0.000090 |
+| X4R | +0.000096 |
+
+All are within the predicted seed floors. W4R, X1mR and W14R are running.

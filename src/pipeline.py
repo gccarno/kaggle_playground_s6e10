@@ -44,7 +44,7 @@ OUT_DIR = Path(os.environ.get("KOUT", "/kaggle/working" if ON_KAGGLE else
 # ---------------------------------------------------------------------- config
 DEFAULTS = {
     "run_tag": "baseline",
-    "learner": "lgb",                # lgb | xgb | cat | glm | mlp
+    "learner": "lgb",                # lgb | xgb | cat | glm | mlp | tabpfn
     "model_seed": SEED,
     "seed_bag": 1,                   # average this many model seeds inside each fold
     "n_folds": N_FOLDS,
@@ -163,9 +163,13 @@ DEFAULTS = {
     "mlp_params": {"epochs": 16, "batch_size": 1024, "lr": 2e-3, "weight_decay": 1e-5,
                    "hidden": 256, "layers": 3, "dropout": 0.1, "emb_dim": 16,
                    "plr_freq": 16, "plr_dim": 8, "plr_sigma": 0.1, "patience": 4},
+    # Phase 4b TabPFN-3.5 (learners._fit_predict_tabpfn): predict batch rows, the KV-cache
+    # build chunk (tfm_lean), and the Hugging Face checkpoint file.
+    "tabpfn_params": {"batch": 32768, "chunk": 16384,
+                      "ckpt": "tabpfn-v3.5-20260909.safetensors"},
 }
 DICT_KEYS = ["lgb_params", "xgb_params", "cat_params", "glm_params", "teacher_params",
-             "teacher_cat_params", "mlp_params"]
+             "teacher_cat_params", "mlp_params", "tabpfn_params"]
 
 
 def load_cfg(override=None):

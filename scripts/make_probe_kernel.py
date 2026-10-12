@@ -37,11 +37,27 @@ for m in ("numpy", "pandas", "sklearn", "lightgbm", "xgboost", "catboost"):
     except Exception as e:
         print(f"  {{m}} unavailable: {{e}}")
 
-env = dict(os.environ, KCFG=json.dumps(cfg), KRUN_ID=RUN_ID, PYTHONUNBUFFERED="1")
+{install}env = dict(os.environ, KCFG=json.dumps(cfg), KRUN_ID=RUN_ID, PYTHONUNBUFFERED="1")
 r = subprocess.run([sys.executable, "-u", os.path.join(code_dir, "pipeline.py")], env=env)
 if r.returncode != 0:
     raise RuntimeError("pipeline.py failed")
 '''
+
+
+# Only for learners that need a package outside the Kaggle image (tabpfn). The install must
+# leave the image's pinned stack alone: in S6E9 installing shap silently upgraded pandas.
+INSTALL = """import importlib.metadata as _md
+def _vers():
+    return {p: _md.version(p) for p in ("numpy", "pandas", "scikit-learn", "torch")}
+_before = _vers()
+subprocess.run([sys.executable, "-m", "pip", "install", "-q", PIP_SPEC], check=True)
+_after = _vers()
+print("pip installed", PIP_SPEC, "| pinned stack", _before)
+if _after != _before:
+    raise RuntimeError(f"pip changed the pinned stack: {_before} -> {_after}")
+
+"""
+PIP = {"tabpfn": "tabpfn==9.0.0"}
 
 
 def slug_for(tag):
@@ -50,12 +66,14 @@ def slug_for(tag):
 
 def make(tag, cfg, sha, run_id, gpu=False):
     slug = slug_for(tag)
+    spec = PIP.get(cfg.get("learner"))
+    install = f"PIP_SPEC = {spec!r}" + chr(10) + INSTALL if spec else ""
     out = REPO_ROOT / ".kaggle_output" / f"_push_{slug}"
     out.mkdir(parents=True, exist_ok=True)
     nb = {
         "cells": [{"cell_type": "code", "execution_count": None, "metadata": {}, "outputs": [],
-                   "source": BODY.format(sha=sha, run_id=run_id,
-                                         cfg_json=json.dumps(cfg)).splitlines(keepends=True)}],
+                   "source": BODY.format(sha=sha, run_id=run_id, cfg_json=json.dumps(cfg),
+                                         install=install).splitlines(keepends=True)}],
         "metadata": {"kernelspec": {"display_name": "Python 3", "language": "python",
                                     "name": "python3"}, "language_info": {"name": "python"}},
         "nbformat": 4, "nbformat_minor": 5,
@@ -65,9 +83,9 @@ def make(tag, cfg, sha, run_id, gpu=False):
         "id": f"{KAGGLE_USER}/{slug}", "title": slug, "code_file": "kernel.ipynb",
         "language": "python", "kernel_type": "notebook", "is_private": True,
         "enable_gpu": gpu, "enable_tpu": False,
-        # No internet: everything the kernel needs is attached, and an offline kernel
-        # cannot pip-install something that silently changes library versions.
-        "enable_internet": False,
+        # No internet unless the learner needs a pip package (tabpfn), and then only behind
+        # INSTALL's version guard: an offline kernel cannot silently change library versions.
+        "enable_internet": bool(spec),
         "dataset_sources": [CODE_DATASET, ORIGIN_DATASET],
         "competition_sources": [COMPETITION], "kernel_sources": [], "model_sources": [],
         "keywords": [],
