@@ -1086,5 +1086,12 @@ No public OOF or test artifact is used.
 | T24R | +0.000007 |
 | X3R | −0.000090 |
 | X4R | +0.000096 |
+| X1mR | +0.000047 |
+| W4R | +0.000008 |
+| W14R | +0.000206 |
 
-All are within the predicted seed floors. W4R, X1mR and W14R are running.
+**Batch 20 result (Oct 12): B8R (`67dc16eb`) OOF 0.961520, against B8's 0.961529 (Δ −0.000009). That's inside the pre-registered ±0.00003, so the B8 recipe is seed-stable on OOF.**
+- Ten of the 11 legs are within their seed floors.
+- The exception is W14R at +0.000206. W14 is a 3-seed MLP bag with a teacher, and its floor sits at the top of the bagged-MLP range. It's also the weakest leg.
+- The leg deltas average out in the blend: their spread is ±0.00009, but the blend moves 0.000009. This is the blend averaging seed noise again (finding 15).
+- B8R submits in tonight's slot (Oct 12, queue position 8), and the other 11 replicate legs fill Oct 13. The B8R−B8 public gap goes to the Oct 18 review as the public noise of this recipe.
