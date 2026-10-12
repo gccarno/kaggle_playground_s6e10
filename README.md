@@ -1025,3 +1025,19 @@ Single-seed MLPs run +0.0006 to +0.0015; bagged MLPs about 0.
 - Every B8 leg is re-run at `model_seed: 43` as `<leg>R`, a strict twin of its archived cfg, and blended as **B8R**.
 - **Prediction:** each leg is within its seed floor; B8R's OOF is within ±0.00003 of B8.
 - **Use:** the B8R−B8 public gap is the public noise of *this recipe*. Final selection needs that number. These are the Oct 13–14 slots.
+
+**Leaderboard reading, 2026-10-12 01:00 UTC** (for the Oct 18 review).
+- **The board:**
+  - 1,554 teams;
+  - #1 0.96243, #10 0.96187, #25–#100 **0.96184** (a flat band), #200 0.96177, #500 0.96093;
+  - **B8 (0.96105) ranks about 466.**
+- **What the band is:** meta-stacks (L2 logistic, rank or hill-climb) over **124–340 public OOF/test libraries**. Examples: kratosyan's "Stacking every public OOF library", goodpjw2008's "228-member meta stack", cdeotte's "Stacking TFMs with public OOF". karttikjangid05 finds that **181 of 340 public OOFs are near-copies** (logit correlation > 0.999), and that 22 distinct OOFs nearly match the full stack (0.96181). Several 0.96184 files are reposts of one credited "Top18" file that has no OOF behind it.
+- **Fold alignment:** every library audited uses **SKF(5, shuffle, 42), our split**. They're blendable with our legs on OOF, so a Final B blend could be honestly validated.
+- **The missing view is tabular foundation models.**
+  - TabPFN-3.5 and TabICL members appear in every top stack. goodpjw2008's TabPFN + route-category notebook scores **0.96160 public**, against our best single (X3, 0.96073) and B8 (0.96105).
+  - cdeotte publishes OOF/test for 9 TFMs (`cdeotte/s6e10-tfm-oof-and-test-predictions`).
+  - A public honest-OOF stack reports **CV 0.96208** (najiama, LB 0.96177), against B8's 0.96154 (fold-ranked). So **the gap is real on CV, not just public overfitting.**
+  - TabPFN-3.5 carries Prior Labs' non-commercial licence; its authors say it permits Kaggle use.
+- **Price of the ours-only policy:** 0.96105 against 0.96184 is **about 0.0008, or about 440 places** today. On Oct 2 it was about 30 places.
+  - The gap is now 5× the public paired SD and about 2× the OOF gap of any leg we've found.
+  - It isn't shakeup noise. It's a missing model family, plus 100+ diverse members.

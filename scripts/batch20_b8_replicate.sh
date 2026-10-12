@@ -4,7 +4,8 @@
 # MLP legs get a T4. The B8R blend of all 11 replicates measures how much of B8's public score is luck.
 cd "$(dirname "$0")/.."
 leg=$1; shift
-read -r cfg base gpu < <(python - "$leg" <<'PY'
+# tr: Windows Python ends lines with \r, which would make gpu "1\r".
+read -r cfg base gpu < <(python - "$leg" <<'PY' | tr -d '\r'
 import json, sys, pandas as pd
 sys.path[:0] = ["src"]; from pipeline import DEFAULTS
 leg = sys.argv[1]
