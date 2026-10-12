@@ -988,3 +988,40 @@ The user approved continuing the MLP axis at Checkpoint 3b. **Why bags first:** 
 **The MLP axis is closed** (stop rule: Y1–Y5 all fail Gate 2). No B9 was built; **B8 stays the champion candidate.** The MLP's value lives in three views: the profile MLP (X1m), the raw-column MLP (X4), and the rating-embedding MLP (X3). Schedule, embedding width, PLR frequency and capacity don't add a view.
 
 **Oct 12 slots:** W6, X5, Y4, Y1, Y2, Y3, Y5, plus three auto-fill near-twins. Oct 11 (tonight) is B8 first.
+
+### Phase 4, resumed (2026-10-12)
+
+The user approved returning to Phase 4 at Checkpoint 3c. There are two jobs before the Oct 18 public-policy review: the midpoint instrument checks, and the review's evidence.
+
+**Oct 11 public scores:** **B8 0.96105** (a new best, +0.00007 over B7; OOF +0.00003). The bagged MLPs are now our best *single* models on public: X3 0.96073, X6 0.96072, X1m 0.96069, X2 0.96067, X4 0.96065, against U11's 0.96066.
+
+**Instrument refit** (`oof_lb_fit.py`, 88 runs):
+- Spearman 0.914; slope 0.973;
+- **σ 0.000373**, up from 0.000259;
+- shipping gate 0.000383 OOF.
+
+σ grew because of the MLPs. The public−OOF offset by family (OOF > 0.957):
+
+| Family | n | Mean offset | SD |
+|---|---|---|---|
+| blend | 8 | −0.000529 | 0.000047 |
+| cat | 25 | −0.000370 | 0.000122 |
+| lgb | 33 | −0.000436 | 0.000133 |
+| xgb | 7 | −0.000489 | 0.000173 |
+| **mlp** | 12 | **+0.000440** | 0.000545 |
+
+Single-seed MLPs run +0.0006 to +0.0015; bagged MLPs about 0.
+
+**Mechanism, in two parts:**
+- **Cross-fold calibration** (measured). The fold-mean AUC minus the pooled OOF AUC is about 0.00001 for every GBDT, 0.00025–0.0006 for single-seed MLPs, and 0.00003–0.00012 for bagged MLPs. Pooled OOF penalises fold models whose probabilities sit on different scales.
+- **Test-side fold averaging** (inferred). A test prediction averages 5 fold models, an implicit 5× bag; an OOF row comes from one model. For a high-variance learner, test is stronger than OOF.
+
+**Consequence:** OOF-based Gate 2 undervalues MLP legs.
+- Ranking within folds before blending fixes the calibration half honestly: B8's OOF goes 0.961529 → **0.961540** (+0.000011, 1.8 SD).
+- It doesn't change membership, since no candidate passes under it, and it doesn't change B8's test file.
+- The test-side half can't be measured on OOF. It's recorded as a Final B question, not a rule.
+
+**Pre-registered, batch 20: a B8 recipe replicate** (`scripts/batch20_b8_replicate.sh`):
+- Every B8 leg is re-run at `model_seed: 43` as `<leg>R`, a strict twin of its archived cfg, and blended as **B8R**.
+- **Prediction:** each leg is within its seed floor; B8R's OOF is within ±0.00003 of B8.
+- **Use:** the B8R−B8 public gap is the public noise of *this recipe*. Final selection needs that number. These are the Oct 13–14 slots.
