@@ -1095,3 +1095,9 @@ No public OOF or test artifact is used.
 - The exception is W14R at +0.000206. W14 is a 3-seed MLP bag with a teacher, and its floor sits at the top of the bagged-MLP range. It's also the weakest leg.
 - The leg deltas average out in the blend: their spread is ±0.00009, but the blend moves 0.000009. This is the blend averaging seed noise again (finding 15).
 - B8R submits in tonight's slot (Oct 12, queue position 8), and the other 11 replicate legs fill Oct 13. The B8R−B8 public gap goes to the Oct 18 review as the public noise of this recipe.
+
+**Z1, first attempt (Oct 12): out of GPU memory at fold 1, no run logged.**
+- Fold 0 finished: **AUC 0.960700**, near the CatBoost legs' fold 0 (W4R 0.960907). The fit took 57 min (peak 13.2 GB of a T4's 14.6), validation 15 min, test 32 min.
+- Fold 1 ran out of memory in every fallback, including `keep_cache_on_device: False`, so fold 0's model and cache had not been freed. The allocator also showed 2.7 GB reserved but unused.
+- **Fix** (`learners._fit_predict_tabpfn`): `del clf`, `gc.collect()` and `torch.cuda.empty_cache()` around each fit, plus `PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True`. The config is unchanged, so Z1 is relaunched under its own tag. Nothing else moves.
+- **Cost revised:** about 104 min per fold, so **about 9 GPU-hours per 5-fold run**, not 2.5 (the public notebooks' 28 min/fold doesn't hold on our kernel). That fits the 12 h session limit, but the weekly GPU quota (about 30 h) now covers about 3 runs. Z1 and Z2 go now. Z3 and any bag wait for the Gate 2 reading.

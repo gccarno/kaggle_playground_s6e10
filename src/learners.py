@@ -96,7 +96,10 @@ def _fit_predict_tabpfn(cfg, Xtr, ytr, Xva, yva, Xte, feats_cat):
     Needs internet on the kernel: tabpfn==9.0.0 is pip-installed by the kernel cell (with a
     version guard), and the checkpoint is downloaded from Hugging Face once per process.
     TabPFN-3.5 carries Prior Labs' non-commercial licence, which permits Kaggle use."""
-    import os, time
+    import gc, os, time
+    # Z1 (Oct 12) OOMed at fold 1 in every fallback: fold 0's cache was never freed, and
+    # 2.7 GB sat reserved-but-unallocated. Expandable segments must be set before CUDA init.
+    os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
     import torch
     from huggingface_hub import hf_hub_download
     from tabpfn import TabPFNClassifier
@@ -120,8 +123,14 @@ def _fit_predict_tabpfn(cfg, Xtr, ytr, Xva, yva, Xte, feats_cat):
     def oom(e):
         return isinstance(e, torch.cuda.OutOfMemoryError) or "out of memory" in str(e).lower()
 
+    def free():
+        gc.collect()
+        if dev == "cuda":
+            torch.cuda.empty_cache()
+
     t0 = time.time()
     clf = None
+    free()
     for extra in ({"memory_saving_mode": "auto", "keep_cache_on_device": True},
                   {"memory_saving_mode": True, "keep_cache_on_device": True},
                   {"memory_saving_mode": True, "keep_cache_on_device": False}):
@@ -141,6 +150,7 @@ def _fit_predict_tabpfn(cfg, Xtr, ytr, Xva, yva, Xte, feats_cat):
                 raise
             print(f"    tabpfn OOM in fit with {extra}; next fallback", flush=True)
             clf = None
+        free()
     peak = torch.cuda.max_memory_allocated() / 2**30 if dev == "cuda" else 0.0
     print(f"    tabpfn fit {(time.time() - t0) / 60:.1f} min, context {len(Xtr):,}, "
           f"peak {peak:.1f} GB", flush=True)
@@ -162,7 +172,10 @@ def _fit_predict_tabpfn(cfg, Xtr, ytr, Xva, yva, Xte, feats_cat):
             i = j
         print(f"    tabpfn {name}: {len(A):,} rows in {(time.time() - t) / 60:.1f} min", flush=True)
         return out
-    return predict(Xva, "val"), predict(Xte, "test"), 0
+    pv, pt = predict(Xva, "val"), predict(Xte, "test")
+    del clf
+    free()
+    return pv, pt, 0
 
 
 def _fit_predict_mlp(cfg, Xtr, ytr, Xva, yva, Xte, feats_cat):
