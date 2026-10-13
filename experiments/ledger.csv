@@ -106,7 +106,7 @@ X3,3c,mlp,X2,leg,LEG,Bagged MLP + rating embeddings: null solo; best ADD of the 
 X4,3c,mlp,X2,leg,LEG,Bagged MLP without the profile: a second MLP view
 X5,3c,mlp,X2,probe,FAIL,Bagged MLP + teacher: lower solo and ADD (finding 16)
 X6,3c,mlp-arch,X2,probe,NULL,OneCycle schedule: solo up; fails Gate 2
-B8,3c,blend,B7,blend,CHAMPION,Current champion: 11 legs (6 CatBoost + 1 lgb + 4 MLP views)
+B8,3c,blend,B7,blend,SUPERSEDED,"11 legs (6 CatBoost + 1 lgb + 4 MLP views); OOF 0.961529, public 0.96105"
 B8st,4,blend,B8,blend,FAIL,Fitted logit stack loses -0.00001 to rank_mean (finding 18)
 Y1,3c,mlp-arch,X3,probe,NULL,OneCycle on X3: fails Gate 2 (public-only bump is provisional)
 Y2,3c,mlp-arch,X3,probe,NULL,Embedding dim 32: fails Gate 2
@@ -126,11 +126,13 @@ Z0s,4b,tfm,,smoke,INFO,TabPFN-3.5 smoke: install + weights + memory patch work
 X1mR,4,replicate,X1m,replicate,INFO,B8 leg at seed 43
 W4R,4,replicate,W4,replicate,INFO,B8 leg at seed 43
 B8R,4,replicate,B8,blend,INFO,B8 recipe at seed 43: OOF -0.000009 and public -0.00004; B8 is seed-stable and its public score is not luck
-Z1,4b,tfm,,leg,RUNNING,TabPFN-3.5 full-context on raw columns; Gate 2 ADD > +0.00005 predicted
-Z2,4b,tfm,Z1,probe,RUNNING,Z1 + FD/age as categoricals (route identity); Gate 1 +0.0002-0.0006 predicted
-Z3,4b,tfm,Z2,probe,PLANNED,Z2 + teacher; runs after Z1/Z2 are read
-Q1,4,features,T24,probe,RUNNING,Quantized FD/age/delays (divisors 5/25/100); predicted null
-Q2,4,route-lookup,T24,probe,RUNNING,Window TE of FD (neighbour routes); predicted null to +0.0001
-Q3,4,age,T24,probe,RUNNING,Binned TE of age and delays; predicted null
-Q4,4,features,T24,probe,RUNNING,arr_delay minus dep_delay; predicted |d| < 0.0001
-Q5,4,one-hot,T24,probe,RUNNING,One-hot of 4 categoricals + 13 ratings; predicted null
+Z1,4b,tfm,,leg,PASS,"TabPFN-3.5 raw columns: solo 0.960859, ADD +0.000067 (11 SD); in B10"
+Z2,4b,tfm,Z1,leg,PASS,Z1 + FD/age as categoricals: Gate 1 +0.000211 vs Z1; ADD +0.000076 (13 SD); in B10
+Z3,4b,tfm,Z2,probe,RUNNING,"Z2 + teacher (Kaggle T4, Oct 13-14); predicted solo +0.0001, ADD lower"
+Q1,4,features,T24,probe,NULL,Quantized FD/age/delays: -0.000019 vs T24; ADD -0.000010
+Q2,4,route-lookup,T24,probe,NULL,Window TE of FD: +0.000043 vs T24; ADD -0.000002
+Q3,4,age,T24,probe,NULL,Binned TE of age and delays: -0.000023 vs T24; ADD -0.000006
+Q4,4,features,T24,probe,NULL,arr_delay minus dep_delay: -0.000007 vs T24; ADD -0.000007
+Q5,4,one-hot,T24,probe,NULL,One-hot of 4 categoricals + 13 ratings: -0.000104 vs T24; ADD -0.000012
+B10,4b,blend,B8,blend,CHAMPION,"Champion: B8 + Z1 + Z2 (TabPFN views), 13 legs; OOF 0.961652 (+0.000123)"
+Z4,4b,tfm,Z2,probe,PLANNED,Z2 + FD route profile; launches after the GPU quota resets (Sat Oct 17)

@@ -10,25 +10,25 @@ TE backoff,target encoding,te_backoff=bins,,FD,Rare values borrow the rate of th
 TE count feature,target encoding,te_count_feature,,FD,Give the model the support count behind each TE value.,Closed by argument at Checkpoint 3.
 Pseudo-label TE,target encoding,te_pseudo,,FD,Add test rows with soft labels to the TE support.,U5 null.
 Original-data TE support,external data,te_origin_support,,FD,Pool the original dataset's labels into the TE.,T19 null: the original's labels don't help (finding 4).
-Binned TE,target encoding,te_bin_cols,Q3,age; delays,Positive rate of value bins rather than single values.,Batch 22 Q3.
-Window TE,target encoding,te_window_cols,Q2,FD,Positive rate of neighbouring values at several radii.,Batch 22 Q2.
+Binned TE,target encoding,te_bin_cols,,age; delays,Positive rate of value bins rather than single values.,Q3 null (-0.000023).
+Window TE,target encoding,te_window_cols,,FD,Positive rate of neighbouring values at several radii.,Q2 null (+0.000043; ADD -0.000002).
 Shape TE,target encoding,te_shape_cols,,FD,Positive rate over very fine bins of the value's shape.,S6E9 tool for a different lookup; FD is exact-value so window TE (Q2) covers it.
 CatBoost ordered CTRs,target encoding,learner=cat+num_as_cat,,FD; age; ratings,CatBoost's own leak-free target statistics incl. combinations like age x class.,Best single legs: U4 U11 U22 W5 W4 (findings 10 13).
 Pair target encoding,interaction,te_pair_cols,,age x cats; rating pairs; FD x class,In-fold positive rate of a pair of columns.,W1-W3 null: inner-fold noise eats the interaction (finding 13).
 Route x class profile,interaction,profile_pair_keys,,FD x class,Passenger-mix profile per route and class.,T22 null.
-Quantization,quantization,fe_quant_cols,Q1,FD; age; delays,Integer-divide values into coarse groups (5/25/100 wide).,Batch 22 Q1.
+Quantization,quantization,fe_quant_cols,,FD; age; delays,Integer-divide values into coarse groups (5/25/100 wide).,Q1 null (-0.000019).
 Digit features,quantization,fe_digit_cols,,,Split a number into its decimal digits.,S6E9-specific (income digits); FD has no digit structure. Not planned.
 Route profile,aggregation,profile_keys,,FD,Mean of every other column per route: a route's typical passenger mix.,T2 +0.0016: the biggest gain (finding 2).
 Profile category shares,aggregation,profile_cat_shares,,FD,Per-route share of each class/type/gender.,T20 null: predicted by what the model had (finding 5).
 Profile spread,aggregation,profile_stats,,FD,Per-route standard deviation of the numerics.,T21 null.
 Rating statistics,aggregation,fe_rating_stats,,ratings,Sum / minimum / zero-count across the 13 ratings.,T13 null: trees already see this.
-Delay difference,combination,fe_delay_diff,Q4,delays,Arrival delay minus departure delay.,Batch 22 Q4.
-One-hot (GBDT),one-hot,one_hot_cols,Q5,4 categoricals; 13 ratings,Replace each column with 0/1 indicators per level.,Batch 22 Q5.
+Delay difference,combination,fe_delay_diff,,delays,Arrival delay minus departure delay.,Q4 null (-0.000007).
+One-hot (GBDT),one-hot,one_hot_cols,,4 categoricals; 13 ratings,Replace each column with 0/1 indicators per level.,Q5 -0.000104: hurts (finding 20).
 One-hot (GLM),one-hot,learner=glm,,4 categoricals,Dummy columns so a linear model can use categories.,G1 W6: the linear family is far below.
 Teacher (original-data model),external data,teacher,,all,A model trained only on the original dataset; its prediction is a feature.,+0.0002 next to the profile (T8); hurts the MLP (findings 4 16).
 Original rows appended,external data,use_origin_extra,,all,Add the original's rows as extra training data.,T12 -0.0009 (finding 4).
 MLP with PLR + embeddings,neural embedding,learner=mlp,,numerics; FD; age; ratings,Neural net: periodic encodings of numbers and learned embeddings of FD/age/ratings.,Weaker solo; the largest blend gains (findings 12 15 17).
-TabPFN-3.5,foundation model,learner=tabpfn,Z1,all,Pretrained transformer doing in-context learning over the whole training fold.,Batch 21 Z1/Z2 on Kaggle GPU.
+TabPFN-3.5,foundation model,learner=tabpfn,Z3,all,Pretrained transformer doing in-context learning over the whole training fold.,"Z1 ADD +0.000067, Z2 +0.000076: in B10 (finding 19). Z3 running."
 Monotone constraints,model-side,monotone,,ratings,Force predictions to rise with each rating.,Not tried: AUC gains in S6E9 were nil; low priority.
 Additive-only (GAM),model-side,additive_only,,all,Trees may split on one feature each: no interactions.,Not tried: interactions are where the signal is (finding 10).
 Seed bagging,model-side,seed_bag,,,Average several seeds of the same model.,Buys solo score not blend value (finding 15).

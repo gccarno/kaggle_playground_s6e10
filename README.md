@@ -1132,3 +1132,42 @@ No public OOF or test artifact is used.
   - Gate 1: +0.00014 vs T24.
   - Gate 2 on the B8 pool: SWAP for T24 > −1 SD, ADD > 2 SD.
 - **Stop rule:** if all five are null, these axes are closed *empirically*, and FINDINGS records that the residual test's "nothing left" call held for every encoder family. Any pass goes into B10 with the Z results.
+
+**Batch 22 result (Oct 13): all five null, as pre-registered. The feature-engineering axes are closed empirically.**
+
+| Tag | OOF | Δ vs T24 | ADD on B8 (SD) | SWAP for U11 |
+|---|---|---|---|---|
+| Q1 quantization | 0.960631 | −0.000019 | −0.000010 (0.000004) | −0.000010 |
+| Q2 window TE | 0.960693 | +0.000043 | −0.000002 (0.000004) | −0.000002 |
+| Q3 binned TE | 0.960627 | −0.000023 | −0.000006 (0.000004) | −0.000006 |
+| Q4 delay diff | 0.960643 | −0.000007 | −0.000007 (0.000005) | −0.000008 |
+| Q5 one-hot | 0.960546 | **−0.000104** | −0.000012 (0.000004) | −0.000013 |
+
+- The residual test's "nothing left in single columns" call held for every encoder family it was used to skip. Only Q2, the one aimed at the route, moved in the positive direction, and it is a third of Gate 1.
+- **Q5 hurts.** One-hot costs lgb 0.0001, so native categorical splits and ordinal ratings are the better representation (finding 20).
+
+**Batch 21 result (Oct 13): both TabPFN legs pass Gate 2 by a wide margin. B10 is the new champion.**
+
+| Tag | Solo OOF | Gate 1 | ADD on B8 (SD) | SWAP for U11 | Runtime |
+|---|---|---|---|---|---|
+| Z1 raw | 0.960859 | (no twin) | **+0.000067** (0.000006) | +0.000070 | 8.3 h T4 |
+| Z2 + FD/age categorical | 0.961070 | +0.000211 vs Z1 | **+0.000076** (0.000006) | +0.000080 | 8.4 h T4 |
+
+- **Predictions held:**
+  - Z1's solo score is a touch above the predicted 0.9600–0.9608;
+  - ADD > +0.00005 for both;
+  - Z2's Gate 1 is at the bottom of the predicted +0.0002–0.0006.
+- **Z2 is within 0.00007 of the best single model** (W5, CatBoost, 0.961140), and it is the largest ADD since the first MLP (W11 +0.000069).
+- **B10** (`98754488`) is the rank mean of B8's 11 legs + Z1 + Z2: **OOF 0.961652, +0.000123 over B8.** The two TabPFN legs stack: B8 + Z2 alone is 0.961605.
+- B10, Z2 and Z1 go first in the Oct 14 slots.
+
+**Batch 23, feature probes on the TabPFN view (pre-registered Oct 13).**
+- **Why:** batch 22 says the GBDT feature space is exhausted, and finding 17 says new views come from new inputs. TabPFN is the one view whose inputs we haven't varied beyond route identity.
+- **Budget:** each run is about 8.4 T4-hours. Z1 + Z2 used about 16.7 of the 30-hour weekly quota, so one run fits before the Saturday reset.
+
+| Tag | Config (twin) | Mechanism | Prediction |
+|---|---|---|---|
+| Z3 | Z2 + `teacher` (Z2), already pre-registered in batch 21 | the original's function as an input column | solo +0.0001 or more; ADD at or below Z2's (U1: the teacher costs diversity) |
+| Z4 | Z2 + `profile_keys: [FD]` (Z2), after the quota resets on Oct 17 | the route's passenger-mix profile, the biggest GBDT gain (T2 +0.0016) | solo +0.0001 to +0.0003: TabPFN sees the route as a category but not as a profile; ADD uncertain |
+
+- **Gates:** Gate 1 +0.00014 vs Z2; Gate 2 ADD on the B10 pool > 2 SD, or SWAP for Z2 > −1 SD.

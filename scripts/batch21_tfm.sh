@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # usage: scripts/batch21_tfm.sh TAG [--launch-only|--adopt] -- Phase 4b batch 21, TabPFN-3.5 legs (README, Oct 12).
-# T4 GPU kernels with internet (pip tabpfn==9.0.0 behind a version guard). Z2 twins Z1; Z3 twins Z2.
+# T4 GPU kernels with internet (pip tabpfn==9.0.0 behind a version guard). Z2 twins Z1; Z3 and Z4 (batch 23) twin Z2.
 cd "$(dirname "$0")/.."
 FD='"flight_distance"'
 T='"learner":"tabpfn"'
@@ -15,6 +15,8 @@ Z2)  cfg="{\"run_tag\":\"Z2\",$T,\"num_as_cat\":[$FD,\"age\"]}"; base="{\"run_ta
      d="Z2: Z1 + FD and age as categoricals"; n="HYPOTHESIS route identity as a categorical (goodpjw2008 idea). PREDICTION Gate 1 +0.0002 to +0.0006.";;
 Z3)  cfg="{\"run_tag\":\"Z3\",$T,\"num_as_cat\":[$FD,\"age\"],\"teacher\":true}"; base="{\"run_tag\":\"Z2\",$T,\"num_as_cat\":[$FD,\"age\"]}"
      d="Z3: Z2 + teacher"; n="HYPOTHESIS the original's function as an input (samanyu1808 orig_pred idea). PREDICTION solo +0.0001 or more; U1 says ADD falls.";;
+Z4)  cfg="{\"run_tag\":\"Z4\",$T,\"num_as_cat\":[$FD,\"age\"],\"profile_keys\":[$FD]}"; base="{\"run_tag\":\"Z2\",$T,\"num_as_cat\":[$FD,\"age\"]}"
+     d="Z4: Z2 + FD route profile (batch 23)"; n="HYPOTHESIS TabPFN sees the route as a category but not its passenger-mix profile (T2 +0.0016 for lgb). PREDICTION solo +0.0001 to +0.0003; ADD on B10 uncertain.";;
 *) echo "unknown tag"; exit 2;;
 esac
 acc=""; [ "$2" = "--launch-only" ] && acc="--accelerator NvidiaTeslaT4"
