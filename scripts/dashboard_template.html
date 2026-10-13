@@ -1,0 +1,249 @@
+<title>S6E10 Experiment Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: a lab notebook board -- summary strip, then charts, then the run ledger. Data in mono. */
+:root {
+  --bg: #f4f6f4; --panel: #ffffff; --ink: #18211e; --muted: #5b6b65; --line: #dde3df;
+  --accent: #0e6b66; --accent-soft: #d7ebe8;
+  --pass: #1f7a3a; --fail: #b3362b; --null: #7d8a85; --leg: #2856a8; --run: #b06d00; --champ: #0e6b66;
+  --f-display: "IBM Plex Sans Condensed", "Arial Narrow", sans-serif;
+  --f-body: "IBM Plex Sans", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #111816; --panel: #18211e; --ink: #e3ebe7; --muted: #93a39c; --line: #2b3733;
+  --accent: #4fc1b8; --accent-soft: #173431;
+  --pass: #5cc77a; --fail: #ef7a6e; --null: #8d9a95; --leg: #7fa6f0; --run: #e8a94a; --champ: #4fc1b8;
+  color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #111816; --panel: #18211e; --ink: #e3ebe7; --muted: #93a39c; --line: #2b3733;
+  --accent: #4fc1b8; --accent-soft: #173431;
+  --pass: #5cc77a; --fail: #ef7a6e; --null: #8d9a95; --leg: #7fa6f0; --run: #e8a94a; --champ: #4fc1b8;
+  color-scheme: dark; }
+body { background: var(--bg); color: var(--ink); font: 14px/1.5 var(--f-body); }
+.wrap { max-width: 1180px; margin: 0 auto; padding-inline: 16px; padding-block: 20px 48px; display: grid; gap: 20px; }
+h1, h2 { font-family: var(--f-display); font-weight: 600; text-wrap: balance; margin: 0; }
+h1 { font-size: 1.9rem; letter-spacing: .01em; }
+h2 { font-size: 1.15rem; }
+.sub { color: var(--muted); }
+.how { color: var(--muted); font-size: .86rem; margin: 2px 0 10px; max-width: 75ch; }
+.mono, td.n, .tile b { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+section { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 16px; min-width: 0; }
+header { display: grid; gap: 4px; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+.tile { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px; display: grid; gap: 2px; }
+.tile span { font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.tile b { font-size: 1.35rem; font-weight: 500; }
+.tile small { color: var(--muted); font-size: .8rem; }
+.tile.champ { border-color: var(--accent); background: var(--accent-soft); }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 480px), 1fr)); gap: 20px; }
+.chart { position: relative; height: 340px; }
+.gates { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: .86rem; color: var(--muted); }
+.gates b { color: var(--ink); font-weight: 600; }
+.pill { display: inline-block; font: 500 .7rem/1 var(--f-mono); padding: 3px 6px; border-radius: 3px; letter-spacing: .03em; border: 1px solid currentColor; white-space: nowrap; }
+.v-PASS { color: var(--pass); } .v-FAIL { color: var(--fail); } .v-NULL { color: var(--null); }
+.v-LEG { color: var(--leg); } .v-RUNNING, .v-PLANNED { color: var(--run); } .v-CHAMPION { color: var(--champ); background: var(--accent-soft); }
+.v-INFO, .v-SUPERSEDED { color: var(--muted); border-style: dashed; }
+.s-closed { color: var(--null); } .s-open { color: var(--pass); } .s-running { color: var(--run); } .s-info { color: var(--muted); border-style: dashed; }
+.axes { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 270px), 1fr)); gap: 12px; }
+.axis { border: 1px solid var(--line); border-radius: 6px; padding: 12px; display: grid; gap: 6px; align-content: start; }
+.axis .top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.axis .name { font-family: var(--f-display); font-weight: 600; font-size: 1rem; }
+.axis p { margin: 0; font-size: .86rem; }
+.axis .meta { font-size: .78rem; color: var(--muted); }
+.flight { display: grid; gap: 8px; }
+.flight div { display: grid; grid-template-columns: auto auto 1fr; gap: 10px; align-items: baseline; }
+.scroll { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: .84rem; }
+th, td { text-align: left; padding: 5px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-weight: 600; font-size: .74rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); position: sticky; top: 0; background: var(--panel); }
+th[data-k] { cursor: pointer; user-select: none; }
+th[data-k]:hover, th[data-k]:focus-visible { color: var(--accent); outline: none; }
+td.n { text-align: right; white-space: nowrap; }
+td.tag { font-family: var(--f-mono); font-weight: 500; white-space: nowrap; }
+.d-up { color: var(--pass); font-weight: 500; } .d-down { color: var(--fail); font-weight: 500; } .d-flat { color: var(--muted); }
+.filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+.filters input, .filters select { font: inherit; font-size: .85rem; padding: 5px 8px; border: 1px solid var(--line); border-radius: 4px; background: var(--bg); color: var(--ink); }
+.filters input:focus-visible, .filters select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.filters input { flex: 1 1 200px; min-width: 0; }
+.tablebox { max-height: 640px; overflow: auto; }
+.count { font-size: .8rem; color: var(--muted); margin-top: 6px; }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>S6E10 Experiment Board</h1>
+    <div class="sub">Kaggle Playground S6E10, airline satisfaction, ROC AUC. Generated <span id="gen" class="mono"></span> from runs.csv and ledger.csv by <span class="mono">scripts/dashboard.py</span>.</div>
+  </header>
+
+  <div class="tiles" id="tiles"></div>
+
+  <section>
+    <h2>The instrument</h2>
+    <p class="how">Every result is read against noise. A single model counts as better only if its OOF beats its strict twin by Gate 1. A blend leg counts only if adding it lifts the champion blend by more than 2 bootstrap SD (Gate 2). Public deltas under about 0.00015 are noise.</p>
+    <div class="gates" id="gates"></div>
+  </section>
+
+  <section>
+    <h2>In flight and next</h2>
+    <p class="how">Runs pre-registered and launched but not yet read, and what has been planned next.</p>
+    <div class="flight" id="flight"></div>
+  </section>
+
+  <div class="grid2">
+    <section>
+      <h2>Progress over time</h2>
+      <p class="how">Dots are full-data single models, coloured by learner. Lines are the best OOF so far for singles and for blends; the dashed line is the best public score so far. Grey labels mark when each phase began.</p>
+      <div class="chart"><canvas id="prog" aria-label="Best OOF AUC over time"></canvas></div>
+    </section>
+    <section>
+      <h2>OOF vs public</h2>
+      <p class="how">Each submitted run. The line is the least-squares fit; the band is ±1 public SD. Points inside the band can't be ranked by public score, which is why decisions use OOF.</p>
+      <div class="chart"><canvas id="scat" aria-label="OOF vs public AUC"></canvas></div>
+    </section>
+  </div>
+
+  <section>
+    <h2>Inside the champion</h2>
+    <p class="how">The legs of the current champion blend (rank mean), read from its manifest. Each leg sees the route in a different way, and that difference is why it earns a place.</p>
+    <div class="scroll"><table id="comp"></table></div>
+  </section>
+
+  <section>
+    <h2>Axes: what has been tried</h2>
+    <p class="how">Each axis is one family of ideas. Closed means a probe settled it; the finding numbers point into FINDINGS.md. "Best" is the strongest single Δ vs twin on the axis.</p>
+    <div class="axes" id="axes"></div>
+  </section>
+
+  <section>
+    <h2>Every run</h2>
+    <p class="how">Δ is OOF minus the strict twin's OOF, the one-key-changed baseline. Green clears Gate 1 (+0.00014). Red is worse by as much. Grey is inside the noise. Click a header to sort.</p>
+    <div class="filters">
+      <input id="q" type="search" placeholder="Search tag or note">
+      <select id="fphase" aria-label="Phase"></select>
+      <select id="faxis" aria-label="Axis"></select>
+      <select id="fverdict" aria-label="Verdict"></select>
+    </div>
+    <div class="tablebox"><table id="runs"></table></div>
+    <div class="count" id="count"></div>
+  </section>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+const D = __DATA__;
+const $ = s => document.querySelector(s);
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const f6 = x => x == null ? "" : x.toFixed(6);
+const f5 = x => x == null ? "" : x.toFixed(5);
+const sd = x => x == null ? "" : (x >= 0 ? "+" : "−") + Math.abs(x).toFixed(6);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const pill = v => `<span class="pill v-${esc(v)}">${esc(v)}</span>`;
+const dcls = d => d == null ? "" : d >= D.gate1 ? "d-up" : d <= -D.gate1 ? "d-down" : "d-flat";
+
+$("#gen").textContent = D.generated;
+const c = D.champ, legsN = D.comp.length;
+$("#tiles").innerHTML = [
+  ["champ", "Champion", c.tag, `OOF ${f6(c.oof)} · public ${f5(c.pub)} · ${legsN} legs`],
+  ["", "Days left", D.days_left, "Deadline Oct 31, 23:59 UTC"],
+  ["", "Submissions", D.subs_used, `of ${D.subs_total} possible (10 per day)`],
+  ["", "Runs logged", D.n_runs, `${D.rows.filter(r => r.verdict === "RUNNING").length} running now`],
+].map(([k, l, b, s]) => `<div class="tile ${k}"><span>${l}</span><b>${esc(b)}</b><small>${esc(s)}</small></div>`).join("");
+
+$("#gates").innerHTML = [
+  ["Gate 1", `OOF Δ vs twin ≥ +${D.gate1}`],
+  ["Gate 2", "ADD > 2 SD, SWAP > −1 SD on the champion pool"],
+  ["Seed floor", `${D.seed_floor} OOF`],
+  ["Public paired SD", `${D.public_sd}`],
+].map(([a, b]) => `<span><b>${a}</b> <span class="mono">${esc(b)}</span></span>`).join("");
+
+const fl = D.rows.filter(r => r.verdict === "RUNNING" || r.verdict === "PLANNED");
+$("#flight").innerHTML = fl.length ? fl.map(r =>
+  `<div><span class="mono"><b>${esc(r.tag)}</b></span>${pill(r.verdict)}<span>${esc(r.note)}${r.twin ? ` <span class="sub">(twin ${esc(r.twin)})</span>` : ""}</span></div>`).join("")
+  : `<span class="sub">Nothing running. Next step: see STATUS.md.</span>`;
+
+$("#comp").innerHTML = `<thead><tr><th>Leg</th><th>Learner</th><th>Axis</th><th style="text-align:right">Solo OOF</th><th>Why it's in</th></tr></thead><tbody>` +
+  D.comp.map(l => `<tr><td class="tag">${esc(l.tag)}</td><td>${esc(l.learner)}</td><td>${esc(l.axis)}</td><td class="n">${f6(l.oof)}</td><td>${esc(l.note)}</td></tr>`).join("") + "</tbody>";
+
+$("#axes").innerHTML = D.axes.map(a => `<div class="axis">
+  <div class="top"><span class="name">${esc(a.axis)}</span><span class="pill s-${esc(a.status)}">${esc(a.status)}</span></div>
+  <p>${esc(a.summary)}</p>
+  <div class="meta mono">${a.n} runs${a.best ? ` · best ${esc(a.best)} <span class="${dcls(a.bestd)}">${sd(a.bestd)}</span>` : ""}${a.findings ? ` · findings ${esc(a.findings)}` : ""}</div>
+</div>`).join("");
+
+// ---- run explorer
+const opts = (sel, label, vals) => { sel.innerHTML = `<option value="">${label}: all</option>` + vals.map(v => `<option>${esc(v)}</option>`).join(""); };
+const uniq = k => [...new Set(D.rows.map(r => r[k]).filter(Boolean))];
+opts($("#fphase"), "Phase", uniq("phase")); opts($("#faxis"), "Axis", uniq("axis").sort()); opts($("#fverdict"), "Verdict", uniq("verdict").sort());
+const cols = [["tag","Tag"],["date","Date"],["phase","Ph"],["learner","Learner"],["axis","Axis"],["twin","Twin"],["oof","OOF"],["delta","Δ vs twin"],["pub","Public"],["verdict","Verdict"],["note","What it tested / result"]];
+let sortK = "ts", sortDir = -1;
+function render() {
+  const q = $("#q").value.toLowerCase(), p = $("#fphase").value, a = $("#faxis").value, v = $("#fverdict").value;
+  let rs = D.rows.filter(r => (!p || r.phase === p) && (!a || r.axis === a) && (!v || r.verdict === v) &&
+    (!q || (r.tag + " " + r.note + " " + r.axis).toLowerCase().includes(q)));
+  rs.sort((x, y) => { const A = x[sortK], B = y[sortK];
+    if (A == null || A === "") return 1; if (B == null || B === "") return -1;
+    return (A < B ? -1 : A > B ? 1 : 0) * sortDir; });
+  $("#runs").innerHTML = `<thead><tr>${cols.map(([k, l]) => `<th data-k="${k}" tabindex="0"${["oof","delta","pub"].includes(k) ? ' style="text-align:right"' : ""}>${l}${sortK === k ? (sortDir > 0 ? " ▲" : " ▼") : ""}</th>`).join("")}</tr></thead><tbody>` +
+    rs.map(r => `<tr><td class="tag">${esc(r.tag)}</td><td class="mono">${esc(r.date)}</td><td>${esc(r.phase)}</td><td>${esc(r.learner)}</td><td>${esc(r.axis)}</td><td class="mono">${esc(r.twin)}</td>
+      <td class="n">${f6(r.oof)}</td><td class="n ${dcls(r.delta)}">${sd(r.delta)}</td><td class="n">${f5(r.pub)}</td><td>${pill(r.verdict)}</td><td>${esc(r.note)}</td></tr>`).join("") + "</tbody>";
+  $("#count").textContent = `${rs.length} of ${D.rows.length} ledger rows`;
+  document.querySelectorAll("#runs th[data-k]").forEach(th => {
+    const go = () => { const k = th.dataset.k; sortDir = sortK === k ? -sortDir : (["oof","delta","pub","ts","date"].includes(k) ? -1 : 1); sortK = k; render(); };
+    th.onclick = go; th.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } };
+  });
+}
+["#q", "#fphase", "#faxis", "#fverdict"].forEach(s => $(s).addEventListener("input", render));
+render();
+
+// ---- charts
+const T0 = Date.UTC(2026, 9, 1);
+const day = ts => (Date.parse(ts) - T0) / 864e5;
+const LC = { lgb: "#3f8f5f", xgb: "#c0812c", cat: "#3a6fc4", mlp: "#a04f9a", glm: "#8a8f8c", tabpfn: "#d0543f", blend: "#0e6b66" };
+let charts = [];
+function draw() {
+  charts.forEach(ch => ch.destroy()); charts = [];
+  const ink = css("--ink"), muted = css("--muted"), line = css("--line"), acc = css("--accent");
+  Chart.defaults.color = muted; Chart.defaults.borderColor = line; Chart.defaults.font.family = css("--f-body");
+  const full = D.rows.filter(r => r.full && r.oof != null && r.ts).sort((a, b) => a.ts.localeCompare(b.ts));
+  const step = (rs, k) => { let best = -1, out = []; rs.forEach(r => { if (r[k] != null && r[k] > best) { best = r[k]; out.push({ x: day(r.ts), y: best, tag: r.tag }); } });
+    if (out.length) out.push({ x: Math.max(...full.map(r => day(r.ts))), y: best, tag: out[out.length - 1].tag }); return out; };
+  const singles = full.filter(r => r.learner !== "blend"), blends = full.filter(r => r.learner === "blend");
+  const phaseLines = { id: "phases", afterDraw(ch) { const { ctx, chartArea: a, scales: { x } } = ch; ctx.save(); ctx.font = `11px ${css("--f-mono")}`; ctx.fillStyle = muted; ctx.strokeStyle = line; ctx.setLineDash([3, 3]);
+    Object.entries(D.phases).forEach(([p, ts]) => { const px = x.getPixelForValue(day(ts)); if (px < a.left || px > a.right) return; ctx.beginPath(); ctx.moveTo(px, a.top); ctx.lineTo(px, a.bottom); ctx.stroke(); ctx.fillText("P" + p, px + 3, a.top + 10); }); ctx.restore(); } };
+  charts.push(new Chart($("#prog"), {
+    type: "scatter", plugins: [phaseLines],
+    data: { datasets: [
+      { label: "best single", type: "line", data: step(singles, "oof"), stepped: true, borderColor: ink, borderWidth: 2, pointRadius: 0 },
+      { label: "best blend", type: "line", data: step(blends, "oof"), stepped: true, borderColor: acc, borderWidth: 2.5, pointRadius: 0 },
+      { label: "best public", type: "line", data: step(full, "pub"), stepped: true, borderColor: muted, borderDash: [5, 4], borderWidth: 1.5, pointRadius: 0 },
+      { label: "single runs", data: singles.filter(r => r.oof > 0.957).map(r => ({ x: day(r.ts), y: r.oof, tag: r.tag })), pointRadius: 3, backgroundColor: singles.filter(r => r.oof > 0.957).map(r => (LC[r.learner] || muted) + "aa"), borderWidth: 0 },
+    ] },
+    options: { maintainAspectRatio: false, animation: false,
+      scales: { x: { min: 1, title: { display: true, text: "October (UTC)" }, ticks: { stepSize: 1, callback: v => "Oct " + (Math.floor(v) + 1) } },
+                y: { min: 0.957, title: { display: true, text: "AUC" }, ticks: { callback: v => v.toFixed(4) } } },
+      plugins: { legend: { labels: { boxWidth: 12 } }, tooltip: { callbacks: { label: i => `${i.raw.tag}: ${i.raw.y.toFixed(6)}` } } } }
+  }));
+  const sub = D.rows.filter(r => r.oof != null && r.pub != null && r.oof > 0.9585);
+  const n = sub.length, mx = sub.reduce((s, r) => s + r.oof, 0) / n, my = sub.reduce((s, r) => s + r.pub, 0) / n;
+  const b = sub.reduce((s, r) => s + (r.oof - mx) * (r.pub - my), 0) / sub.reduce((s, r) => s + (r.oof - mx) ** 2, 0), a0 = my - b * mx;
+  const xs = [Math.min(...sub.map(r => r.oof)), Math.max(...sub.map(r => r.oof))];
+  const ln = k => xs.map(x => ({ x, y: a0 + b * x + k * D.public_sd }));
+  const byL = {}; sub.forEach(r => (byL[r.learner] ??= []).push({ x: r.oof, y: r.pub, tag: r.tag }));
+  charts.push(new Chart($("#scat"), {
+    type: "scatter",
+    data: { datasets: [
+      { label: `fit (slope ${b.toFixed(2)})`, type: "line", data: ln(0), borderColor: ink, borderWidth: 1.5, pointRadius: 0 },
+      { label: "±1 SD", type: "line", data: ln(1), borderColor: line, borderWidth: 1, pointRadius: 0, fill: "+1", backgroundColor: acc + "22" },
+      { label: "", type: "line", data: ln(-1), borderColor: line, borderWidth: 1, pointRadius: 0 },
+      ...Object.entries(byL).map(([l, pts]) => ({ label: l, data: pts, backgroundColor: LC[l] || muted, pointRadius: l === "blend" ? 5 : 3.5, pointStyle: l === "blend" ? "rectRot" : "circle" })),
+    ] },
+    options: { maintainAspectRatio: false, animation: false,
+      scales: { x: { title: { display: true, text: "OOF AUC" }, ticks: { callback: v => v.toFixed(4) } }, y: { title: { display: true, text: "Public AUC" }, ticks: { callback: v => v.toFixed(4) } } },
+      plugins: { legend: { labels: { boxWidth: 12, filter: i => i.text !== "" } }, tooltip: { callbacks: { label: i => i.raw.tag ? `${i.raw.tag}: OOF ${i.raw.x.toFixed(6)} · public ${i.raw.y.toFixed(5)}` : "" } } } }
+  }));
+}
+if (window.Chart) { draw(); matchMedia("(prefers-color-scheme: dark)").addEventListener("change", draw);
+  new MutationObserver(draw).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] }); }
+</script>

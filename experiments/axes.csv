@@ -1,0 +1,20 @@
+axis,status,findings,summary
+route-lookup,closed,"1,2,3,6",flight_distance is a route key. Identity (+0.0007) plus knowledge (+0.0008) are fully used; the residual test sits at 1 under the champion.
+teacher,closed,"4,16",A model fit on the original data helps GBDTs next to route features; hurts the MLP; costs blend diversity on the TE view.
+original-data,closed,4,The original's labels as rows or TE support are null to negative. Only its function (the teacher) carries signal.
+profile-ext,closed,5,Extra route statistics are predicted by what the model already has (R2 0.97).
+age,closed,"7,10",Age as an lgb categorical hurts; as a CatBoost categorical it pays via age x class CTRs.
+catboost-ctr,closed,"10,13,14",CatBoost ordered CTRs of FD/age/ratings give the strongest legs and the teacher-free view. Delays are null.
+interactions,closed,13,Explicit pair TEs are null; CatBoost's internal CTRs already extract them.
+diversity,closed,9,A leg's blend value is what it doesn't share. Adding the pool's best feature to a different view kills its value.
+family-leg,closed,12,XGBoost/CatBoost on one representation add little; new representations matter more than new families.
+mlp,closed,"12,15,16",The MLP is a genuinely new view (largest ADDs). Two to four MLP legs saturate it.
+mlp-arch,closed,17,Five architecture/optimisation changes all failed Gate 2. New views come from inputs not fitting.
+bagging,closed,15,Seed bags raise solo but not blend value. Bag only to read a probe.
+capacity,closed,2,Depth / leaves / lr: null as in S6E9.
+blend,open,18,rank_mean of distinct views; fitted stacks lose. Champion B8.
+tfm,running,,TabPFN-3.5 full-context: the one family we have never had. Z1/Z2 on Kaggle T4s now.
+instrument,info,,Seed twins and calibration controls that set the gates (README section 4).
+replicate,info,,B8 rebuilt at seed 43 (B8R): the champion recipe is seed-stable.
+family,closed,,Raw-feature family points (xgb/cat/glm/MLP smoke) are near LightGBM or below; families matter only with a new view.
+features,closed,5,Hand-made rating aggregates are already visible to trees.

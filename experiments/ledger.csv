@@ -1,0 +1,131 @@
+run_tag,phase,axis,twin,role,verdict,one_liner
+P0_smoke_local,0,harness,,smoke,INFO,Local harness runs end to end on a 10% sample
+P0_smoke_kernel,0,harness,P0_smoke_local,smoke,INFO,Kaggle kernel path bit-identical to local
+A0,1,baseline,,probe,INFO,Baseline: raw 21 features with LightGBM; every later probe descends from it
+A0s,1,instrument,A0,probe,INFO,Seed twin: sets the seed-noise floor (0.000039 OOF) and moved public +0.00010
+A0b3,1,instrument,A0,probe,INFO,3-seed bag: +0.00018 OOF but public flat; bagging buys little
+L7,1,instrument,A0,probe,INFO,Capacity ladder low end: shallow trees lose ~0.0004
+L255,1,instrument,A0,probe,NULL,Capacity ladder high end: no gain; capacity isn't the bottleneck
+D1,1,instrument,A0,probe,INFO,Degraded control (drop top 2 ratings) for the OOF->public calibration fit
+D2,1,instrument,A0,probe,INFO,Degraded control (drop all ratings) for the calibration fit
+G1,1,instrument,A0,probe,INFO,Logistic regression family point; far below GBDTs and excluded from the fit
+X1,1,family,A0,probe,NULL,XGBoost on raw features is about equal to LightGBM
+A0arm,1,harness,A0,replay,INFO,Parity: the ARM VM reproduces A0 bit-identically
+T1,2,route-lookup,A0,probe,PASS,Per-value TE of flight_distance +0.00135: FD is a route lookup key (the big find)
+T2,2,route-lookup,A0,probe,PASS,Unsupervised route profile +0.00159: route knowledge without labels beats TE
+T3,2,teacher,A0,probe,NULL,Teacher (model fit on the original data) alone on raw features: small
+T4,2,route-lookup,A0,probe,PASS,max_bin 4096 lets trees address single routes: +0.0007 (identity)
+T5,2,route-lookup,A0,probe,PASS,FD frequency gives route identity: +0.0007 (control for T1)
+T6,2,route-lookup,A0,probe,NULL,Negative control: TE of age adds nothing; confirms the residual test
+T7,2,route-lookup,T2,probe,NULL,TE on top of the profile: redundant once the profile is in
+T8,2,teacher,T2,probe,PASS,Profile + teacher +0.0002: the Phase 2/3 champion single
+T9,2,route-lookup,T2,probe,NULL,max_bin on top of the profile: redundant
+K1,2,family,A0,probe,NULL,CatBoost on raw features is about equal to LightGBM
+T10,2,instrument,T8,probe,INFO,T8 seed twin
+T11,3,bagging,T8,probe,PASS,"3-seed bag of T8 +0.00014 solo; bags buy solo, not blend value"
+T12,3,original-data,T8,probe,FAIL,Original rows appended as training data hurt (-0.0009)
+T13,3,features,T8,probe,NULL,Rating sum/min/zero-count: trees already see this
+T14,3,family-leg,T8,leg,PASS,XGBoost leg on the T8 representation; early blend leg
+T15,3,family-leg,T8,leg,PASS,CatBoost leg on the T8 representation; early blend leg
+T16,3,instrument,T8,probe,INFO,T8 seed twin (seed floor at the champion)
+T17,3,instrument,T8,probe,INFO,T8 seed twin
+T18,3,instrument,T8,probe,INFO,T8 seed twin
+T19,3,original-data,T1,probe,NULL,Original labels pooled into the route TE: null
+T1r,3,harness,T1,replay,INFO,Parity replay after refactor
+T8r,3,harness,T8,replay,INFO,Parity replay after refactor
+T20,3,profile-ext,T8,probe,NULL,Per-route category shares: already predicted by distance and means (finding 5)
+T21,3,profile-ext,T8,probe,NULL,Per-route std of numerics: null
+T22,3,profile-ext,T8,probe,NULL,Profile keyed on route x class: null
+T8r2,3,harness,T8,replay,INFO,Parity replay after the teacher axes
+T23,3,teacher,T8,probe,NULL,Route-aware teacher: null
+T24,3,teacher,T8,leg,LEG,CatBoost teacher: null solo but a lasting blend leg (in B8)
+T25,3,teacher,T8,probe,NULL,500-round teacher: null
+T26,3,instrument,T14,probe,INFO,T14 seed twin
+T27,3,instrument,T15,probe,INFO,T15 seed twin
+T28,3,age,T8,probe,NULL,TE of age: null (residual test said so)
+T29,3,age,T8,probe,FAIL,Age as an lgb categorical: -0.00035; calibration not ranking (finding 7)
+B1,4,blend,T8,blend,SUPERSEDED,First blend: 3 families on the T8 representation; +0.0003 over T8
+B2,4,blend,B1,blend,SUPERSEDED,Adds the TE route view (T1) and CatBoost teacher (T24)
+U1,4,diversity,T1,probe,FAIL,TE view + teacher: solo up but blend value destroyed (finding 9)
+U5,4,diversity,U1,probe,NULL,Pseudo-label TE support: null
+U2,4,diversity,U1,probe,NULL,TE view on xgb: null in the blend
+U3,4,diversity,U1,probe,NULL,TE view on CatBoost: null in the blend
+U4,4,catboost-ctr,T15,leg,PASS,FD as a CatBoost categorical (ordered CTRs) +0.00015: new route view
+V2,4,diversity,T1,probe,NULL,TE view on xgb without teacher: null
+V3,4,diversity,T1,probe,NULL,TE view on CatBoost without teacher: null
+B3,4,blend,B2,blend,SUPERSEDED,U4 replaces T15
+B3s,4,blend,B3,blend,INFO,Seed-twin legs: blend moves only at noise level
+B3c,4,blend,B3,blend,INFO,Both cat legs: no gain
+B3m,4,blend,B3,blend,INFO,Leave-one-out of T8: T8 near zero value
+B3x,4,blend,B3,blend,INFO,Seed-bagged blend: no gain
+U7,4,catboost-ctr,T8,probe,FAIL,FD as an lgb categorical: -0.0012 (lgb overfits the identity)
+U6,4,catboost-ctr,T14,probe,FAIL,FD as an xgb categorical: -0.0024
+U9,4,catboost-ctr,U4,leg,NULL,CTR-only route view (no profile): solo equal; diversity leg
+U4s,4,instrument,U4,probe,INFO,U4 seed twin
+U4s2,4,instrument,U4,probe,INFO,U4 seed twin
+B4,4,blend,B3,blend,SUPERSEDED,U9 replaces T8
+U15,4,capacity,U4,probe,NULL,CatBoost depth 8: null (capacity axis closed)
+U16,4,bagging,U4,probe,NULL,CatBoost 3-seed bag: solo +0.00012; no blend value
+U17,4,capacity,U4,probe,NULL,Lower lr / more iterations: null
+U10,4,catboost-ctr,U9,probe,FAIL,CTR view without teacher: -0.00055 solo
+U13,4,teacher,U9,leg,NULL,CTR view with a CatBoost teacher; in B5-B7 then dropped from B8
+U14,4,instrument,U9,probe,INFO,U9 seed twin
+U11,4,age,U4,leg,LEG,Age as a CatBoost categorical +0.00017: CTRs find age x class (finding 10)
+B5,4,blend,B4,blend,SUPERSEDED,U11 replaces U4; + U13
+U18,4,age,U9,leg,LEG,Age categorical on the CTR-only view +0.00017
+U19,4,bagging,U11,probe,NULL,U11 3-seed bag: solo up; no blend value (finding 15)
+U20,4,catboost-ctr,U11,probe,NULL,dep_delay as a categorical: null
+U24,4,teacher,U11,leg,LEG,U11 with a CatBoost teacher: a separate view kept in the blend
+U22,4,catboost-ctr,U11,leg,LEG,13 ratings as CatBoost categoricals +0.000075; strong blend leg
+U23,4,instrument,U11,probe,INFO,U11 seed twin: -0.0001 shows the CatBoost seed floor is large (finding 11)
+B6,4,blend,B5,blend,SUPERSEDED,+U22 +U18 +U24 -U9
+B6m,4,blend,B6,blend,INFO,Leave-one-out of T14: zero value
+B6b,4,blend,B6,blend,INFO,Bagged U11 in place of U11: no gain
+B6s,4,blend,B6,blend,INFO,+U11 seed twin: no gain
+W1,3b,interactions,T1,probe,FAIL,Explicit pair TEs in lgb: -0.00009 (finding 13)
+W3,3b,interactions,T14,probe,NULL,Pair TEs in xgb: null
+W9s,3b,mlp,,smoke,INFO,MLP smoke test
+W6,3b,family,W1,probe,INFO,GLM on the pair-TE representation: far below
+W2,3b,interactions,V2,probe,NULL,Pair TEs on the xgb TE view: +0.00006
+W9,3b,mlp,,leg,PASS,First MLP (PLR numerics + FD/age embeddings): 0.002 lower solo but a new view
+W10,3b,mlp,W9,probe,NULL,MLP + route profile
+W5,3b,catboost-ctr,U18,leg,LEG,Ratings as categoricals on the CTR-only view +0.00014
+W11,3b,mlp,W10,leg,PASS,MLP 3-seed bag: +0.0012 solo; largest Gate 2 ADD of its round (8.6 SD)
+U10r,3b,harness,U10,replay,INFO,Parity after the CatBoost NaN fix
+W12,3b,mlp,W10,probe,NULL,MLP + rating embeddings (single seed: unreadable)
+W14,3b,mlp,W10,leg,LEG,MLP + teacher: lower solo but kept as a blend leg
+W15,3b,mlp,W10,probe,NULL,MLP + FD TE: null
+U18r,3b,harness,U18,replay,INFO,Parity replay
+W13,3b,mlp,W10,probe,NULL,MLP dropout 0.25: null
+W4,3b,catboost-ctr,U10,leg,LEG,All-CTR CatBoost (no profile/teacher): made T1 redundant (finding 14)
+B7,3b,blend,B6,blend,SUPERSEDED,MLP legs + W5 + W4 enter; T14 and T1 leave; +0.00017
+W7,3b,catboost-ctr,U11,probe,NULL,arr_delay as a categorical: null
+X2,3c,mlp,W10,probe,INFO,MLP 5-seed bag: base for X3-X6
+X1m,3c,mlp,W11,leg,LEG,MLP 10-seed bag; replaces W11 in B8
+X3,3c,mlp,X2,leg,LEG,Bagged MLP + rating embeddings: null solo; best ADD of the round (finding 15)
+X4,3c,mlp,X2,leg,LEG,Bagged MLP without the profile: a second MLP view
+X5,3c,mlp,X2,probe,FAIL,Bagged MLP + teacher: lower solo and ADD (finding 16)
+X6,3c,mlp-arch,X2,probe,NULL,OneCycle schedule: solo up; fails Gate 2
+B8,3c,blend,B7,blend,CHAMPION,Current champion: 11 legs (6 CatBoost + 1 lgb + 4 MLP views)
+B8st,4,blend,B8,blend,FAIL,Fitted logit stack loses -0.00001 to rank_mean (finding 18)
+Y1,3c,mlp-arch,X3,probe,NULL,OneCycle on X3: fails Gate 2 (public-only bump is provisional)
+Y2,3c,mlp-arch,X3,probe,NULL,Embedding dim 32: fails Gate 2
+Y3,3c,mlp-arch,X3,probe,NULL,PLR sigma 1.0: fails Gate 2
+Y4,3c,mlp-arch,X4,probe,NULL,All-embedding MLP: fails Gate 2
+Y5,3c,mlp-arch,X3,probe,NULL,Hidden 512: fails Gate 2; MLP architecture axis closed (finding 17)
+X4R,4,replicate,X4,replicate,INFO,B8 leg at seed 43
+X3R,4,replicate,X3,replicate,INFO,B8 leg at seed 43
+U11R,4,replicate,U11,replicate,INFO,B8 leg at seed 43
+U22R,4,replicate,U22,replicate,INFO,B8 leg at seed 43
+U18R,4,replicate,U18,replicate,INFO,B8 leg at seed 43
+U24R,4,replicate,U24,replicate,INFO,B8 leg at seed 43
+W5R,4,replicate,W5,replicate,INFO,B8 leg at seed 43
+T24R,4,replicate,T24,replicate,INFO,B8 leg at seed 43
+W14R,4,replicate,W14,replicate,INFO,B8 leg at seed 43
+Z0s,4b,tfm,,smoke,INFO,TabPFN-3.5 smoke: install + weights + memory patch work
+X1mR,4,replicate,X1m,replicate,INFO,B8 leg at seed 43
+W4R,4,replicate,W4,replicate,INFO,B8 leg at seed 43
+B8R,4,replicate,B8,blend,INFO,B8 recipe at seed 43: OOF -0.000009 and public -0.00004; B8 is seed-stable and its public score is not luck
+Z1,4b,tfm,,leg,RUNNING,TabPFN-3.5 full-context on raw columns; Gate 2 ADD > +0.00005 predicted
+Z2,4b,tfm,Z1,probe,RUNNING,Z1 + FD/age as categoricals (route identity); Gate 1 +0.0002-0.0006 predicted
+Z3,4b,tfm,Z2,probe,PLANNED,Z2 + teacher; runs after Z1/Z2 are read
