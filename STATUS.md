@@ -1,14 +1,13 @@
 # S6E10 status: start here
 
-*Rewritten in place after every batch (last: 2026-10-13, batch 22 launched). For the visual version, see the dashboard (tabs **Experiments**, **Features**, **EDA**): run `python scripts/dashboard.py`, which writes `reports/dashboard.html` and is published as the "S6E10 Experiment Board" artifact. README.md is the contract and FINDINGS.md has the explanations. This page only orients.*
+*Rewritten in place after every batch (last: 2026-10-13, end of day: B10 champion, batch 22 closed). For the visual version, see the dashboard (tabs **Experiments**, **Features**, **EDA**): run `python scripts/dashboard.py`, which writes `reports/dashboard.html` and is published as the "S6E10 Experiment Board" artifact. README.md is the contract and FINDINGS.md has the explanations. This page only orients.*
 
 ## Where we are
-- **Champion: B8.** It's a rank-mean blend of 11 legs.
-  - **Scores:** OOF **0.961529**, public **0.96105**.
-  - **Legs:** 6 CatBoost, 1 LightGBM and 4 MLP views of the data.
-  - **Seed check:** a full rebuild at a new seed (B8R) scored 0.961520 / 0.96101, so B8's score isn't luck.
-- **Phase:** 4b, a tabular foundation model leg (TabPFN-3.5). It's the one model family we've never had.
-- **Side batch 22:** an audit found feature techniques we had never run (quantization, binned/window TE, delay difference, one-hot). We're testing them instead of arguing them closed. The dashboard's **Features** tab lists every technique and the runs that used it.
+- **Champion: B10.** It's B8's 11 legs plus two TabPFN-3.5 legs (Z1, Z2), rank-mean blended.
+  - **Score:** OOF **0.961652**, which is **+0.000123** over B8 (0.961529, public 0.96105). B10's first public score lands with the Oct 14 slots.
+  - **Why it moved:** TabPFN predicts by in-context learning, so its errors differ from every CatBoost, lgb and MLP leg. Each TabPFN leg passed Gate 2 at 11–13 SD.
+- **Feature engineering on GBDTs is closed with data.** Batch 22 tried every encoder we had skipped (quantization, window TE, binned TE, delay difference, one-hot). All five were null; one-hot actually hurts (−0.0001). See the dashboard's **Features** tab.
+- **Phase:** 4b. Feature work moves to the TabPFN view (batch 23).
 - **Deadline:** 2026-10-31 23:59 UTC. A cron on oci-free spends 10 submission slots a day.
 
 ## The story so far (one line per phase)
@@ -18,7 +17,8 @@
 4. **Phase 4, diversity and blending:** CatBoost's ordered CTRs see the route and age × class in a different way. Blends of *different views* beat any single model by about 0.0005 (FINDINGS 9–11, 14).
 5. **Phase 3b/3c, MLP:** a neural net is weaker solo, but it was the biggest blend contributor. Architecture tweaks never helped; new *inputs* did (FINDINGS 12–17).
 6. **Phase 4, B8 and the replicate:** stacking lost to a plain rank mean (FINDINGS 18). B8 was reproduced at a new seed.
-7. **Phase 4b, now:** TabPFN-3.5, full-context in-context learning. The public leaderboard's frontier (0.9618) is built on models like this.
+7. **Phase 4b:** TabPFN-3.5, full-context in-context learning. It's a new view: B10 is +0.000123 over B8 (FINDINGS 19).
+8. **Batch 22:** every untried GBDT feature encoder was null (FINDINGS 20).
 
 ## How results are judged
 - **Gate 1 (single model):** OOF minus its strict twin (exactly one config key changed) ≥ **+0.00014**.
@@ -35,21 +35,17 @@
   - capacity and HPO;
   - seed bagging for blend value;
   - MLP architecture;
-  - fitted stacks.
-- **Open:** blending (champion B8).
-- **Running:**
-  - TFM (TabPFN-3.5);
-  - feature-gap probes (batch 22: quantization, window TE, binned TE, delay difference, one-hot).
+  - fitted stacks;
+  - GBDT feature encoders and one-hot (batch 22).
+- **Open:**
+  - blending (champion B10);
+  - TFM inputs (batch 23).
 
 ## Running now
-- **Z1** (TabPFN-3.5 on raw columns) and **Z2** (+ FD/age as categoricals) are on Kaggle T4s.
-  - Launched about 23:30 UTC Oct 12, expected about 09:00 UTC Oct 13.
-  - About 9 GPU-hours each.
-- **Q1–Q5** (batch 22) are on Kaggle CPU, launched about 10:25 UTC Oct 13, about 6 minutes each. Each is a strict twin of T24 (the lgb leg in B8) with one feature technique added.
-- **The Oct 13 slot queue holds** the B8 replicate legs (X1mR, U11R, …) plus auto-fill.
+- **Z3** (Z2 + teacher, batch 23) is on a Kaggle T4. Launched about 23:55 UTC Oct 13, expected about 08:30 UTC Oct 14.
+- **The Oct 14 slot queue** (all 10 banked) is B10, Z2 and Z1, then auto-fill: Q1–Q5, B6b and B6m.
 
 ## Next decisions
-1. **When Q1–Q5 land:** Gate 1 vs T24, then Gate 2 (ADD to B8, SWAP for T24). If all five are null, the feature-engineering axes close with data.
-2. **When Z1 and Z2 land:** run Gate 2 on the B8 pool. Passing legs go into **B10**, which is queued for the Oct 14 slots.
-3. **Z3** (Z2 + teacher) runs after that. If Z1–Z3 all fail Gate 2, the TFM axis closes.
-4. **Oct 18 review (user's call):** whether to keep the final submission ours-only, or allow public artifacts.
+1. **When Z3 lands:** Gate 1 vs Z2, then Gate 2 on the B10 pool. A pass makes B11.
+2. **Z4** (Z2 + route profile) launches when the weekly GPU quota resets (Sat Oct 17). Each TabPFN run costs about 8.4 of the 30 weekly T4-hours.
+3. **Oct 18 review (user's call):** whether to keep the final submission ours-only, or allow public artifacts.
