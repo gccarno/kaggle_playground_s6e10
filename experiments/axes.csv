@@ -18,3 +18,4 @@ instrument,info,,Seed twins and calibration controls that set the gates (README 
 replicate,info,,B8 rebuilt at seed 43 (B8R): the champion recipe is seed-stable.
 family,closed,,Raw-feature family points (xgb/cat/glm/MLP smoke) are near LightGBM or below; families matter only with a new view.
 features,closed,5,Hand-made rating aggregates are already visible to trees.
+one-hot,running,,One-hot indicators instead of native categoricals or ordinal ratings (batch 22 Q5); used implicitly only by the GLM before.

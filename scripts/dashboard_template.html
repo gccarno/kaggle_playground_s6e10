@@ -2,7 +2,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <style>
-/* Layout: a lab notebook board -- summary strip, then charts, then the run ledger. Data in mono. */
+/* Layout: a lab notebook board -- summary strip, tabs (experiments / features / EDA). Data in mono. */
 :root {
   --bg: #f4f6f4; --panel: #ffffff; --ink: #18211e; --muted: #5b6b65; --line: #dde3df;
   --accent: #0e6b66; --accent-soft: #d7ebe8;
@@ -27,7 +27,7 @@ h1, h2 { font-family: var(--f-display); font-weight: 600; text-wrap: balance; ma
 h1 { font-size: 1.9rem; letter-spacing: .01em; }
 h2 { font-size: 1.15rem; }
 .sub { color: var(--muted); }
-.how { color: var(--muted); font-size: .86rem; margin: 2px 0 10px; max-width: 75ch; }
+.how { color: var(--muted); font-size: .86rem; margin: 2px 0 10px; max-width: 80ch; }
 .mono, td.n, .tile b { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
 section { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 16px; min-width: 0; }
 header { display: grid; gap: 4px; }
@@ -46,6 +46,7 @@ header { display: grid; gap: 4px; }
 .v-LEG { color: var(--leg); } .v-RUNNING, .v-PLANNED { color: var(--run); } .v-CHAMPION { color: var(--champ); background: var(--accent-soft); }
 .v-INFO, .v-SUPERSEDED { color: var(--muted); border-style: dashed; }
 .s-closed { color: var(--null); } .s-open { color: var(--pass); } .s-running { color: var(--run); } .s-info { color: var(--muted); border-style: dashed; }
+.st-tried { color: var(--pass); } .st-running { color: var(--run); } .st-not-tried { color: var(--fail); border-style: dashed; }
 .axes { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 270px), 1fr)); gap: 12px; }
 .axis { border: 1px solid var(--line); border-radius: 6px; padding: 12px; display: grid; gap: 6px; align-content: start; }
 .axis .top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
@@ -62,6 +63,7 @@ th[data-k] { cursor: pointer; user-select: none; }
 th[data-k]:hover, th[data-k]:focus-visible { color: var(--accent); outline: none; }
 td.n { text-align: right; white-space: nowrap; }
 td.tag { font-family: var(--f-mono); font-weight: 500; white-space: nowrap; }
+tr.fam td { background: var(--bg); font: 600 .78rem var(--f-display); text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
 .d-up { color: var(--pass); font-weight: 500; } .d-down { color: var(--fail); font-weight: 500; } .d-flat { color: var(--muted); }
 .filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
 .filters input, .filters select { font: inherit; font-size: .85rem; padding: 5px 8px; border: 1px solid var(--line); border-radius: 4px; background: var(--bg); color: var(--ink); }
@@ -69,70 +71,160 @@ td.tag { font-family: var(--f-mono); font-weight: 500; white-space: nowrap; }
 .filters input { flex: 1 1 200px; min-width: 0; }
 .tablebox { max-height: 640px; overflow: auto; }
 .count { font-size: .8rem; color: var(--muted); margin-top: 6px; }
+nav.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+nav.tabs a { font: 600 .95rem var(--f-display); color: var(--muted); text-decoration: none; padding: 8px 14px; border: 1px solid transparent; border-bottom: none; border-radius: 6px 6px 0 0; margin-bottom: -1px; }
+nav.tabs a[aria-selected="true"] { color: var(--ink); background: var(--panel); border-color: var(--line); }
+nav.tabs a:hover, nav.tabs a:focus-visible { color: var(--accent); outline: none; }
+.tab { display: grid; gap: 20px; }
+.flow { display: flex; flex-wrap: wrap; gap: 10px; align-items: stretch; }
+.stage { flex: 1 1 170px; border: 1px solid var(--line); border-radius: 6px; padding: 10px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+.stage h3 { margin: 0; font: 600 .82rem var(--f-display); text-transform: uppercase; letter-spacing: .05em; color: var(--ink); }
+.stage small { color: var(--muted); font-size: .76rem; }
+.chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.chip { font-size: .76rem; padding: 2px 7px; border-radius: 10px; border: 1px solid var(--line); color: var(--muted); }
+.chip.on { border-color: var(--accent); color: var(--ink); background: var(--accent-soft); font-weight: 500; }
+.arrow { align-self: center; color: var(--muted); font-size: 1.2rem; }
+.yes { color: var(--pass); font-weight: 600; } .no { color: var(--muted); }
+.heat td.c { text-align: center; font-family: var(--f-mono); font-size: .78rem; }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.facts div { border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; }
+.facts span { display: block; font-size: .7rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.facts b { font: 500 1.05rem var(--f-mono); }
+@media (max-width: 560px) { .arrow { display: none; } }
 </style>
 
 <div class="wrap">
   <header>
     <h1>S6E10 Experiment Board</h1>
-    <div class="sub">Kaggle Playground S6E10, airline satisfaction, ROC AUC. Generated <span id="gen" class="mono"></span> from runs.csv and ledger.csv by <span class="mono">scripts/dashboard.py</span>.</div>
+    <div class="sub">Kaggle Playground S6E10, airline satisfaction, ROC AUC. Generated <span id="gen" class="mono"></span> from runs.csv, ledger.csv, techniques.csv and eda.json by <span class="mono">scripts/dashboard.py</span>.</div>
   </header>
 
   <div class="tiles" id="tiles"></div>
 
-  <section>
-    <h2>The instrument</h2>
-    <p class="how">Every result is read against noise. A single model counts as better only if its OOF beats its strict twin by Gate 1. A blend leg counts only if adding it lifts the champion blend by more than 2 bootstrap SD (Gate 2). Public deltas under about 0.00015 are noise.</p>
-    <div class="gates" id="gates"></div>
-  </section>
+  <nav class="tabs" role="tablist">
+    <a href="#experiments" role="tab" data-tab="experiments">Experiments</a>
+    <a href="#features" role="tab" data-tab="features">Features</a>
+    <a href="#eda" role="tab" data-tab="eda">EDA</a>
+  </nav>
 
-  <section>
-    <h2>In flight and next</h2>
-    <p class="how">Runs pre-registered and launched but not yet read, and what has been planned next.</p>
-    <div class="flight" id="flight"></div>
-  </section>
-
-  <div class="grid2">
+  <div class="tab" id="tab-experiments">
     <section>
-      <h2>Progress over time</h2>
-      <p class="how">Dots are full-data single models, coloured by learner. Lines are the best OOF so far for singles and for blends; the dashed line is the best public score so far. Grey labels mark when each phase began.</p>
-      <div class="chart"><canvas id="prog" aria-label="Best OOF AUC over time"></canvas></div>
+      <h2>The instrument</h2>
+      <p class="how">Every result is read against noise. A single model counts as better only if its OOF beats its strict twin by Gate 1. A blend leg counts only if adding it lifts the champion blend by more than 2 bootstrap SD (Gate 2). Public deltas under about 0.00015 are noise.</p>
+      <div class="gates" id="gates"></div>
     </section>
+
     <section>
-      <h2>OOF vs public</h2>
-      <p class="how">Each submitted run. The line is the least-squares fit; the band is ±1 public SD. Points inside the band can't be ranked by public score, which is why decisions use OOF.</p>
-      <div class="chart"><canvas id="scat" aria-label="OOF vs public AUC"></canvas></div>
+      <h2>In flight and next</h2>
+      <p class="how">Runs pre-registered and launched but not yet read, and what has been planned next.</p>
+      <div class="flight" id="flight"></div>
+    </section>
+
+    <div class="grid2">
+      <section>
+        <h2>Progress over time</h2>
+        <p class="how">Dots are full-data single models, coloured by learner. Lines are the best OOF so far for singles and for blends; the dashed line is the best public score so far. Grey labels mark when each phase began.</p>
+        <div class="chart"><canvas id="prog" aria-label="Best OOF AUC over time"></canvas></div>
+      </section>
+      <section>
+        <h2>OOF vs public</h2>
+        <p class="how">Each submitted run. The line is the least-squares fit; the band is ±1 public SD. Points inside the band can't be ranked by public score, which is why decisions use OOF.</p>
+        <div class="chart"><canvas id="scat" aria-label="OOF vs public AUC"></canvas></div>
+      </section>
+    </div>
+
+    <section>
+      <h2>Inside the champion</h2>
+      <p class="how">The legs of the current champion blend (rank mean), read from its manifest. Each leg sees the route in a different way, and that difference is why it earns a place.</p>
+      <div class="scroll"><table id="comp"></table></div>
+    </section>
+
+    <section>
+      <h2>Axes: what has been tried</h2>
+      <p class="how">Each axis is one family of ideas. Closed means a probe settled it; the finding numbers point into FINDINGS.md. "Best" is the strongest single Δ vs twin on the axis.</p>
+      <div class="axes" id="axes"></div>
+    </section>
+
+    <section>
+      <h2>Every run</h2>
+      <p class="how">Δ is OOF minus the strict twin's OOF, the one-key-changed baseline. Green clears Gate 1 (+0.00014). Red is worse by as much. Grey is inside the noise. Click a header to sort.</p>
+      <div class="filters">
+        <input id="q" type="search" placeholder="Search tag or note">
+        <select id="fphase" aria-label="Phase"></select>
+        <select id="faxis" aria-label="Axis"></select>
+        <select id="fverdict" aria-label="Verdict"></select>
+      </div>
+      <div class="tablebox"><table id="runs"></table></div>
+      <div class="count" id="count"></div>
     </section>
   </div>
 
-  <section>
-    <h2>Inside the champion</h2>
-    <p class="how">The legs of the current champion blend (rank mean), read from its manifest. Each leg sees the route in a different way, and that difference is why it earns a place.</p>
-    <div class="scroll"><table id="comp"></table></div>
-  </section>
+  <div class="tab" id="tab-features" hidden>
+    <section>
+      <h2>The feature pipeline</h2>
+      <p class="how">How a run turns raw columns into a prediction. Unsupervised features are computed once over train and test. Supervised encoders are fitted inside each CV fold so labels never leak. Highlighted chips are what the current champion's legs actually use.</p>
+      <div class="flow" id="flow"></div>
+    </section>
+    <section>
+      <h2>Every technique, and whether it was tried</h2>
+      <p class="how">Coverage is read from every archived run config, so nothing here is claimed by hand. "Best Δ" counts only probes where the technique was the one key changed versus the twin. <b>Not tried</b> rows carry the reason they were skipped.</p>
+      <div class="filters"><select id="fstat" aria-label="Status"><option value="">Status: all</option><option>tried</option><option>running</option><option>not tried</option></select></div>
+      <div class="scroll"><table id="techs"></table></div>
+    </section>
+    <section>
+      <h2>What each champion leg sees</h2>
+      <p class="how">Each blend leg is one way of seeing the data. Legs differ in whether they get the route profile, a teacher, and which columns are treated as categories. That difference is what the blend averages over.</p>
+      <div class="scroll"><table id="see"></table></div>
+    </section>
+  </div>
 
-  <section>
-    <h2>Axes: what has been tried</h2>
-    <p class="how">Each axis is one family of ideas. Closed means a probe settled it; the finding numbers point into FINDINGS.md. "Best" is the strongest single Δ vs twin on the axis.</p>
-    <div class="axes" id="axes"></div>
-  </section>
-
-  <section>
-    <h2>Every run</h2>
-    <p class="how">Δ is OOF minus the strict twin's OOF, the one-key-changed baseline. Green clears Gate 1 (+0.00014). Red is worse by as much. Grey is inside the noise. Click a header to sort.</p>
-    <div class="filters">
-      <input id="q" type="search" placeholder="Search tag or note">
-      <select id="fphase" aria-label="Phase"></select>
-      <select id="faxis" aria-label="Axis"></select>
-      <select id="fverdict" aria-label="Verdict"></select>
+  <div class="tab" id="tab-eda" hidden>
+    <section>
+      <h2>Data at a glance</h2>
+      <p class="how">The competition data is synthetic, generated from a 130k-row airline survey (the "original"). There's no drift between train and test, so the adversarial AUC is about 0.5.</p>
+      <div class="facts" id="facts"></div>
+    </section>
+    <section>
+      <h2>flight_distance is a route ID</h2>
+      <p class="how">Each dot is one of the 400 most common distances, plotted as its satisfaction rate. The line is the smooth trend over 50-mile bins. If distance were a plain magnitude, dots would sit within noise of the line. Many sit far off it (red: more than 3 SD), because each distance is really a route with its own passenger mix. This is the contest's biggest finding (+0.0016).</p>
+      <div class="chart"><canvas id="fd" aria-label="Satisfaction rate per flight distance"></canvas></div>
+    </section>
+    <div class="grid2">
+      <section>
+        <h2>Satisfaction by age</h2>
+        <p class="how">The rate per age value (ages with 30 or more rows). It's a smooth curve, so age reads as a magnitude. The extra gain from age came only through CatBoost combinations like age × class.</p>
+        <div class="chart"><canvas id="age" aria-label="Satisfaction rate by age"></canvas></div>
+      </section>
+      <section>
+        <h2>Satisfaction by delay</h2>
+        <p class="how">Rate per delay bucket in minutes. Longer delays mean fewer satisfied passengers, but the effect is mild next to the ratings.</p>
+        <div class="chart"><canvas id="delay" aria-label="Satisfaction rate by delay"></canvas></div>
+      </section>
     </div>
-    <div class="tablebox"><table id="runs"></table></div>
-    <div class="count" id="count"></div>
-  </section>
+    <section>
+      <h2>Satisfaction by survey rating</h2>
+      <p class="how">The rate for each rating level (0 = not answered). Darker cells are more satisfied. Dropping all 13 ratings costs 0.08 AUC (D2), so they carry most of the signal.</p>
+      <div class="scroll"><table class="heat" id="heat"></table></div>
+    </section>
+    <div class="grid2">
+      <section>
+        <h2>Categoricals: train vs original</h2>
+        <p class="how">The satisfaction rate per level in the competition data and in the original survey. They match closely: the generator copied the original's structure, which is why a teacher fit on the original helps.</p>
+        <div class="scroll"><table id="cats"></table></div>
+      </section>
+      <section>
+        <h2>What signal is left: residual χ²/df</h2>
+        <p class="how">For each column, this measures whether the model's errors still vary by value more than noise allows. About 1 means the column is fully used; above 1 means signal is left. Compare the A0 baseline with the champion. <span id="chinote"></span></p>
+        <div class="chart" style="height:460px"><canvas id="chi" aria-label="Residual chi2 per column"></canvas></div>
+      </section>
+    </div>
+  </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>
 const D = __DATA__;
+const E = D.eda;
 const $ = s => document.querySelector(s);
 const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 const f6 = x => x == null ? "" : x.toFixed(6);
@@ -142,6 +234,7 @@ const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;
 const pill = v => `<span class="pill v-${esc(v)}">${esc(v)}</span>`;
 const dcls = d => d == null ? "" : d >= D.gate1 ? "d-up" : d <= -D.gate1 ? "d-down" : "d-flat";
 
+// ================= experiments tab
 $("#gen").textContent = D.generated;
 const c = D.champ, legsN = D.comp.length;
 $("#tiles").innerHTML = [
@@ -172,7 +265,6 @@ $("#axes").innerHTML = D.axes.map(a => `<div class="axis">
   <div class="meta mono">${a.n} runs${a.best ? ` · best ${esc(a.best)} <span class="${dcls(a.bestd)}">${sd(a.bestd)}</span>` : ""}${a.findings ? ` · findings ${esc(a.findings)}` : ""}</div>
 </div>`).join("");
 
-// ---- run explorer
 const opts = (sel, label, vals) => { sel.innerHTML = `<option value="">${label}: all</option>` + vals.map(v => `<option>${esc(v)}</option>`).join(""); };
 const uniq = k => [...new Set(D.rows.map(r => r[k]).filter(Boolean))];
 opts($("#fphase"), "Phase", uniq("phase")); opts($("#faxis"), "Axis", uniq("axis").sort()); opts($("#fverdict"), "Verdict", uniq("verdict").sort());
@@ -197,28 +289,80 @@ function render() {
 ["#q", "#fphase", "#faxis", "#fverdict"].forEach(s => $(s).addEventListener("input", render));
 render();
 
-// ---- charts
+// ================= features tab
+const FL = [
+  ["Raw columns", "21 columns", [["4 numerics", () => true], ["13 ratings", () => true], ["4 categoricals", () => true]]],
+  ["Unsupervised", "once, over train + test", [["route profile", l => l.profile], ["teacher", l => !!l.teacher], ["frequency", () => false], ["quantization", () => false], ["one-hot", () => false]]],
+  ["Supervised, per fold", "fitted inside each CV fold", [["CatBoost CTRs", l => l.learner === "cat" && l.cats.length > 0], ["MLP embeddings", l => l.learner === "mlp"], ["value TE", l => l.te.length > 0], ["pair TE", () => false], ["window / bin TE", () => false]]],
+  ["Learner", "one per run", [["lgb", l => l.learner === "lgb"], ["xgb", l => l.learner === "xgb"], ["cat", l => l.learner === "cat"], ["mlp", l => l.learner === "mlp"], ["tabpfn", l => l.learner === "tabpfn"]]],
+  ["Blend", "rank mean of the legs", [["rank_mean", () => true], ["stacking", () => false]]],
+];
+$("#flow").innerHTML = FL.map(([h, sm, chips], i) => (i ? '<span class="arrow" aria-hidden="true">→</span>' : "") +
+  `<div class="stage"><h3>${h}</h3><small>${sm}</small><div class="chips">${chips.map(([n, f]) => `<span class="chip${D.see.some(f) ? " on" : ""}">${n}</span>`).join("")}</div></div>`).join("");
+function renderTechs() {
+  const st = $("#fstat").value; let fam = "", h = "";
+  D.techs.filter(t => !st || t.status === st).forEach(t => {
+    if (t.family !== fam) { fam = t.family; h += `<tr class="fam"><td colspan="6">${esc(fam)}</td></tr>`; }
+    const runs = t.runs.length ? `${t.runs.length}: ${t.runs.slice(0, 6).join(" ")}${t.runs.length > 6 ? " …" : ""}` : (t.planned.length ? "queued: " + t.planned.join(" ") : "—");
+    h += `<tr><td><b>${esc(t.technique)}</b><br><span class="sub">${esc(t.what)}</span></td><td>${esc(t.columns)}</td>
+      <td><span class="pill st-${t.status.replace(" ", "-")}">${t.status}</span></td><td class="mono">${esc(runs)}</td>
+      <td class="n ${dcls(t.bestd)}">${t.best ? esc(t.best) + " " + sd(t.bestd) : ""}</td><td>${esc(t.note)}</td></tr>`;
+  });
+  $("#techs").innerHTML = `<thead><tr><th>Technique</th><th>Columns</th><th>Status</th><th>Runs</th><th style="text-align:right">Best Δ</th><th>Result / reason</th></tr></thead><tbody>${h}</tbody>`;
+}
+$("#fstat").addEventListener("input", renderTechs); renderTechs();
+const yn = b => b ? '<span class="yes">✓</span>' : '<span class="no">—</span>';
+const catTxt = cs => { const r = cs.filter(c => !["flight_distance", "age"].includes(c)).length;
+  return [cs.includes("flight_distance") && "FD", cs.includes("age") && "age", r && `${r} ratings`].filter(Boolean).join(", ") || "—"; };
+$("#see").innerHTML = `<thead><tr><th>Leg</th><th>Learner</th><th>Route profile</th><th>Teacher</th><th>As categories / embeddings</th><th style="text-align:right">Seed bag</th></tr></thead><tbody>` +
+  D.see.map(l => `<tr><td class="tag">${esc(l.tag)}</td><td>${esc(l.learner)}</td><td>${yn(l.profile)}</td><td>${l.teacher ? esc(l.teacher) + " teacher" : '<span class="no">—</span>'}</td><td>${esc(catTxt(l.cats))}</td><td class="n">${l.bag}</td></tr>`).join("") + "</tbody>";
+
+// ================= EDA tab (tables)
+if (E) {
+  const f = E.facts;
+  $("#facts").innerHTML = [["Train rows", f.train_rows.toLocaleString()], ["Test rows", f.test_rows.toLocaleString()], ["Original rows", f.original_rows.toLocaleString()],
+    ["Satisfied (train)", (100 * f.pos_rate_train).toFixed(2) + "%"], ["Satisfied (original)", (100 * f.pos_rate_original).toFixed(2) + "%"],
+    ["Distinct distances", f.cardinality.flight_distance.toLocaleString()], ["Distinct ages", f.cardinality.age], ["Test distances unseen", f.fd_unseen_in_test],
+    ["arr_delay missing", f.nan.arr_delay || 0], ["Adversarial AUC", f.adversarial_auc.toFixed(4)]]
+    .map(([a, b]) => `<div><span>${a}</span><b>${esc(b)}</b></div>`).join("");
+  const lv = [0, 1, 2, 3, 4, 5];
+  const at = (d, l) => { for (const k of [String(l), l + ".0"]) { const i = d.x.indexOf(k); if (i >= 0) return i; } return -1; };
+  $("#heat").innerHTML = `<thead><tr><th>Rating</th>${lv.map(l => `<th style="text-align:center">${l}</th>`).join("")}<th style="text-align:right">answered 0</th></tr></thead><tbody>` +
+    Object.entries(E.ratings).map(([cn, d]) => `<tr><td>${esc(cn)}</td>${lv.map(l => { const i = at(d, l);
+      if (i < 0) return '<td class="c no">—</td>'; const r = d.rate[i];
+      return `<td class="c" style="background:color-mix(in srgb, var(--accent) ${Math.round(r * 85)}%, transparent);color:${r > .55 ? "var(--bg)" : "var(--ink)"}" title="n=${d.n[i]}">${(100 * r).toFixed(0)}%</td>`; }).join("")}<td class="n">${f.rating_zero_pct[cn]}%</td></tr>`).join("") + "</tbody>";
+  $("#cats").innerHTML = `<thead><tr><th>Column</th><th>Level</th><th style="text-align:right">Train</th><th style="text-align:right">Original</th><th style="text-align:right">Rows</th></tr></thead><tbody>` +
+    Object.entries(E.cats).map(([cn, d]) => d.x.map((v, i) => { const o = E.original_cats[cn], j = o.x.indexOf(v);
+      return `<tr><td>${i ? "" : esc(cn)}</td><td>${esc(v)}</td><td class="n">${(100 * d.rate[i]).toFixed(1)}%</td><td class="n">${j >= 0 ? (100 * o.rate[j]).toFixed(1) + "%" : ""}</td><td class="n">${d.n[i].toLocaleString()}</td></tr>`; }).join("")).join("") + "</tbody>";
+  $("#chinote").textContent = `The champion (${E.chi2.champion}) is a rank blend, so its ranks were mapped to probabilities with an in-sample isotonic fit first.`;
+} else {
+  $("#facts").innerHTML = '<span class="sub">Run python scripts/eda_report.py to fill this tab.</span>';
+}
+
+// ================= charts (drawn for the visible tab only)
 const T0 = Date.UTC(2026, 9, 1);
 const day = ts => (Date.parse(ts) - T0) / 864e5;
 const LC = { lgb: "#3f8f5f", xgb: "#c0812c", cat: "#3a6fc4", mlp: "#a04f9a", glm: "#8a8f8c", tabpfn: "#d0543f", blend: "#0e6b66" };
-let charts = [];
-function draw() {
-  charts.forEach(ch => ch.destroy()); charts = [];
+let charts = [], cur = "experiments";
+function theme() {
+  Chart.defaults.color = css("--muted"); Chart.defaults.borderColor = css("--line"); Chart.defaults.font.family = css("--f-body");
+}
+function drawExp() {
   const ink = css("--ink"), muted = css("--muted"), line = css("--line"), acc = css("--accent");
-  Chart.defaults.color = muted; Chart.defaults.borderColor = line; Chart.defaults.font.family = css("--f-body");
   const full = D.rows.filter(r => r.full && r.oof != null && r.ts).sort((a, b) => a.ts.localeCompare(b.ts));
   const step = (rs, k) => { let best = -1, out = []; rs.forEach(r => { if (r[k] != null && r[k] > best) { best = r[k]; out.push({ x: day(r.ts), y: best, tag: r.tag }); } });
     if (out.length) out.push({ x: Math.max(...full.map(r => day(r.ts))), y: best, tag: out[out.length - 1].tag }); return out; };
   const singles = full.filter(r => r.learner !== "blend"), blends = full.filter(r => r.learner === "blend");
   const phaseLines = { id: "phases", afterDraw(ch) { const { ctx, chartArea: a, scales: { x } } = ch; ctx.save(); ctx.font = `11px ${css("--f-mono")}`; ctx.fillStyle = muted; ctx.strokeStyle = line; ctx.setLineDash([3, 3]);
     Object.entries(D.phases).forEach(([p, ts]) => { const px = x.getPixelForValue(day(ts)); if (px < a.left || px > a.right) return; ctx.beginPath(); ctx.moveTo(px, a.top); ctx.lineTo(px, a.bottom); ctx.stroke(); ctx.fillText("P" + p, px + 3, a.top + 10); }); ctx.restore(); } };
+  const dots = singles.filter(r => r.oof > 0.957);
   charts.push(new Chart($("#prog"), {
     type: "scatter", plugins: [phaseLines],
     data: { datasets: [
       { label: "best single", type: "line", data: step(singles, "oof"), stepped: true, borderColor: ink, borderWidth: 2, pointRadius: 0 },
       { label: "best blend", type: "line", data: step(blends, "oof"), stepped: true, borderColor: acc, borderWidth: 2.5, pointRadius: 0 },
       { label: "best public", type: "line", data: step(full, "pub"), stepped: true, borderColor: muted, borderDash: [5, 4], borderWidth: 1.5, pointRadius: 0 },
-      { label: "single runs", data: singles.filter(r => r.oof > 0.957).map(r => ({ x: day(r.ts), y: r.oof, tag: r.tag })), pointRadius: 3, backgroundColor: singles.filter(r => r.oof > 0.957).map(r => (LC[r.learner] || muted) + "aa"), borderWidth: 0 },
+      { label: "single runs", data: dots.map(r => ({ x: day(r.ts), y: r.oof, tag: r.tag })), pointRadius: 3, backgroundColor: dots.map(r => (LC[r.learner] || muted) + "aa"), borderWidth: 0 },
     ] },
     options: { maintainAspectRatio: false, animation: false,
       scales: { x: { min: 1, title: { display: true, text: "October (UTC)" }, ticks: { stepSize: 1, callback: v => "Oct " + (Math.floor(v) + 1) } },
@@ -244,6 +388,51 @@ function draw() {
       plugins: { legend: { labels: { boxWidth: 12, filter: i => i.text !== "" } }, tooltip: { callbacks: { label: i => i.raw.tag ? `${i.raw.tag}: OOF ${i.raw.x.toFixed(6)} · public ${i.raw.y.toFixed(5)}` : "" } } } }
   }));
 }
-if (window.Chart) { draw(); matchMedia("(prefers-color-scheme: dark)").addEventListener("change", draw);
-  new MutationObserver(draw).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] }); }
+function drawEda() {
+  if (!E) return;
+  const ink = css("--ink"), muted = css("--muted"), acc = css("--accent"), fail = css("--fail");
+  const pct = { ticks: { callback: v => (100 * v).toFixed(0) + "%" }, title: { display: true, text: "satisfied" } };
+  const R = E.fd_routes, pts = R.fd.map((x, i) => ({ x, y: R.rate[i], n: R.n[i], z: R.z[i] }));
+  charts.push(new Chart($("#fd"), { type: "scatter", data: { datasets: [
+      { label: "trend (50-mile bins)", type: "line", data: E.fd_binned.x.map((x, i) => ({ x: +x + 25, y: E.fd_binned.rate[i] })), borderColor: ink, borderWidth: 1.5, pointRadius: 0 },
+      { label: "route within 3 SD of trend", data: pts.filter(p => Math.abs(p.z) <= 3), backgroundColor: muted + "99", pointRadius: 2.5 },
+      { label: "route off-trend (> 3 SD)", data: pts.filter(p => Math.abs(p.z) > 3), backgroundColor: fail, pointRadius: 3 } ] },
+    options: { maintainAspectRatio: false, animation: false, scales: { x: { title: { display: true, text: "flight_distance (miles)" }, min: 0, max: 4000 }, y: pct },
+      plugins: { legend: { labels: { boxWidth: 12 } }, tooltip: { callbacks: { label: i => i.raw.n ? `FD ${i.raw.x}: ${(100 * i.raw.y).toFixed(1)}% of ${i.raw.n} rows (z ${i.raw.z})` : `trend ${(100 * i.raw.y).toFixed(1)}%` } } } } }));
+  charts.push(new Chart($("#age"), { type: "scatter", data: { datasets: [{ label: "satisfied", type: "line", data: E.age.x.map((x, i) => ({ x: +x, y: E.age.rate[i] })), borderColor: acc, pointRadius: 0, borderWidth: 2 }] },
+    options: { maintainAspectRatio: false, animation: false, scales: { x: { title: { display: true, text: "age" } }, y: pct }, plugins: { legend: { display: false } } } }));
+  const dd = E.delays;
+  charts.push(new Chart($("#delay"), { type: "bar", data: { labels: dd.dep_delay.x, datasets: [
+      { label: "departure delay", data: dd.dep_delay.rate, backgroundColor: acc },
+      { label: "arrival delay", data: dd.dep_delay.x.map(l => { const i = dd.arr_delay.x.indexOf(l); return i >= 0 ? dd.arr_delay.rate[i] : null; }), backgroundColor: muted }] },
+    options: { maintainAspectRatio: false, animation: false, scales: { x: { title: { display: true, text: "minutes" } }, y: { ...pct, min: 0.3 } }, plugins: { legend: { labels: { boxWidth: 12 } } } } }));
+  const C = E.chi2, ch = C.champion;
+  charts.push(new Chart($("#chi"), { type: "bar", data: { labels: C.keys, datasets: [
+      { label: "A0 baseline", data: C.models.A0, backgroundColor: muted }, { label: ch + " (champion)", data: C.models[ch], backgroundColor: acc }] },
+    options: { indexAxis: "y", maintainAspectRatio: false, animation: false, scales: { x: { title: { display: true, text: "residual χ²/df (1 = nothing left)" } }, y: { ticks: { font: { size: 10 } } } },
+      plugins: { legend: { labels: { boxWidth: 12 } } } } }));
+}
+function draw() {
+  if (!window.Chart) return;
+  charts.forEach(ch => ch.destroy()); charts = [];
+  theme();
+  if (cur === "experiments") drawExp(); else if (cur === "eda") drawEda();
+}
+
+// ================= tabs
+function show(t) {
+  if (!["experiments", "features", "eda"].includes(t)) t = "experiments";
+  cur = t;
+  document.querySelectorAll(".tab").forEach(el => el.hidden = el.id !== "tab-" + t);
+  document.querySelectorAll("nav.tabs a").forEach(a => a.setAttribute("aria-selected", String(a.dataset.tab === t)));
+  try { localStorage.setItem("tab", t); } catch (e) {}
+  draw();
+}
+document.querySelectorAll("nav.tabs a").forEach(a => a.addEventListener("click", e => {
+  e.preventDefault(); try { history.replaceState(null, "", "#" + a.dataset.tab); } catch (err) {} show(a.dataset.tab); }));
+let start = location.hash.slice(1);
+if (!start) { try { start = localStorage.getItem("tab") || ""; } catch (e) {} }
+show(start);
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", draw);
+new MutationObserver(draw).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 </script>

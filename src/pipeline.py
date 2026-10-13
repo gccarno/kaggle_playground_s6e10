@@ -56,6 +56,7 @@ DEFAULTS = {
     # -- feature set
     "drop_cols": [],                 # raw columns removed from the feature set
     "num_as_cat": [],                # numeric columns ALSO given to the learner as categoricals
+    "one_hot_cols": [],              # columns REPLACED by 0/1 indicators (batch 22, Q5)
 
     # -- UNSUPERVISED feature engineering (computed once over train + test)
     "freq_cols": [],                 # log1p(train+test value count)
@@ -266,6 +267,18 @@ def base_features(train, test, cfg):
         vocab = pd.api.types.CategoricalDtype(sorted(set(tr[c].dropna()) | set(te[c].dropna())))
         tr[c] = tr[c].astype(vocab)
         te[c] = te[c].astype(vocab)
+
+    for c in cfg["one_hot_cols"]:
+        # One-hot replaces the column (native categorical or ordinal numeric) with 0/1
+        # indicators over the train + test levels; a NaN row is all zeros.
+        levels = sorted(set(tr[c].dropna()) | set(te[c].dropna()))
+        for v in levels:
+            name = f"oh_{c}_" + re.sub(r"\W+", "_", str(v))
+            for df in (tr, te):
+                df[name] = (df[c] == v).to_numpy(np.float64)
+            feats_num.append(name)
+        feats_cat = [f for f in feats_cat if f != c]
+        feats_num = [f for f in feats_num if f != c]
     return tr, te, feats_num, feats_cat
 
 

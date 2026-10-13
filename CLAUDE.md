@@ -14,7 +14,7 @@ The user's entry point is **STATUS.md** (one screen, rewritten in place) plus th
 
 **Dashboard ritual (every pre-registration, every batch collection, every checkpoint):**
 1. Add or update the run's `experiments/ledger.csv` row: phase, axis, twin, role, verdict, one-liner. A new run gets verdict RUNNING when it's pre-registered.
-2. Update `experiments/axes.csv` when an axis opens or closes.
+2. Update `experiments/axes.csv` when an axis opens or closes, and `experiments/techniques.csv` when a new technique (config key) appears. Coverage in the Features tab is derived from every run's `cfg.json`. Re-run `python scripts/eda_report.py` (EDA tab: data facts plus residual χ²/df at A0 vs the champion) whenever the champion changes.
 3. Run `python scripts/dashboard.py`. It refuses if any runs.csv tag lacks a ledger row.
 4. Rewrite STATUS.md.
 5. Republish the artifact (Artifact publish with `url` above).

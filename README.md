@@ -1107,3 +1107,28 @@ No public OOF or test artifact is used.
 - The replicate legs land where their originals did: U22R 0.96067 against 0.96064, and W5R 0.96059 against 0.96059.
 - **Other Oct 12 public scores:** X5 0.96042, Y1 0.96075, Y2 0.96068, Y3 0.96063, Y4 0.96070, Y5 0.96065, W6 0.94847.
 - **Y1 (10-epoch OneCycle) is the best public MLP so far**, but it failed Gate 2 on OOF (ADD −0.000004). A public-only effect with no OOF movement is provisional (§5), so the MLP axis stays closed.
+
+**Batch 22, feature-engineering gaps (pre-registered Oct 13).**
+- **Why now:** the user asked whether every feature technique had been tried. An audit of every archived `cfg.json` against `DEFAULTS` showed which encoders had never run, though the code exists (ported from S6E9):
+  - quantization (`fe_quant_cols`);
+  - binned, window and shape TE;
+  - TE multi-smoothing and backoff;
+  - digit features;
+  - the arrival − departure delay difference;
+  - one-hot, which had no axis at all.
+- **Checkpoint 3 closed the FD-TE family by argument** (FD residual χ²/df ≈ 1 under the champion), not by runs. This batch tests that argument on the cheapest base.
+- **The twin is T24:** lgb with the FD profile plus a CatBoost teacher, OOF 0.960650, and B8's lgb leg. A passing probe is therefore also a direct SWAP for T24 in B8.
+- **New axis `one_hot_cols`** (default `[]`): it replaces each listed column with 0/1 indicators over the train+test levels. It's additive, and a 5% T24 replay is byte-identical before and after.
+
+| Tag | One key changed | Mechanism | Prediction |
+|---|---|---|---|
+| Q1 | `fe_quant_cols: [FD, age, dep_delay, arr_delay]` | quantization (divisors 5/25/100) | null: trees threshold raw values, and the profile already addresses each route |
+| Q2 | `te_window_cols: [FD]` | neighbour-route label rates, radii 1–50 | null to +0.0001 (FD χ²/df ≈ 1) |
+| Q3 | `te_bin_cols: [age, dep_delay, arr_delay]` | binned TE of the magnitudes | null (T28; χ²/df ≤ 1.01) |
+| Q4 | `fe_delay_diff: true` | arr − dep delay, time made up in the air | \|Δ\| < 0.0001 |
+| Q5 | `one_hot_cols`: 4 categoricals + 13 ratings | one-hot instead of native or ordinal | null |
+
+- **Gates:**
+  - Gate 1: +0.00014 vs T24.
+  - Gate 2 on the B8 pool: SWAP for T24 > −1 SD, ADD > 2 SD.
+- **Stop rule:** if all five are null, these axes are closed *empirically*, and FINDINGS records that the residual test's "nothing left" call held for every encoder family. Any pass goes into B10 with the Z results.

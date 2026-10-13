@@ -129,3 +129,8 @@ B8R,4,replicate,B8,blend,INFO,B8 recipe at seed 43: OOF -0.000009 and public -0.
 Z1,4b,tfm,,leg,RUNNING,TabPFN-3.5 full-context on raw columns; Gate 2 ADD > +0.00005 predicted
 Z2,4b,tfm,Z1,probe,RUNNING,Z1 + FD/age as categoricals (route identity); Gate 1 +0.0002-0.0006 predicted
 Z3,4b,tfm,Z2,probe,PLANNED,Z2 + teacher; runs after Z1/Z2 are read
+Q1,4,features,T24,probe,RUNNING,Quantized FD/age/delays (divisors 5/25/100); predicted null
+Q2,4,route-lookup,T24,probe,RUNNING,Window TE of FD (neighbour routes); predicted null to +0.0001
+Q3,4,age,T24,probe,RUNNING,Binned TE of age and delays; predicted null
+Q4,4,features,T24,probe,RUNNING,arr_delay minus dep_delay; predicted |d| < 0.0001
+Q5,4,one-hot,T24,probe,RUNNING,One-hot of 4 categoricals + 13 ratings; predicted null
