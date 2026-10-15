@@ -1171,3 +1171,20 @@ No public OOF or test artifact is used.
 | Z4 | Z2 + `profile_keys: [FD]` (Z2), after the quota resets on Oct 17 | the route's passenger-mix profile, the biggest GBDT gain (T2 +0.0016) | solo +0.0001 to +0.0003: TabPFN sees the route as a category but not as a profile; ADD uncertain |
 
 - **Gates:** Gate 1 +0.00014 vs Z2; Gate 2 ADD on the B10 pool > 2 SD, or SWAP for Z2 > −1 SD.
+
+**Batch 23 result, Z3 (Oct 15): Gate 1 fails, Gate 2 passes. B11 is the new champion.**
+
+| Tag | Solo OOF | Gate 1 vs Z2 | ADD on B10 (SD) | SWAP for T24 | Public |
+|---|---|---|---|---|---|
+| Z3 Z2 + teacher (`538c0c67`) | 0.960987 | **−0.000083** | **+0.000023** (0.000004) | +0.000030 | 0.96056 |
+
+- **The prediction was half right.**
+  - The ADD fell, as U1 predicted: +0.000023, against Z2's +0.000076.
+  - But the solo score *also* fell, where we had predicted +0.0001. For TabPFN, the teacher column is a strong, smooth input. It pulls in-context learning toward the original's function and away from the route-level detail that Z2's categoricals gave it.
+- **The leg still ships**, because a solo loss with a blend gain means the teacher-conditioned TabPFN errs in different places from both Z2 and the GBDT teacher legs. Only Gate 2 is a shipping decision (playbook §3).
+- **B11** (`0571d27a`) is B10's 13 legs + Z3, a rank mean of 14: **OOF 0.961675, +0.000023 over B10.** That's below Gate 1's single-model bar, but it's a pre-registered Gate 2 pass at about 6 SD.
+- **Oct 14 public scores:** B10 **0.96116**, Z2 0.96068, Z1 0.96049, and Q1–Q5 0.96014–0.96030.
+  - B10 − B8 public is **+0.00011**, against the OOF gain of +0.000123. So the TabPFN gain transfers, at above the public paired SD (0.000152) × 0.7.
+  - B11 public is 0.96118 (+0.00002 vs B10), which is unreadable as expected.
+- **OOF→LB fit (120 runs):** slope 0.973, residual σ 0.000349 LB.
+- **Next:** Z4 (Z2 + route profile) launches when the GPU quota resets on Oct 17. Checkpoint 4 is Oct 18.

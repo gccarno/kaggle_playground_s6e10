@@ -12,10 +12,10 @@ mlp,closed,"12,15,16",The MLP is a genuinely new view (largest ADDs). Two to fou
 mlp-arch,closed,17,Five architecture/optimisation changes all failed Gate 2. New views come from inputs not fitting.
 bagging,closed,15,Seed bags raise solo but not blend value. Bag only to read a probe.
 capacity,closed,2,Depth / leaves / lr: null as in S6E9.
-blend,open,18,"rank_mean of distinct views; fitted stacks lose. Champion B10 (B8 + two TabPFN legs)."
-tfm,open,19,"TabPFN-3.5 is a new view: Z1/Z2 pass Gate 2 at 11-13 SD and B10 = B8 + Z1 + Z2 (+0.000123). Feature probes on this view continue (Z3 teacher, Z4 profile)."
+blend,open,18,rank_mean of distinct views; fitted stacks lose. Champion B11 (B8 + three TabPFN legs).
+tfm,open,19,"TabPFN-3.5 is a new view: Z1/Z2 pass Gate 2 at 11-13 SD (B10, +0.000123). Z3 (teacher) lowers solo but still adds +0.000023 (B11). Z4 (route profile) next, after the Oct 17 GPU quota reset."
 instrument,info,,Seed twins and calibration controls that set the gates (README section 4).
 replicate,info,,B8 rebuilt at seed 43 (B8R): the champion recipe is seed-stable.
 family,closed,,Raw-feature family points (xgb/cat/glm/MLP smoke) are near LightGBM or below; families matter only with a new view.
 features,closed,"5,20","Batch 22 closed every untried encoder empirically: quantization, window TE, binned TE, delay difference, one-hot are all null on T24."
-one-hot,closed,20,"One-hot of the categoricals and ratings costs lgb 0.0001 (Q5): native categorical splits group levels; indicators can only peel one off at a time."
+one-hot,closed,20,One-hot of the categoricals and ratings costs lgb 0.0001 (Q5): native categorical splits group levels; indicators can only peel one off at a time.

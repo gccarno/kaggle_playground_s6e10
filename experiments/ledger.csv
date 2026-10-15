@@ -128,11 +128,12 @@ W4R,4,replicate,W4,replicate,INFO,B8 leg at seed 43
 B8R,4,replicate,B8,blend,INFO,B8 recipe at seed 43: OOF -0.000009 and public -0.00004; B8 is seed-stable and its public score is not luck
 Z1,4b,tfm,,leg,PASS,"TabPFN-3.5 raw columns: solo 0.960859, ADD +0.000067 (11 SD); in B10"
 Z2,4b,tfm,Z1,leg,PASS,Z1 + FD/age as categoricals: Gate 1 +0.000211 vs Z1; ADD +0.000076 (13 SD); in B10
-Z3,4b,tfm,Z2,probe,RUNNING,"Z2 + teacher (Kaggle T4, Oct 13-14); predicted solo +0.0001, ADD lower"
+Z3,4b,tfm,Z2,leg,PASS,"Z2 + teacher: Gate 1 -0.000083 vs Z2 (solo falls), but ADD +0.000023 (6 SD) on B10; in B11; public 0.96056"
 Q1,4,features,T24,probe,NULL,Quantized FD/age/delays: -0.000019 vs T24; ADD -0.000010
 Q2,4,route-lookup,T24,probe,NULL,Window TE of FD: +0.000043 vs T24; ADD -0.000002
 Q3,4,age,T24,probe,NULL,Binned TE of age and delays: -0.000023 vs T24; ADD -0.000006
 Q4,4,features,T24,probe,NULL,arr_delay minus dep_delay: -0.000007 vs T24; ADD -0.000007
 Q5,4,one-hot,T24,probe,NULL,One-hot of 4 categoricals + 13 ratings: -0.000104 vs T24; ADD -0.000012
-B10,4b,blend,B8,blend,CHAMPION,"Champion: B8 + Z1 + Z2 (TabPFN views), 13 legs; OOF 0.961652 (+0.000123)"
+B10,4b,blend,B8,blend,SUPERSEDED,"B8 + Z1 + Z2 (TabPFN views), 13 legs; OOF 0.961652 (+0.000123), public 0.96116"
+B11,4b,blend,B10,blend,CHAMPION,"Champion: B10 + Z3, 14 legs; OOF 0.961675 (+0.000023), public 0.96118"
 Z4,4b,tfm,Z2,probe,PLANNED,Z2 + FD route profile; launches after the GPU quota resets (Sat Oct 17)

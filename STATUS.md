@@ -1,13 +1,16 @@
 # S6E10 status: start here
 
-*Rewritten in place after every batch (last: 2026-10-13, end of day: B10 champion, batch 22 closed). For the visual version, see the dashboard (tabs **Experiments**, **Features**, **EDA**): run `python scripts/dashboard.py`, which writes `reports/dashboard.html` and is published as the "S6E10 Experiment Board" artifact. README.md is the contract and FINDINGS.md has the explanations. This page only orients.*
+*Rewritten in place after every batch (last: 2026-10-15 01:00 UTC: Z3 collected, B11 champion). For the visual version, see the dashboard (tabs **Experiments**, **Features**, **EDA**): run `python scripts/dashboard.py`, which writes `reports/dashboard.html` and is published as the "S6E10 Experiment Board" artifact. README.md is the contract and FINDINGS.md has the explanations. This page only orients.*
 
 ## Where we are
-- **Champion: B10.** It's B8's 11 legs plus two TabPFN-3.5 legs (Z1, Z2), rank-mean blended.
-  - **Score:** OOF **0.961652**, which is **+0.000123** over B8 (0.961529, public 0.96105). B10's first public score lands with the Oct 14 slots.
-  - **Why it moved:** TabPFN predicts by in-context learning, so its errors differ from every CatBoost, lgb and MLP leg. Each TabPFN leg passed Gate 2 at 11–13 SD.
+- **Champion: B11.** It's B8's 11 legs plus three TabPFN-3.5 legs (Z1, Z2, Z3), rank-mean blended.
+  - **Score:** OOF **0.961675**, public **0.96118**.
+  - **Against B10:** B10 scored OOF 0.961652 and public 0.96116.
+  - **Against B8:** B8 scored public 0.96105, so the TabPFN gain transferred to public (+0.00011 for B10).
+  - **Why it moved:** TabPFN predicts by in-context learning, so its errors differ from every CatBoost, lgb and MLP leg.
+- **Z3 (Z2 + teacher)** was weaker solo (−0.000083 vs Z2) but still added +0.000023 (6 SD) to the blend. Only the blend gate decides what ships (finding 21).
 - **Feature engineering on GBDTs is closed with data.** Batch 22 tried every encoder we had skipped (quantization, window TE, binned TE, delay difference, one-hot). All five were null; one-hot actually hurts (−0.0001). See the dashboard's **Features** tab.
-- **Phase:** 4b. Feature work moves to the TabPFN view (batch 23).
+- **Phase:** 4b, batch 23 (feature probes on the TabPFN view).
 - **Deadline:** 2026-10-31 23:59 UTC. A cron on oci-free spends 10 submission slots a day.
 
 ## The story so far (one line per phase)
@@ -19,6 +22,7 @@
 6. **Phase 4, B8 and the replicate:** stacking lost to a plain rank mean (FINDINGS 18). B8 was reproduced at a new seed.
 7. **Phase 4b:** TabPFN-3.5, full-context in-context learning. It's a new view: B10 is +0.000123 over B8 (FINDINGS 19).
 8. **Batch 22:** every untried GBDT feature encoder was null (FINDINGS 20).
+9. **Batch 23, Z3:** the teacher lowers TabPFN's solo score but adds blend value, which makes B11 (FINDINGS 21).
 
 ## How results are judged
 - **Gate 1 (single model):** OOF minus its strict twin (exactly one config key changed) ≥ **+0.00014**.
@@ -38,14 +42,13 @@
   - fitted stacks;
   - GBDT feature encoders and one-hot (batch 22).
 - **Open:**
-  - blending (champion B10);
+  - blending (champion B11);
   - TFM inputs (batch 23).
 
 ## Running now
-- **Z3** (Z2 + teacher, batch 23) is on a Kaggle T4. Launched about 23:55 UTC Oct 13, expected about 08:30 UTC Oct 14.
-- **The Oct 14 slot queue** (all 10 banked) is B10, Z2 and Z1, then auto-fill: Q1–Q5, B6b and B6m.
+- **Nothing is training.** The weekly GPU quota is nearly spent until Sat Oct 17.
+- **Oct 15 slots:** B11 and Z3 were submitted by hand. The oci-free cron auto-fills the other 8 at 23:15 UTC.
 
 ## Next decisions
-1. **When Z3 lands:** Gate 1 vs Z2, then Gate 2 on the B10 pool. A pass makes B11.
-2. **Z4** (Z2 + route profile) launches when the weekly GPU quota resets (Sat Oct 17). Each TabPFN run costs about 8.4 of the 30 weekly T4-hours.
-3. **Oct 18 review (user's call):** whether to keep the final submission ours-only, or allow public artifacts.
+1. **Z4** (Z2 + route profile) launches when the weekly GPU quota resets (Sat Oct 17). Each TabPFN run costs about 8.4 of the 30 weekly T4-hours.
+2. **Oct 18 review (user's call):** whether to keep the final submission ours-only, or allow public artifacts.
