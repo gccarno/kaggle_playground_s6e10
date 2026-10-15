@@ -33,7 +33,7 @@ Monotone constraints,model-side,monotone,,ratings,Force predictions to rise with
 Additive-only (GAM),model-side,additive_only,,all,Trees may split on one feature each: no interactions.,Not tried: interactions are where the signal is (finding 10).
 Seed bagging,model-side,seed_bag,,,Average several seeds of the same model.,Buys solo score not blend value (finding 15).
 Capacity / learning rate,model-side,lgb_params.num_leaves;cat_params.depth;cat_params.learning_rate,,,Bigger or slower models.,Null as in S6E9 (L255 U15 U17).
-Random forest,tree-structure,lgb_params.boosting_type,R1,all,Average many deep trees fit on bootstrap rows instead of boosting them in sequence.,Batch 24.
-Extra-trees,tree-structure,lgb_params.extra_trees,R2,all,"Pick split thresholds at random, which smooths the step functions.",Batch 24.
-Linear leaves,tree-structure,lgb_params.linear_tree,R3,numerics,Fit a linear model inside each leaf instead of a constant.,Batch 24.
-CatBoost tree shape,tree-structure,cat_params.grow_policy,R4 R5,all,Grow asymmetric (Depthwise) or leaf-wise (Lossguide) trees instead of oblivious ones.,Batch 24.
+Random forest,tree-structure,lgb_params.boosting_type,R1,all,Average many deep trees fit on bootstrap rows instead of boosting them in sequence.,"R1: -0.00245 solo, ADD -0.000040."
+Extra-trees,tree-structure,lgb_params.extra_trees,R2,all,"Pick split thresholds at random, which smooths the step functions.","R2: -0.00016 solo, ADD -0.000006."
+Linear leaves,tree-structure,lgb_params.linear_tree,R3,numerics,Fit a linear model inside each leaf instead of a constant.,"R3: -0.00019 solo, ADD -0.000013."
+CatBoost tree shape,tree-structure,cat_params.grow_policy,R4 R5,all,Grow asymmetric (Depthwise) or leaf-wise (Lossguide) trees instead of oblivious ones.,"R4/R5: -0.00028 solo, ADD -0.000017 (finding 22)."

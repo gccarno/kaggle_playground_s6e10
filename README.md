@@ -1215,3 +1215,28 @@ No public OOF or test artifact is used.
 - **What `vm_launch.sh` does:** it pulls main without losing VM-only runs.csv rows, then pushes `src/` as the code dataset at that HEAD.
 - **Collection:** a second one-shot entry at Sat 14:00 UTC adopts the output on the VM (`batch21_tfm.sh Z4 --adopt`). That night's scheduler auto-fill then submits Z4.
 - **On the laptop:** `sync_runs.py pull` brings the row over, and Gate 2 on the then-champion pool follows.
+
+**Batch 24 result (Oct 15): all five fail Gate 2. The tree-structure axis is closed.**
+
+| Tag | Solo OOF | Δ vs twin | ADD on B11 (SD) | SWAP | Public |
+|---|---|---|---|---|---|
+| R1 random forest | 0.958202 | −0.002448 (T24) | −0.000040 (0.000006) | −0.000041 | 0.95767 |
+| R2 extra-trees | 0.960491 | −0.000159 (T24) | −0.000006 (0.000004) | −0.000002 | 0.95984 |
+| R3 linear leaves | 0.960465 | −0.000185 (T24) | −0.000013 (0.000004) | −0.000010 | 0.96012 |
+| R4 CatBoost Depthwise | 0.960729 | −0.000280 (U11) | −0.000017 (0.000003) | −0.000011 | 0.96046 |
+| R5 CatBoost Lossguide | 0.960736 | −0.000273 (U11) | −0.000016 (0.000004) | −0.000010 | 0.96059 |
+
+- **Every variant is weaker solo, and every ADD is negative.** So a changed tree shape on the same inputs gives a slightly worse copy of the same view, not a new view.
+- **The default growers are the right ones for this data.** CatBoost's oblivious trees beat the asymmetric ones by 0.00027. That fits the regularising role symmetric trees play with ordered CTRs on a high-cardinality route key. This mechanism is plausible but not tested.
+- **R1 was the only prediction that held in size** (−0.0024 in a predicted −0.001 to −0.003). R4/R5 were predicted within ±0.0002 and fell slightly outside it.
+- **Stop rule applied:** GBDT views are saturated in both inputs (batch 22) and tree shape (batch 24), as finding 22 records. B11 stays champion.
+
+**Batch 25, TabPFN weight in the blend (pre-registered Oct 15, before scoring).**
+- **Why:** B11's leave-one-out puts Z1 (+0.000047) and Z2 (+0.000056) far above every other leg, and seven legs are slightly negative. The equal-weight rank mean may dilute the one family that is genuinely different.
+- **Probe B12w:** B11 with Z1, Z2 and Z3 each listed twice, so the TFM share of the blend goes from 3/14 to 6/17. This is one structural choice, not a fitted weight (finding 18).
+- **Prediction:** +0.00001 to +0.00004 over B11.
+- **Gate:** the paired bootstrap Δ vs B11 must exceed 2 SD. Weight 3 is computed as information only and can't ship, so the choice of k isn't tuned on OOF.
+
+**Batch 25 result (Oct 15): B12w passes. TabPFN at weight 2 gives OOF 0.961718, +0.000043 over B11 (paired SD 0.000008, 5.3 SD), at the top of the predicted range. Public 0.96122 vs B11 0.96118 (+0.00004), the same direction and unreadable in size.**
+- Weight 3 (information only) adds +0.000049 at 3.6 SD, so the curve is flat past 2 and k isn't tuned.
+- **B12w (`1337a5f8`) is the champion.** From now on, new TFM legs are gated on the B12w pool at weight 2 (finding 23).

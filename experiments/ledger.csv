@@ -135,10 +135,11 @@ Q3,4,age,T24,probe,NULL,Binned TE of age and delays: -0.000023 vs T24; ADD -0.00
 Q4,4,features,T24,probe,NULL,arr_delay minus dep_delay: -0.000007 vs T24; ADD -0.000007
 Q5,4,one-hot,T24,probe,NULL,One-hot of 4 categoricals + 13 ratings: -0.000104 vs T24; ADD -0.000012
 B10,4b,blend,B8,blend,SUPERSEDED,"B8 + Z1 + Z2 (TabPFN views), 13 legs; OOF 0.961652 (+0.000123), public 0.96116"
-B11,4b,blend,B10,blend,CHAMPION,"Champion: B10 + Z3, 14 legs; OOF 0.961675 (+0.000023), public 0.96118"
+B11,4b,blend,B10,blend,SUPERSEDED,"B10 + Z3, 14 legs; OOF 0.961675 (+0.000023), public 0.96118"
 Z4,4b,tfm,Z2,probe,PLANNED,Z2 + FD route profile; one-shot cron on oci-free launches it Sat Oct 17 03:00 UTC (GPU quota reset)
-R1,4b,tree-structure,T24,probe,RUNNING,"T24 as a random forest (lgb rf); predicted solo -0.001 to -0.003, ADD ~0"
-R2,4b,tree-structure,T24,probe,RUNNING,T24 with extra_trees (random thresholds); predicted solo +-0.0001
-R3,4b,tree-structure,T24,probe,RUNNING,T24 with linear_tree (linear leaves); predicted solo +-0.0002
-R4,4b,tree-structure,U11,probe,RUNNING,U11 with depthwise (asymmetric) CatBoost trees; Gate 2 is the test
-R5,4b,tree-structure,U11,probe,RUNNING,U11 with leaf-wise (Lossguide) CatBoost trees; Gate 2 is the test
+R1,4b,tree-structure,T24,probe,FAIL,Random forest: solo -0.00245 vs T24 (as predicted); ADD -0.000040 (6 SD): weaker and not different enough; public 0.95767
+R2,4b,tree-structure,T24,probe,NULL,"Extra-trees: solo -0.000159 vs T24; ADD -0.000006, SWAP for T24 -0.000002 (within 1 SD); public 0.95984"
+R3,4b,tree-structure,T24,probe,NULL,Linear leaves: solo -0.000185 vs T24; ADD -0.000013 (3 SD); public 0.96012
+R4,4b,tree-structure,U11,probe,NULL,Depthwise CatBoost: solo -0.000280 vs U11; ADD -0.000017 (5 SD); public 0.96046
+R5,4b,tree-structure,U11,probe,NULL,Lossguide CatBoost: solo -0.000273 vs U11; ADD -0.000016 (4 SD); public 0.96059
+B12w,4b,blend,B11,blend,CHAMPION,"Champion: B11 with the 3 TabPFN legs at weight 2; OOF 0.961718 (+0.000043, 5.3 SD), public 0.96122"

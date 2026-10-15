@@ -3,15 +3,18 @@
 *Rewritten in place after every batch (last: 2026-10-15 01:00 UTC: Z3 collected, B11 champion). For the visual version, see the dashboard (tabs **Experiments**, **Features**, **EDA**): run `python scripts/dashboard.py`, which writes `reports/dashboard.html` and is published as the "S6E10 Experiment Board" artifact. README.md is the contract and FINDINGS.md has the explanations. This page only orients.*
 
 ## Where we are
-- **Champion: B11.** It's B8's 11 legs plus three TabPFN-3.5 legs (Z1, Z2, Z3), rank-mean blended.
-  - **Score:** OOF **0.961675**, public **0.96118**.
-  - **Against B10:** B10 scored OOF 0.961652 and public 0.96116.
-  - **Against B8:** B8 scored public 0.96105, so the TabPFN gain transferred to public (+0.00011 for B10).
-  - **Why it moved:** TabPFN predicts by in-context learning, so its errors differ from every CatBoost, lgb and MLP leg.
-- **Z3 (Z2 + teacher)** was weaker solo (−0.000083 vs Z2) but still added +0.000023 (6 SD) to the blend. Only the blend gate decides what ships (finding 21).
-- **Feature engineering on GBDTs is closed with data.** Batch 22 tried every encoder we had skipped (quantization, window TE, binned TE, delay difference, one-hot). All five were null; one-hot actually hurts (−0.0001). See the dashboard's **Features** tab.
-- **Phase:** 4b, batch 23 (feature probes on the TabPFN view).
-- **Deadline:** 2026-10-31 23:59 UTC. A cron on oci-free spends 10 submission slots a day.
+- **Champion: B12w.** It's B8's 11 legs plus three TabPFN-3.5 legs (Z1, Z2, Z3), with the TabPFN legs at double weight in the rank mean.
+  - **Score:** OOF **0.961718**, public **0.96122**.
+  - **Against the earlier champions:**
+
+    | Run | OOF | Public |
+    |---|---|---|
+    | B11 | 0.961675 | 0.96118 |
+    | B10 | 0.961652 | 0.96116 |
+    | B8 | 0.961529 | 0.96105 |
+  - **Why it moved:** TabPFN reads the data by in-context learning, so its errors differ from every tree and MLP leg. Equal weights diluted that, and doubling its weight is +0.000043 (5.3 SD).
+- **The GBDT views are saturated.** New encoders (batch 22) and new tree shapes (batch 24: random forest, extra-trees, linear leaves, asymmetric CatBoost) were all null or negative (findings 20, 22).
+- **Phase:** 4b. **Deadline:** 2026-10-31 23:59 UTC. A cron on oci-free spends the leftover slots each night.
 
 ## The story so far (one line per phase)
 1. **Phase 1, instrument:** measured the noise. Seed changes move OOF by 0.00004 and public by up to 0.00015. So a probe must beat its twin by **+0.00014 OOF** (Gate 1), and public deltas below about 0.00015 are unreadable.
@@ -23,6 +26,8 @@
 7. **Phase 4b:** TabPFN-3.5, full-context in-context learning. It's a new view: B10 is +0.000123 over B8 (FINDINGS 19).
 8. **Batch 22:** every untried GBDT feature encoder was null (FINDINGS 20).
 9. **Batch 23, Z3:** the teacher lowers TabPFN's solo score but adds blend value, which makes B11 (FINDINGS 21).
+10. **Batch 24:** tree shape is not a view, and all five probes were null (FINDINGS 22).
+11. **Batch 25:** TabPFN legs at double weight make B12w (FINDINGS 23).
 
 ## How results are judged
 - **Gate 1 (single model):** OOF minus its strict twin (exactly one config key changed) ≥ **+0.00014**.
@@ -40,18 +45,17 @@
   - seed bagging for blend value;
   - MLP architecture;
   - fitted stacks;
-  - GBDT feature encoders and one-hot (batch 22).
-- **Open:**
-  - blending (champion B11);
-  - TFM inputs (batch 23);
+  - GBDT feature encoders and one-hot (batch 22);
   - tree structure (batch 24).
+- **Open:**
+  - blending (champion B12w);
+  - TFM inputs (batch 23).
 
 ## Running now
-- **Batch 24 (CPU kernels): R1–R5.** Same inputs as the T24 / U11 legs, but the trees grow differently: random forest, extra-trees, linear leaves, and asymmetric CatBoost. The question is whether a different tree shape is a new blend view.
-- **Z4 is scheduled.** A one-shot cron on oci-free launches it Sat Oct 17 03:00 UTC, after the GPU quota reset, and adopts it hourly from 12:00 UTC.
-- **Oct 15 slots:** B11 and Z3 are submitted. R1–R5 are submitted as they land, and the cron auto-fills the rest at 23:15 UTC.
+- **Nothing is training.** The GPU quota is spent, and batch 24 is closed.
+- **Z4 is scheduled.** A one-shot cron on oci-free launches it Sat Oct 17 03:00 UTC and adopts it hourly from 12:00 UTC. That night's scheduler submits it. Check `logs/z4.log` on oci-free.
+- **Oct 15 slots:** 8 of 10 are used (B11, Z3, R1–R5, B12w). The cron auto-fills the last 2 at 23:15 UTC.
 
 ## Next decisions
-1. **When R1–R5 land:** Gate 2 on the B11 pool. Passing legs make B12. If all fail, the tree-structure axis is closed.
-2. **Z4** (Z2 + route profile) is automatic on Oct 17. Each TabPFN run costs about 8.4 of the 30 weekly T4-hours.
-3. **Oct 18 review (user's call):** whether to keep the final submission ours-only, or allow public artifacts.
+1. **When Z4 lands:** Gate 2 on the B12w pool, keeping TFM legs at weight 2.
+2. **Oct 18 review (user's call):** whether to keep the final submission ours-only, or allow public artifacts.
