@@ -43,12 +43,15 @@
   - GBDT feature encoders and one-hot (batch 22).
 - **Open:**
   - blending (champion B11);
-  - TFM inputs (batch 23).
+  - TFM inputs (batch 23);
+  - tree structure (batch 24).
 
 ## Running now
-- **Nothing is training.** The weekly GPU quota is nearly spent until Sat Oct 17.
-- **Oct 15 slots:** B11 and Z3 were submitted by hand. The oci-free cron auto-fills the other 8 at 23:15 UTC.
+- **Batch 24 (CPU kernels): R1–R5.** Same inputs as the T24 / U11 legs, but the trees grow differently: random forest, extra-trees, linear leaves, and asymmetric CatBoost. The question is whether a different tree shape is a new blend view.
+- **Z4 is scheduled.** A one-shot cron on oci-free launches it Sat Oct 17 03:00 UTC, after the GPU quota reset, and adopts it hourly from 12:00 UTC.
+- **Oct 15 slots:** B11 and Z3 are submitted. R1–R5 are submitted as they land, and the cron auto-fills the rest at 23:15 UTC.
 
 ## Next decisions
-1. **Z4** (Z2 + route profile) launches when the weekly GPU quota resets (Sat Oct 17). Each TabPFN run costs about 8.4 of the 30 weekly T4-hours.
-2. **Oct 18 review (user's call):** whether to keep the final submission ours-only, or allow public artifacts.
+1. **When R1–R5 land:** Gate 2 on the B11 pool. Passing legs make B12. If all fail, the tree-structure axis is closed.
+2. **Z4** (Z2 + route profile) is automatic on Oct 17. Each TabPFN run costs about 8.4 of the 30 weekly T4-hours.
+3. **Oct 18 review (user's call):** whether to keep the final submission ours-only, or allow public artifacts.

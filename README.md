@@ -1188,3 +1188,30 @@ No public OOF or test artifact is used.
   - B11 public is 0.96118 (+0.00002 vs B10), which is unreadable as expected.
 - **OOF→LB fit (120 runs):** slope 0.973, residual σ 0.000349 LB.
 - **Next:** Z4 (Z2 + route profile) launches when the GPU quota resets on Oct 17. Checkpoint 4 is Oct 18.
+
+**Batch 24, tree-structure views on CPU (pre-registered Oct 15).**
+- **Why now:** the GPU quota is spent until Sat Oct 17, and the user asked to keep probing in the meantime.
+- **The open question:** findings 12 and 19 say blend value comes from a different inductive bias. Every GBDT leg in B11 grows trees one way: CatBoost's oblivious (symmetric) trees, or lgb's boosted leaf-wise trees.
+- **The test:** these probes change only *how the trees are grown*, never the inputs. Each is one `*_params` key, so no code changes.
+- **Smoke test:** every config ran at 5% of rows and 2 folds on the laptop first.
+
+| Tag | Twin | One key changed | Mechanism | Prediction |
+|---|---|---|---|---|
+| R1 | T24 | `lgb_params`: `boosting_type rf`, 1023 leaves, 500 trees, bagging 0.632, colsample 0.5 | averaged deep independent trees (bagging, not boosting) | solo −0.001 to −0.003; ADD 0 to +0.00002 |
+| R2 | T24 | `lgb_params`: `extra_trees true` | random split thresholds smooth the step functions | solo ±0.0001; ADD small |
+| R3 | T24 | `lgb_params`: `linear_tree true` | linear models in the leaves for the magnitudes | solo ±0.0002; ADD uncertain |
+| R4 | U11 | `cat_params`: `grow_policy Depthwise` | asymmetric trees that keep the ordered CTRs | solo ±0.0001; **ADD > 2 SD is the test** |
+| R5 | U11 | `cat_params`: `grow_policy Lossguide`, 64 leaves, depth ≤ 10 | leaf-wise growth chases the hard routes deeper | solo ±0.0002; **ADD > 2 SD is the test** |
+
+- **Gates:**
+  - Gate 1 vs the twin is reported but isn't the decision.
+  - Gate 2 on the B11 pool: ADD > 2 SD and SWAP > −1 SD.
+  - Passing legs form B12.
+- **Stop rule:** if all five fail Gate 2, the tree-structure axis is closed. The GBDT views would then be saturated in the inputs (batch 22) *and* in the tree shape. Remaining blend headroom would come only from new families, such as TFM inputs.
+- **Slots:** every probe is submitted as it lands (Oct 15). Unused slots auto-fill.
+
+**Z4 is scheduled for the quota reset.** A one-shot cron on oci-free runs `scripts/vm_launch.sh scripts/batch21_tfm.sh Z4 --launch-only` at **Sat Oct 17 03:00 UTC**.
+- **Why 03:00:** it leaves a margin past the weekly reset, because a T4 run started on the remaining ~5 h would die mid-fold.
+- **What `vm_launch.sh` does:** it pulls main without losing VM-only runs.csv rows, then pushes `src/` as the code dataset at that HEAD.
+- **Collection:** a second one-shot entry at Sat 14:00 UTC adopts the output on the VM (`batch21_tfm.sh Z4 --adopt`). That night's scheduler auto-fill then submits Z4.
+- **On the laptop:** `sync_runs.py pull` brings the row over, and Gate 2 on the then-champion pool follows.

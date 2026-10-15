@@ -28,8 +28,12 @@ One-hot (GLM),one-hot,learner=glm,,4 categoricals,Dummy columns so a linear mode
 Teacher (original-data model),external data,teacher,,all,A model trained only on the original dataset; its prediction is a feature.,+0.0002 next to the profile (T8); hurts the MLP (findings 4 16).
 Original rows appended,external data,use_origin_extra,,all,Add the original's rows as extra training data.,T12 -0.0009 (finding 4).
 MLP with PLR + embeddings,neural embedding,learner=mlp,,numerics; FD; age; ratings,Neural net: periodic encodings of numbers and learned embeddings of FD/age/ratings.,Weaker solo; the largest blend gains (findings 12 15 17).
-TabPFN-3.5,foundation model,learner=tabpfn,Z3,all,Pretrained transformer doing in-context learning over the whole training fold.,"Z1 ADD +0.000067, Z2 +0.000076: in B10 (finding 19). Z3 running."
+TabPFN-3.5,foundation model,learner=tabpfn,Z4,all,Pretrained transformer doing in-context learning over the whole training fold.,"Z1 +0.000067, Z2 +0.000076 (B10); Z3 teacher: solo -0.000083 but ADD +0.000023 (B11, finding 21). Z4 Oct 17."
 Monotone constraints,model-side,monotone,,ratings,Force predictions to rise with each rating.,Not tried: AUC gains in S6E9 were nil; low priority.
 Additive-only (GAM),model-side,additive_only,,all,Trees may split on one feature each: no interactions.,Not tried: interactions are where the signal is (finding 10).
 Seed bagging,model-side,seed_bag,,,Average several seeds of the same model.,Buys solo score not blend value (finding 15).
 Capacity / learning rate,model-side,lgb_params.num_leaves;cat_params.depth;cat_params.learning_rate,,,Bigger or slower models.,Null as in S6E9 (L255 U15 U17).
+Random forest,tree-structure,lgb_params.boosting_type,R1,all,Average many deep trees fit on bootstrap rows instead of boosting them in sequence.,Batch 24.
+Extra-trees,tree-structure,lgb_params.extra_trees,R2,all,"Pick split thresholds at random, which smooths the step functions.",Batch 24.
+Linear leaves,tree-structure,lgb_params.linear_tree,R3,numerics,Fit a linear model inside each leaf instead of a constant.,Batch 24.
+CatBoost tree shape,tree-structure,cat_params.grow_policy,R4 R5,all,Grow asymmetric (Depthwise) or leaf-wise (Lossguide) trees instead of oblivious ones.,Batch 24.

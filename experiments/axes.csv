@@ -19,3 +19,4 @@ replicate,info,,B8 rebuilt at seed 43 (B8R): the champion recipe is seed-stable.
 family,closed,,Raw-feature family points (xgb/cat/glm/MLP smoke) are near LightGBM or below; families matter only with a new view.
 features,closed,"5,20","Batch 22 closed every untried encoder empirically: quantization, window TE, binned TE, delay difference, one-hot are all null on T24."
 one-hot,closed,20,One-hot of the categoricals and ratings costs lgb 0.0001 (Q5): native categorical splits group levels; indicators can only peel one off at a time.
+tree-structure,open,,"Same inputs, different tree growth: random forest, extra-trees, linear leaves, asymmetric CatBoost (batch 24, CPU)."
