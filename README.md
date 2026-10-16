@@ -1248,3 +1248,9 @@ No public OOF or test artifact is used.
 - **B13p:** greedy backward elimination from B12w over the candidates W14, X1m, T24, X4, in that order. A drop is kept only while OOF does not fall.
 - **B13pk3:** the B13p pool at TabPFN weight 3.
 - **Gate:** none of these can replace B12w as champion. Any gain is inside 2 SD, and the pruning order was chosen after looking at leave-one-out scores. They enter the final-selection pool only.
+
+**Batch 26 result (Oct 16): three finalist blends written and queued for tonight's slots. B12w stays champion.**
+- **B13p** (`cc839b3d`): greedy pruning dropped W14, X1m and T24 and kept X4. OOF 0.961731, +0.000013 over B12w. The order was picked after seeing leave-one-out scores, so this gain is optimistic.
+- **B13k3** (`0cfc1174`): OOF 0.961725, +0.000007.
+- **B13pk3** (`eda537d3`): OOF 0.961724. On the pruned pool, weight 3 is worse than weight 2.
+- All three sit ahead of auto-fill in the oci-free queue. The other 7 slots tonight go to leftover runs (W14, W11, W5, W10, W9, W2, W3), which add low-OOF points to the OOF-to-public fit.

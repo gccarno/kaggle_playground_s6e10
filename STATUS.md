@@ -1,6 +1,6 @@
 # S6E10 status: start here
 
-*Rewritten in place after every batch (last: 2026-10-15 01:00 UTC: Z3 collected, B11 champion). For the visual version, see the dashboard (tabs **Experiments**, **Features**, **EDA**): run `python scripts/dashboard.py`, which writes `reports/dashboard.html` and is published as the "S6E10 Experiment Board" artifact. README.md is the contract and FINDINGS.md has the explanations. This page only orients.*
+*Rewritten in place after every batch (last: 2026-10-16 02:00 UTC: batch 26 finalist blends queued). For the visual version, see the dashboard (tabs **Experiments**, **Features**, **EDA**): run `python scripts/dashboard.py`, which writes `reports/dashboard.html` and is published as the "S6E10 Experiment Board" artifact. README.md is the contract and FINDINGS.md has the explanations. This page only orients.*
 
 ## Where we are
 - **Champion: B12w.** It's B8's 11 legs plus three TabPFN-3.5 legs (Z1, Z2, Z3), with the TabPFN legs at double weight in the rank mean.
@@ -28,6 +28,7 @@
 9. **Batch 23, Z3:** the teacher lowers TabPFN's solo score but adds blend value, which makes B11 (FINDINGS 21).
 10. **Batch 24:** tree shape is not a view, and all five probes were null (FINDINGS 22).
 11. **Batch 25:** TabPFN legs at double weight make B12w (FINDINGS 23).
+12. **Batch 26:** three finalist blends (pruned pool, TabPFN weight 3) to fill slots. Each is within noise of B12w, so none can take champion.
 
 ## How results are judged
 - **Gate 1 (single model):** OOF minus its strict twin (exactly one config key changed) ≥ **+0.00014**.
@@ -54,8 +55,11 @@
 ## Running now
 - **Nothing is training.** The GPU quota is spent, and batch 24 is closed.
 - **Z4 is scheduled.** A one-shot cron on oci-free launches it Sat Oct 17 03:00 UTC and adopts it hourly from 12:00 UTC. That night's scheduler submits it. Check `logs/z4.log` on oci-free.
-- **Oct 15 slots:** 8 of 10 are used (B11, Z3, R1–R5, B12w). The cron auto-fills the last 2 at 23:15 UTC.
+- **Oct 16 slots (0 of 10 used yet):** tonight's 23:15 UTC cron sends the queue first, then 7 leftover runs:
+  - B13p, B13k3, B13pk3 (batch 26);
+  - W14, W11, W5, W10, W9, W2, W3 (auto-fill).
+- **After tonight only W1, B6 and U23 are left in auto-fill**, plus Z4 and its blends on Oct 17. From Oct 18, slots go unfilled unless new runs are banked. That's deliberate: public deltas this small are unreadable.
 
 ## Next decisions
-1. **When Z4 lands:** Gate 2 on the B12w pool, keeping TFM legs at weight 2.
+1. **When Z4 lands (Oct 17):** Gate 2 on the B12w pool, keeping TFM legs at weight 2. Then queue B14 = B12w + Z4, plus its pruned and weight-3 versions.
 2. **Oct 18 review (user's call):** whether to keep the final submission ours-only, or allow public artifacts.
