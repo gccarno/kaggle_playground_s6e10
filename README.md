@@ -1240,3 +1240,11 @@ No public OOF or test artifact is used.
 **Batch 25 result (Oct 15): B12w passes. TabPFN at weight 2 gives OOF 0.961718, +0.000043 over B11 (paired SD 0.000008, 5.3 SD), at the top of the predicted range. Public 0.96122 vs B11 0.96118 (+0.00004), the same direction and unreadable in size.**
 - Weight 3 (information only) adds +0.000049 at 3.6 SD, so the curve is flat past 2 and k isn't tuned.
 - **B12w (`1337a5f8`) is the champion.** From now on, new TFM legs are gated on the B12w pool at weight 2 (finding 23).
+
+**Batch 26, finalist blends to fill slots (pre-registered Oct 16, before writing).**
+- **Why:** after tonight only one banked run is left for auto-fill, so the remaining slots need candidates. Public deltas this small are unreadable, so these are finalist candidates and calibration points, not decisions.
+- **Already seen (scored Oct 16 while planning, so not blind):** TabPFN weight 3 is +0.000007 over B12w. Dropping W14, X1m, T24 or X4 alone is +0.000003 to +0.000006.
+- **B13k3:** B12w at TabPFN weight 3.
+- **B13p:** greedy backward elimination from B12w over the candidates W14, X1m, T24, X4, in that order. A drop is kept only while OOF does not fall.
+- **B13pk3:** the B13p pool at TabPFN weight 3.
+- **Gate:** none of these can replace B12w as champion. Any gain is inside 2 SD, and the pruning order was chosen after looking at leave-one-out scores. They enter the final-selection pool only.

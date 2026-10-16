@@ -143,3 +143,6 @@ R3,4b,tree-structure,T24,probe,NULL,Linear leaves: solo -0.000185 vs T24; ADD -0
 R4,4b,tree-structure,U11,probe,NULL,Depthwise CatBoost: solo -0.000280 vs U11; ADD -0.000017 (5 SD); public 0.96046
 R5,4b,tree-structure,U11,probe,NULL,Lossguide CatBoost: solo -0.000273 vs U11; ADD -0.000016 (4 SD); public 0.96059
 B12w,4b,blend,B11,blend,CHAMPION,"Champion: B11 with the 3 TabPFN legs at weight 2; OOF 0.961718 (+0.000043, 5.3 SD), public 0.96122"
+B13k3,4b,blend,B12w,blend,RUNNING,"B12w at TabPFN weight 3; finalist candidate only, cannot take champion"
+B13p,4b,blend,B12w,blend,RUNNING,"B12w with greedy backward pruning of W14/X1m/T24/X4; finalist candidate only (post-hoc order)"
+B13pk3,4b,blend,B13p,blend,RUNNING,"B13p pool at TabPFN weight 3; finalist candidate only"
