@@ -44,7 +44,7 @@ OUT_DIR = Path(os.environ.get("KOUT", "/kaggle/working" if ON_KAGGLE else
 # ---------------------------------------------------------------------- config
 DEFAULTS = {
     "run_tag": "baseline",
-    "learner": "lgb",                # lgb | xgb | cat | glm | mlp | tabpfn
+    "learner": "lgb",                # lgb | xgb | cat | glm | mlp | tabpfn | tabicl
     "model_seed": SEED,
     "seed_bag": 1,                   # average this many model seeds inside each fold
     "n_folds": N_FOLDS,
@@ -168,9 +168,14 @@ DEFAULTS = {
     # build chunk (tfm_lean), and the Hugging Face checkpoint file.
     "tabpfn_params": {"batch": 32768, "chunk": 16384,
                       "ckpt": "tabpfn-v3.5-20260909.safetensors"},
+    # Phase 5 TabICL v2 (learners._fit_predict_tabicl): stratified context rows per fold,
+    # ensemble members (and how many run at once), predict batch rows, the KV cache mode,
+    # and the Hugging Face checkpoint.
+    "tabicl_params": {"context": 250000, "n_estimators": 4, "est_batch": 1, "batch": 8192,
+                      "kv_cache": False, "ckpt": "tabicl-classifier-v2-20260212.ckpt"},
 }
 DICT_KEYS = ["lgb_params", "xgb_params", "cat_params", "glm_params", "teacher_params",
-             "teacher_cat_params", "mlp_params", "tabpfn_params"]
+             "teacher_cat_params", "mlp_params", "tabpfn_params", "tabicl_params"]
 
 
 def load_cfg(override=None):

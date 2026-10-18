@@ -84,6 +84,9 @@ def fit_predict(cfg, Xtr, ytr, Xva, yva, Xte, feats_cat):
     if name == "tabpfn":
         return _fit_predict_tabpfn(cfg, Xtr, ytr, Xva, yva, Xte, feats_cat)
 
+    if name == "tabicl":
+        return _fit_predict_tabicl(cfg, Xtr, ytr, Xva, yva, Xte, feats_cat)
+
     raise ValueError(f"unknown learner {name!r}")
 
 
@@ -171,6 +174,79 @@ def _fit_predict_tabpfn(cfg, Xtr, ytr, Xva, yva, Xte, feats_cat):
                 raise
             i = j
         print(f"    tabpfn {name}: {len(A):,} rows in {(time.time() - t) / 60:.1f} min", flush=True)
+        return out
+    pv, pt = predict(Xva, "val"), predict(Xte, "test")
+    del clf
+    free()
+    return pv, pt, 0
+
+
+def _fit_predict_tabicl(cfg, Xtr, ytr, Xva, yva, Xte, feats_cat):
+    """TabICL v2 in-context learner (Phase 5, batch 27): a second TFM family next to TabPFN,
+    with column-then-row attention and a different synthetic prior. The context is a
+    stratified `context`-row subsample of the training fold (koumeimaki's c250k, cdeotte's
+    tabicl2 member), because a full 560k-row context does not fit a T4.
+
+    Needs internet on the kernel: tabicl is pip-installed behind the version guard and the
+    checkpoint comes from Hugging Face (jingang/TabICL). TabICL is BSD-3."""
+    import gc, os, time
+    os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
+    import torch
+    from tabicl import TabICLClassifier
+    p = cfg["tabicl_params"]
+    dev = "cuda" if torch.cuda.is_available() else "cpu"
+    cats = [c for c in feats_cat if c in Xtr.columns]
+
+    def arr(X):
+        # Category codes as numbers (NaN stays NaN): TabICL has no categorical input.
+        D = X.copy()
+        for c in cats:
+            codes = D[c].cat.codes.astype("float32")
+            D[c] = codes.where(codes >= 0)
+        return D.to_numpy(np.float32)
+
+    def oom(e):
+        return isinstance(e, torch.cuda.OutOfMemoryError) or "out of memory" in str(e).lower()
+
+    def free():
+        gc.collect()
+        if dev == "cuda":
+            torch.cuda.empty_cache()
+
+    y = np.asarray(ytr)
+    idx = np.arange(len(y))
+    if len(y) > p["context"]:
+        # Stratified subsample, seeded by model_seed, so the context keeps the class ratio.
+        rng = np.random.default_rng(cfg["model_seed"])
+        idx = np.sort(np.concatenate([
+            rng.choice(np.flatnonzero(y == k), int(round(p["context"] * (y == k).mean())),
+                       replace=False) for k in (0, 1)]))
+    t0 = time.time()
+    free()
+    clf = TabICLClassifier(n_estimators=p["n_estimators"], batch_size=p["est_batch"],
+                           kv_cache=p["kv_cache"], checkpoint_version=p["ckpt"],
+                           device=dev, random_state=cfg["model_seed"], verbose=False)
+    clf.fit(arr(Xtr).take(idx, axis=0), y[idx])
+    print(f"    tabicl fit {(time.time() - t0) / 60:.1f} min, context {len(idx):,}", flush=True)
+
+    def predict(X, name):
+        A = arr(X)
+        out = np.empty(len(A))
+        bs, i, t = p["batch"], 0, time.time()
+        while i < len(A):
+            j = min(i + bs, len(A))
+            try:
+                out[i:j] = clf.predict_proba(A[i:j])[:, 1]
+            except Exception as e:
+                if oom(e) and bs > 256:
+                    bs //= 2
+                    free()
+                    continue
+                raise
+            i = j
+        peak = torch.cuda.max_memory_allocated() / 2**30 if dev == "cuda" else 0.0
+        print(f"    tabicl {name}: {len(A):,} rows in {(time.time() - t) / 60:.1f} min, "
+              f"batch {bs}, peak {peak:.1f} GB", flush=True)
         return out
     pv, pt = predict(Xva, "val"), predict(Xte, "test")
     del clf

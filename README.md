@@ -1254,3 +1254,27 @@ No public OOF or test artifact is used.
 - **B13k3** (`0cfc1174`): OOF 0.961725, +0.000007.
 - **B13pk3** (`eda537d3`): OOF 0.961724. On the pruned pool, weight 3 is worse than weight 2.
 - All three sit ahead of auto-fill in the oci-free queue. The other 7 slots tonight go to leftover runs (W14, W11, W5, W10, W9, W2, W3), which add low-OOF points to the OOF-to-public fit.
+
+**Z4 result (Oct 17 kernel, collected Oct 19): it fails Gate 1 but passes Gate 2 marginally. B14 is a Final A candidate, not a new champion.**
+- **Solo:** Z4 (`6ea49b38`) OOF 0.960847, −0.000223 vs Z2, public 0.96064. The prediction (+0.0001 to +0.0003) failed in sign. The route profile is the largest GBDT gain (T2 +0.0016), but TabPFN with 17 extra profile columns is weaker. A plausible, untested mechanism: TabPFN already reads the route from the category, so the profile columns add width without information.
+- **Gate 2 on B12w at TFM weight 2:** ADD +0.0000118 (SD 0.0000058, **2.05 SD**). SWAP Z4 for Z3 is −0.0000000, and SWAP Z4 for Z1 is −0.000017. At weight 1 the ADD is +0.0000096 (3.2 SD).
+- **B14** (`754f9b07`) = B12w + Z4, TFM weight 2: OOF 0.961730. That's a pass at the edge of the gate, the same size as B13p's post-hoc pruning gain. It's banked as a Final A candidate, and B12w keeps the champion title because the margin is the gate itself.
+
+### Checkpoint 4 (2026-10-18): the public-artifact review
+- **The user's decision:** "borrow more from the leaderboard". Public OOF/test pairs may now enter **Final B** (fold-aligned, with a manifest). **Final A stays ours-only** (§5.2).
+- **The GPU for the rest of the week (~22 T4-hours) goes to our own TabICL leg** (user's choice over a TabPFN seed bag). Public TabICL and TabPFN members enter Final B either way, so this buys Final A a second TFM family.
+- **Board, Oct 18 23:40 UTC:** #1 0.96309, #6–9 about 0.96200, us 0.96122.
+
+### Phase 5: finals (from 2026-10-19)
+
+**Batch 27, our TabICL leg (pre-registered Oct 19, before launch).**
+- **Code (default off):** `learners._fit_predict_tabicl` (TabICL v2, `tabicl==2.1.1`, checkpoint `tabicl-classifier-v2-20260212.ckpt`, BSD-3) and `tabicl_params` in DEFAULTS: a 250k stratified context per fold, 4 ensemble members, predict batch 8192 with a halving back-off. The kernel installs the package behind the pinned-stack guard. The idea comes from koumeimaki's c250k TabICL member and cdeotte's tabicl2. No public artifact is used.
+- **Bit-identity:** the U18r kernel regenerates byte-identical. A 2% CPU smoke (3k context, 1 member) gives OOF 0.9539, so the code path is sound.
+
+| Tag | Config (twin) | Mechanism | Prediction |
+|---|---|---|---|
+| K0s | `learner: tabicl`, 5% rows, 2 folds (NOSUBMIT) | install, checkpoint, T4 path, timing | runs; AUC about 0.955 |
+| K1 | `learner: tabicl` (Z1; only `learner` changes) | a second in-context family with column-then-row attention and a different prior | solo 0.9603–0.9610; **ADD on B12w > +0.00002** |
+
+- **Gate:** Gate 2 on the B12w pool at TFM weight 2 (ADD > 2 SD, SWAP > −1 SD). A pass makes **B15** = B14 + K1 at TFM weight 2.
+- **Pre-registered fallback:** if K0s or K1's first fold projects past the 12 h session, relaunch K1 with `tabicl_params.context` 150k. That's the same probe at a smaller context, not a new one.

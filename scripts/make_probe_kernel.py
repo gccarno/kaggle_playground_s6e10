@@ -57,7 +57,7 @@ if _after != _before:
     raise RuntimeError(f"pip changed the pinned stack: {_before} -> {_after}")
 
 """
-PIP = {"tabpfn": "tabpfn==9.0.0"}
+PIP = {"tabpfn": "tabpfn==9.0.0", "tabicl": "tabicl==2.1.1"}
 
 
 def slug_for(tag):
