@@ -303,6 +303,21 @@ def cmd_climb(keys, max_steps, write=None):
                        "max_steps": max_steps})
 
 
+def cmd_adopt(tag, result_dir, description, notes):
+    """Archive a blend computed off the laptop by scripts/burst_blends.py (Phase 5): the
+    nested OOF and test arrays come from <result_dir>/<tag>.npz, the method and legs from
+    <tag>.json. Only one leg is loaded (for the fold and test-id arrays), so a 195-leg pool
+    costs no memory here. archive() checks the F* tag rule for public legs."""
+    d = Path(result_dir)
+    res = json.loads((d / f"{tag}.json").read_text())
+    arr = np.load(d / f"{tag}.npz")
+    legs = res["pool"] if res["method"] == "nested_logit_stack" else list(res["counts"])
+    extra = {k: v for k, v in res.items() if k not in ("tag", "method", "nested_oof")}
+    print(f"{tag}: {res['method']}, nested OOF {res['nested_oof']:.6f} (burst)")
+    archive(legs, tag, description, notes, oof=arr["oof"], test=arr["test"],
+            method=res["method"], extra=extra, light=True)
+
+
 def cmd_disagree(ref, keys):
     """Strength vs disagreement (playbook section 7). Disagreement = 1 - Spearman of OOF
     ranks against the reference. The ensemble axis is open only if some leg is both
@@ -331,9 +346,13 @@ def cmd_write(keys, tag, description, notes):
             method="rank_mean")
 
 
-def archive(keys, tag, description, notes, oof, test, method, extra=None):
+def archive(keys, tag, description, notes, oof, test, method, extra=None, light=False):
+    """light=True (cmd_adopt): legs are named by run_tag and resolved from runs.csv only;
+    just the first leg's arrays are loaded."""
+    name = (lambda k: resolve(k).get("run_tag") or resolve(k)["run_id"]) if light         else (lambda k: leg(k)[0])
+    rid = (lambda k: resolve(k)["run_id"]) if light else (lambda k: leg(k)[1])
     # Checkpoint 4: public members (P_ legs) may only enter Final B blends, tagged F*.
-    if any(leg(k)[0].startswith("P_") for k in keys) and not tag.startswith("F"):
+    if any(name(k).startswith("P_") for k in keys) and not tag.startswith("F"):
         raise SystemExit(f"{tag}: blends with public P_ legs must be tagged F* (Final B)")
     if any(r.get("run_tag") == tag for r in runlog.read_rows()):
         raise SystemExit(f"run_tag {tag!r} already exists")
@@ -350,7 +369,7 @@ def archive(keys, tag, description, notes, oof, test, method, extra=None):
     pd.DataFrame({"id": test_ids, "proba": test}).to_csv(out / "test_proba_blend.csv",
                                                          index=False)
     pd.DataFrame({ID: test_ids, TARGET: test}).to_csv(out / "submission.csv", index=False)
-    manifest = {"method": method, "legs": {leg(k)[0]: leg(k)[1] for k in keys}, **(extra or {})}
+    manifest = {"method": method, "legs": {name(k): rid(k) for k in keys}, **(extra or {})}
     (out / "manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
 
     git = lambda *a: __import__("subprocess").run(["git", *a], capture_output=True,
@@ -360,7 +379,7 @@ def archive(keys, tag, description, notes, oof, test, method, extra=None):
                "fold_auc_mean": round(float(np.mean(fold_aucs)), 6),
                "fold_auc_std": round(float(np.std(fold_aucs)), 6),
                "fold_aucs": [round(a, 6) for a in fold_aucs],
-               "engineered": [leg(k)[0] for k in keys]}
+               "engineered": [name(k) for k in keys]}
     row = runlog.build_row(
         metrics, run_id=run_id,
         timestamp_utc=datetime.now(timezone.utc).isoformat(timespec="seconds"),
@@ -392,6 +411,10 @@ def main():
     p.add_argument("--write", metavar="TAG")
     p.add_argument("--description", default="")
     p.add_argument("--notes", default="")
+    p = sub.add_parser("adopt"); p.add_argument("tag")
+    p.add_argument("--result", required=True, help="burst_blends.py output dir")
+    p.add_argument("--description", required=True)
+    p.add_argument("--notes", default="")
     p = sub.add_parser("disagree")
     p.add_argument("--ref", required=True)
     p.add_argument("legs", nargs="*")
@@ -411,6 +434,8 @@ def main():
         cmd_curve(a.legs)
     elif a.cmd == "stack":
         cmd_stack(a.legs, (a.write, a.description, a.notes) if a.write else None, a.C)
+    elif a.cmd == "adopt":
+        cmd_adopt(a.tag, a.result, a.description, a.notes)
     elif a.cmd == "climb":
         cmd_climb(a.legs, a.max_steps, (a.write, a.description, a.notes) if a.write else None)
     elif a.cmd == "disagree":
