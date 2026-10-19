@@ -1307,3 +1307,6 @@ No public OOF or test artifact is used.
 - **Decision rule:** the Final B candidate is the best nested OOF among F1, F2 and F6. Public is read only for direction (§5).
 - **Leak tripwire:** if an F blend's public score sits more than 0.0003 above the OOF→public line, a member is suspect. Then the members flagged by their fold-AUC spread get dropped, and the blend is refit.
 - **Slots:** F1–F7 plus B14 take the Oct 19 slots. B14 is the Final A candidate.
+- **Tag rename:** `K1` was already taken (Phase 2's CatBoost on raw features), so the TabICL runs are logged as **TI0s** (`446cbf82`) and **TI1** (`845df7a2`). The kernel slugs stay `s6e10-k0s`/`s6e10-k1`, and the adopt crons rename the rows by run_id. **TI0s passes:** the install guard held, folds 0.9576/0.9580 at 5% rows. Test prediction takes 4.2 min per 300k rows at a 17k context, so TI1 at 250k projects to about 90 min per fold, inside the 12 h session.
+- **F5 result: it fails.** OOF 0.961342, which is −0.000376 against B12w. The prediction was 0.9618–0.9620. Equal weight on 23 public TFMs of mixed strength (mitra2 0.9571, causilo 0.9583, among others) dilutes the strong legs, so Final B needs selection (F1) or fitting (F2), not an unfitted mean.
+- **F1 and F2 were stopped** before finishing, because the laptop ran out of memory. Each holds about 195 legs × 1M rows in memory. Neither wrote a run.

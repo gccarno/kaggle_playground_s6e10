@@ -136,7 +136,7 @@ Q4,4,features,T24,probe,NULL,arr_delay minus dep_delay: -0.000007 vs T24; ADD -0
 Q5,4,one-hot,T24,probe,NULL,One-hot of 4 categoricals + 13 ratings: -0.000104 vs T24; ADD -0.000012
 B10,4b,blend,B8,blend,SUPERSEDED,"B8 + Z1 + Z2 (TabPFN views), 13 legs; OOF 0.961652 (+0.000123), public 0.96116"
 B11,4b,blend,B10,blend,SUPERSEDED,"B10 + Z3, 14 legs; OOF 0.961675 (+0.000023), public 0.96118"
-Z4,4b,tfm,Z2,probe,PLANNED,Z2 + FD route profile; one-shot cron on oci-free launches it Sat Oct 17 03:00 UTC (GPU quota reset)
+Z4,4b,tfm,Z2,probe,PASS,"Route profile for TabPFN: solo -0.000223 vs Z2 (prediction failed in sign); Gate 2 ADD +0.000012 at weight 2 (2.05 SD, marginal); public 0.96064"
 R1,4b,tree-structure,T24,probe,FAIL,Random forest: solo -0.00245 vs T24 (as predicted); ADD -0.000040 (6 SD): weaker and not different enough; public 0.95767
 R2,4b,tree-structure,T24,probe,NULL,"Extra-trees: solo -0.000159 vs T24; ADD -0.000006, SWAP for T24 -0.000002 (within 1 SD); public 0.95984"
 R3,4b,tree-structure,T24,probe,NULL,Linear leaves: solo -0.000185 vs T24; ADD -0.000013 (3 SD); public 0.96012
@@ -146,3 +146,193 @@ B12w,4b,blend,B11,blend,CHAMPION,"Champion: B11 with the 3 TabPFN legs at weight
 B13k3,4b,blend,B12w,blend,INFO,"B12w at TabPFN weight 3: OOF 0.961725 (+0.000007, in noise); finalist candidate, queued Oct 16"
 B13p,4b,blend,B12w,blend,INFO,"B12w minus W14/X1m/T24 (greedy; X4 kept): OOF 0.961731 (+0.000013, post-hoc); finalist candidate, queued Oct 16"
 B13pk3,4b,blend,B13p,blend,INFO,"B13p pool at TabPFN weight 3: OOF 0.961724 (-0.000007 vs B13p); finalist candidate, queued Oct 16"
+P_amanatar_forge_cat,5,public,,member,INFO,Public member forge_cat from amanatar/s6e10-forge-own-pairs: OOF 0.960908; Final B only
+P_amanatar_forge_ghost_xt,5,public,,member,INFO,Public member forge_ghost_xt from amanatar/s6e10-forge-own-pairs: OOF 0.960920; Final B only
+P_amanatar_forge_lgbm,5,public,,member,INFO,Public member forge_lgbm from amanatar/s6e10-forge-own-pairs: OOF 0.961037; Final B only
+P_amanatar_forge_lgbm_xt,5,public,,member,INFO,Public member forge_lgbm_xt from amanatar/s6e10-forge-own-pairs: OOF 0.960903; Final B only
+P_amanatar_forge_realmlp,5,public,,member,INFO,Public member forge_realmlp from amanatar/s6e10-forge-own-pairs: OOF 0.961220; Final B only
+P_amanatar_forge_xgb,5,public,,member,INFO,Public member forge_xgb from amanatar/s6e10-forge-own-pairs: OOF 0.961047; Final B only
+P_cdeotte_ar_cat_5f,5,public,,member,INFO,Public member ar_cat_5f from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.960940; Final B only
+P_cdeotte_ar_lgb_5f,5,public,,member,INFO,Public member ar_lgb_5f from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961029; Final B only
+P_cdeotte_ar_realmlp_5f,5,public,,member,INFO,Public member ar_realmlp_5f from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.960879; Final B only
+P_cdeotte_ar_xgb_5f,5,public,,member,INFO,Public member ar_xgb_5f from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961049; Final B only
+P_cdeotte_bp_cat,5,public,,member,INFO,Public member bp_cat from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.960887; Final B only
+P_cdeotte_bp_lgbm,5,public,,member,INFO,Public member bp_lgbm from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961058; Final B only
+P_cdeotte_bp_lgbm_xt,5,public,,member,INFO,Public member bp_lgbm_xt from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.960930; Final B only
+P_cdeotte_bp_xgb,5,public,,member,INFO,Public member bp_xgb from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961020; Final B only
+P_cdeotte_gl_a,5,public,,member,INFO,Public member gl_a from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.959568; Final B only
+P_cdeotte_gl_b,5,public,,member,INFO,Public member gl_b from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.958727; Final B only
+P_cdeotte_gl_c,5,public,,member,INFO,Public member gl_c from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.958338; Final B only
+P_cdeotte_gl_d,5,public,,member,INFO,Public member gl_d from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.958341; Final B only
+P_cdeotte_gl_e,5,public,,member,INFO,Public member gl_e from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.956817; Final B only
+P_cdeotte_gl_f,5,public,,member,INFO,Public member gl_f from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.948865; Final B only
+P_cdeotte_gl_g,5,public,,member,INFO,Public member gl_g from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.954592; Final B only
+P_cdeotte_gl_h,5,public,,member,INFO,Public member gl_h from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.959791; Final B only
+P_cdeotte_gl_i,5,public,,member,INFO,Public member gl_i from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.959651; Final B only
+P_cdeotte_gl_j,5,public,,member,INFO,Public member gl_j from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961150; Final B only
+P_cdeotte_gl_k,5,public,,member,INFO,Public member gl_k from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.960934; Final B only
+P_cdeotte_gl_l,5,public,,member,INFO,Public member gl_l from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.960956; Final B only
+P_cdeotte_gl_m,5,public,,member,INFO,Public member gl_m from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.960411; Final B only
+P_cdeotte_gl_n,5,public,,member,INFO,Public member gl_n from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961233; Final B only
+P_cdeotte_gp_cat_ctr,5,public,,member,INFO,Public member gp_cat_ctr from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961045; Final B only
+P_cdeotte_gp_cat_ctr3,5,public,,member,INFO,Public member gp_cat_ctr3 from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961118; Final B only
+P_cdeotte_gp_cat_ctr5,5,public,,member,INFO,Public member gp_cat_ctr5 from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961090; Final B only
+P_cdeotte_gp_cat_v3,5,public,,member,INFO,Public member gp_cat_v3 from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.960833; Final B only
+P_cdeotte_gp_cat_vb,5,public,,member,INFO,Public member gp_cat_vb from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.960805; Final B only
+P_cdeotte_gp_deepfm_rawaux,5,public,,member,INFO,Public member gp_deepfm_rawaux from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.960479; Final B only
+P_cdeotte_gp_deepfm_v1,5,public,,member,INFO,Public member gp_deepfm_v1 from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.960728; Final B only
+P_cdeotte_gp_glm6_xgb,5,public,,member,INFO,Public member gp_glm6_xgb from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.960803; Final B only
+P_cdeotte_gp_glm_xgb,5,public,,member,INFO,Public member gp_glm_xgb from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.960751; Final B only
+P_cdeotte_gp_lgb_auxall,5,public,,member,INFO,Public member gp_lgb_auxall from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961153; Final B only
+P_cdeotte_gp_lgb_v3,5,public,,member,INFO,Public member gp_lgb_v3 from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961057; Final B only
+P_cdeotte_gp_lgb_vb,5,public,,member,INFO,Public member gp_lgb_vb from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961011; Final B only
+P_cdeotte_gp_lgb_vb_aux,5,public,,member,INFO,Public member gp_lgb_vb_aux from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961061; Final B only
+P_cdeotte_gp_lgb_vb_ogev,5,public,,member,INFO,Public member gp_lgb_vb_ogev from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961057; Final B only
+P_cdeotte_gp_realmlp_fa,5,public,,member,INFO,Public member gp_realmlp_fa from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.960946; Final B only
+P_cdeotte_gp_realmlp_fa_aux,5,public,,member,INFO,Public member gp_realmlp_fa_aux from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961004; Final B only
+P_cdeotte_gp_realmlp_fa_aux3,5,public,,member,INFO,Public member gp_realmlp_fa_aux3 from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961077; Final B only
+P_cdeotte_gp_realmlp_fa_aux_s2,5,public,,member,INFO,Public member gp_realmlp_fa_aux_s2 from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961018; Final B only
+P_cdeotte_gp_realmlp_fa_auxog,5,public,,member,INFO,Public member gp_realmlp_fa_auxog from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.960888; Final B only
+P_cdeotte_gp_realmlp_fa_auxogev,5,public,,member,INFO,Public member gp_realmlp_fa_auxogev from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961029; Final B only
+P_cdeotte_gp_realmlp_fa_s123,5,public,,member,INFO,Public member gp_realmlp_fa_s123 from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.960908; Final B only
+P_cdeotte_gp_realmlp_fa_s7,5,public,,member,INFO,Public member gp_realmlp_fa_s7 from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.960976; Final B only
+P_cdeotte_gp_realmlp_og,5,public,,member,INFO,Public member gp_realmlp_og from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.960779; Final B only
+P_cdeotte_gp_realmlp_pub,5,public,,member,INFO,Public member gp_realmlp_pub from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.960769; Final B only
+P_cdeotte_gp_realmlp_pub_s1,5,public,,member,INFO,Public member gp_realmlp_pub_s1 from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.960718; Final B only
+P_cdeotte_gp_realmlp_pub_s2,5,public,,member,INFO,Public member gp_realmlp_pub_s2 from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.960757; Final B only
+P_cdeotte_gp_realmlp_v4,5,public,,member,INFO,Public member gp_realmlp_v4 from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961136; Final B only
+P_cdeotte_gp_realmlp_v4_s1,5,public,,member,INFO,Public member gp_realmlp_v4_s1 from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961105; Final B only
+P_cdeotte_gp_realmlp_v4_s2,5,public,,member,INFO,Public member gp_realmlp_v4_s2 from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961160; Final B only
+P_cdeotte_gp_realmlp_v4fa,5,public,,member,INFO,Public member gp_realmlp_v4fa from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961179; Final B only
+P_cdeotte_gp_realmlp_vb_aux,5,public,,member,INFO,Public member gp_realmlp_vb_aux from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961345; Final B only
+P_cdeotte_gp_realmlp_vb_aux_s2,5,public,,member,INFO,Public member gp_realmlp_vb_aux_s2 from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961316; Final B only
+P_cdeotte_gp_tabicl_full_raw,5,public,,member,INFO,Public member gp_tabicl_full_raw from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.957590; Final B only
+P_cdeotte_gp_tabpfn_catfd,5,public,,member,INFO,Public member gp_tabpfn_catfd from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.960925; Final B only
+P_cdeotte_gp_tabpfn_catfd10,5,public,,member,INFO,Public member gp_tabpfn_catfd10 from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961071; Final B only
+P_cdeotte_gp_tabpfn_catfd_s1,5,public,,member,INFO,Public member gp_tabpfn_catfd_s1 from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.960895; Final B only
+P_cdeotte_gp_tabpfn_full_raw,5,public,,member,INFO,Public member gp_tabpfn_full_raw from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.960729; Final B only
+P_cdeotte_gp_tabpfn_full_raw_s1,5,public,,member,INFO,Public member gp_tabpfn_full_raw_s1 from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.960628; Final B only
+P_cdeotte_gp_tabpfn_te,5,public,,member,INFO,Public member gp_tabpfn_te from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961099; Final B only
+P_cdeotte_gp_tabpfn_te4,5,public,,member,INFO,Public member gp_tabpfn_te4 from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961142; Final B only
+P_cdeotte_gp_xgb_auxall,5,public,,member,INFO,Public member gp_xgb_auxall from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961156; Final B only
+P_cdeotte_gp_xgb_auxev,5,public,,member,INFO,Public member gp_xgb_auxev from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961174; Final B only
+P_cdeotte_gp_xgb_v3,5,public,,member,INFO,Public member gp_xgb_v3 from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961072; Final B only
+P_cdeotte_gp_xgb_v3_d10,5,public,,member,INFO,Public member gp_xgb_v3_d10 from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961061; Final B only
+P_cdeotte_gp_xgb_v3_s1,5,public,,member,INFO,Public member gp_xgb_v3_s1 from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961095; Final B only
+P_cdeotte_gp_xgb_v4_tuned,5,public,,member,INFO,Public member gp_xgb_v4_tuned from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961113; Final B only
+P_cdeotte_gp_xgb_vb,5,public,,member,INFO,Public member gp_xgb_vb from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.960926; Final B only
+P_cdeotte_meh_cat,5,public,,member,INFO,Public member meh_cat from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.960329; Final B only
+P_cdeotte_meh_lgb,5,public,,member,INFO,Public member meh_lgb from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.960689; Final B only
+P_cdeotte_meh_realmlp,5,public,,member,INFO,Public member meh_realmlp from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.960958; Final B only
+P_cdeotte_meh_xgb,5,public,,member,INFO,Public member meh_xgb from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.960432; Final B only
+P_cdeotte_mg_cat,5,public,,member,INFO,Public member mg_cat from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.960901; Final B only
+P_cdeotte_mg_cat_ctr,5,public,,member,INFO,Public member mg_cat_ctr from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.960980; Final B only
+P_cdeotte_mg_lgb,5,public,,member,INFO,Public member mg_lgb from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961014; Final B only
+P_cdeotte_mg_lgb_ogteach,5,public,,member,INFO,Public member mg_lgb_ogteach from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961000; Final B only
+P_cdeotte_mg_lgb_route,5,public,,member,INFO,Public member mg_lgb_route from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961035; Final B only
+P_cdeotte_mg_realmlp,5,public,,member,INFO,Public member mg_realmlp from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961007; Final B only
+P_cdeotte_mg_realmlp_fa4,5,public,,member,INFO,Public member mg_realmlp_fa4 from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961015; Final B only
+P_cdeotte_mg_realmlp_og,5,public,,member,INFO,Public member mg_realmlp_og from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.960922; Final B only
+P_cdeotte_mg_realmlp_v4,5,public,,member,INFO,Public member mg_realmlp_v4 from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961198; Final B only
+P_cdeotte_mg_realmlp_v4og,5,public,,member,INFO,Public member mg_realmlp_v4og from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961232; Final B only
+P_cdeotte_mg_xgb,5,public,,member,INFO,Public member mg_xgb from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.960911; Final B only
+P_cdeotte_mi_cat_ctr,5,public,,member,INFO,Public member mi_cat_ctr from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961120; Final B only
+P_cdeotte_mi_glm_xgb,5,public,,member,INFO,Public member mi_glm_xgb from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961065; Final B only
+P_cdeotte_mi_lgb_route_cat,5,public,,member,INFO,Public member mi_lgb_route_cat from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961027; Final B only
+P_cdeotte_mi_realmlp_lean,5,public,,member,INFO,Public member mi_realmlp_lean from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961307; Final B only
+P_cdeotte_mi_realmlp_raw,5,public,,member,INFO,Public member mi_realmlp_raw from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.960976; Final B only
+P_cdeotte_mi_xgb,5,public,,member,INFO,Public member mi_xgb from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961247; Final B only
+P_cdeotte_mi_xgb_d5,5,public,,member,INFO,Public member mi_xgb_d5 from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961288; Final B only
+P_cdeotte_nj_01,5,public,,member,EXCLUDED,A blend output (najiama 01) re-hosted as a member: excluded as META
+P_cdeotte_pfn_hemingweb_raw,5,public,,member,INFO,Public member pfn_hemingweb_raw from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961053; Final B only
+P_cdeotte_pfn_samanyu_route_og,5,public,,member,INFO,Public member pfn_samanyu_route_og from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961268; Final B only
+P_cdeotte_pfn_samanyu_seeds,5,public,,member,INFO,Public member pfn_samanyu_seeds from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961008; Final B only
+P_cdeotte_sa_cat_ctr_auxall_k10,5,public,,member,INFO,Public member sa_cat_ctr_auxall_k10 from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961174; Final B only
+P_cdeotte_sa_cat_ctr_auxev,5,public,,member,INFO,Public member sa_cat_ctr_auxev from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.960984; Final B only
+P_cdeotte_sa_cat_ctr_auxev_k10,5,public,,member,INFO,Public member sa_cat_ctr_auxev_k10 from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961160; Final B only
+P_cdeotte_sa_lgb_A,5,public,,member,INFO,Public member sa_lgb_A from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.960971; Final B only
+P_cdeotte_sa_lgb_A_auxall,5,public,,member,INFO,Public member sa_lgb_A_auxall from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961136; Final B only
+P_cdeotte_sa_lgb_A_auxall_k10,5,public,,member,INFO,Public member sa_lgb_A_auxall_k10 from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961237; Final B only
+P_cdeotte_sa_lgb_B_k10,5,public,,member,INFO,Public member sa_lgb_B_k10 from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961065; Final B only
+P_cdeotte_sa_rmlp_B,5,public,,member,INFO,Public member sa_rmlp_B from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961282; Final B only
+P_cdeotte_sa_rmlp_B_k10,5,public,,member,INFO,Public member sa_rmlp_B_k10 from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961378; Final B only
+P_cdeotte_sa_rmlp_ogx_aux,5,public,,member,INFO,Public member sa_rmlp_ogx_aux from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961081; Final B only
+P_cdeotte_sa_rmlp_ogx_aux_k10,5,public,,member,INFO,Public member sa_rmlp_ogx_aux_k10 from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961175; Final B only
+P_cdeotte_sa_rmlp_raw_aux_k10,5,public,,member,INFO,Public member sa_rmlp_raw_aux_k10 from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961252; Final B only
+P_cdeotte_sa_rmlp_raw_aux_s2,5,public,,member,INFO,Public member sa_rmlp_raw_aux_s2 from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961118; Final B only
+P_cdeotte_sa_rmlp_v4aux,5,public,,member,INFO,Public member sa_rmlp_v4aux from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961268; Final B only
+P_cdeotte_sa_rmlp_v4aux_k10,5,public,,member,INFO,Public member sa_rmlp_v4aux_k10 from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961398; Final B only
+P_cdeotte_sa_rmlp_v4aux_k10s2,5,public,,member,INFO,Public member sa_rmlp_v4aux_k10s2 from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961413; Final B only
+P_cdeotte_sa_rmlp_v4ev_e4_k10,5,public,,member,INFO,Public member sa_rmlp_v4ev_e4_k10 from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961244; Final B only
+P_cdeotte_sa_xgb_A,5,public,,member,INFO,Public member sa_xgb_A from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.960903; Final B only
+P_cdeotte_sa_xgb_A_auxev,5,public,,member,INFO,Public member sa_xgb_A_auxev from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961044; Final B only
+P_cdeotte_sa_xgb_raw,5,public,,member,INFO,Public member sa_xgb_raw from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.958832; Final B only
+P_cdeotte_sa_xgb_route,5,public,,member,INFO,Public member sa_xgb_route from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.960317; Final B only
+P_cdeotte_sa_xgb_te,5,public,,member,INFO,Public member sa_xgb_te from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.960179; Final B only
+P_cdeotte_th_catboost,5,public,,member,INFO,Public member th_catboost from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.960941; Final B only
+P_cdeotte_th_realmlp,5,public,,member,INFO,Public member th_realmlp from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961042; Final B only
+P_cdeotte_th_xgb,5,public,,member,INFO,Public member th_xgb from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961093; Final B only
+P_cdeotte_wx_context_numeric,5,public,,member,INFO,Public member wx_context_numeric from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.960649; Final B only
+P_cdeotte_wx_rating_segments,5,public,,member,INFO,Public member wx_rating_segments from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.960811; Final B only
+P_cdeotte_causilo,5,public,,member,INFO,Public member causilo from cdeotte/s6e10-tfm-oof-and-test-predictions: OOF 0.958275; Final B only
+P_cdeotte_exaone,5,public,,member,INFO,Public member exaone from cdeotte/s6e10-tfm-oof-and-test-predictions: OOF 0.958557; Final B only
+P_cdeotte_kumolarge,5,public,,member,INFO,Public member kumolarge from cdeotte/s6e10-tfm-oof-and-test-predictions: OOF 0.960036; Final B only
+P_cdeotte_kumosmall,5,public,,member,INFO,Public member kumosmall from cdeotte/s6e10-tfm-oof-and-test-predictions: OOF 0.958484; Final B only
+P_cdeotte_limix2,5,public,,member,INFO,Public member limix2 from cdeotte/s6e10-tfm-oof-and-test-predictions: OOF 0.958474; Final B only
+P_cdeotte_mitra2,5,public,,member,INFO,Public member mitra2 from cdeotte/s6e10-tfm-oof-and-test-predictions: OOF 0.957075; Final B only
+P_cdeotte_realmlp,5,public,,member,INFO,Public member realmlp from cdeotte/s6e10-tfm-oof-and-test-predictions: OOF 0.959311; Final B only
+P_cdeotte_tabfm,5,public,,member,INFO,Public member tabfm from cdeotte/s6e10-tfm-oof-and-test-predictions: OOF 0.958871; Final B only
+P_cdeotte_tabicl2,5,public,,member,INFO,Public member tabicl2 from cdeotte/s6e10-tfm-oof-and-test-predictions: OOF 0.958088; Final B only
+P_cdeotte_tabpfn35,5,public,,member,INFO,Public member tabpfn35 from cdeotte/s6e10-tfm-oof-and-test-predictions: OOF 0.961145; Final B only
+P_cdeotte_xgboost,5,public,,member,INFO,Public member xgboost from cdeotte/s6e10-tfm-oof-and-test-predictions: OOF 0.959852; Final B only
+P_dmitriykol_cb_cat,5,public,,member,INFO,Public member cb_cat from dmitriykolmikov/s6e10-catboost-all-categorical-oof-and-test: OOF 0.960665; Final B only
+P_goodpjw200_cat_aux,5,public,,member,INFO,Public member cat_aux from goodpjw2008/s6e10-goodpjw2008-extra-members-oof: OOF 0.960937; Final B only
+P_goodpjw200_cat_ctr_k,5,public,,member,INFO,Public member cat_ctr_k from goodpjw2008/s6e10-goodpjw2008-extra-members-oof: OOF 0.961003; Final B only
+P_goodpjw200_cat_k10,5,public,,member,INFO,Public member cat_k10 from goodpjw2008/s6e10-goodpjw2008-extra-members-oof: OOF 0.961114; Final B only
+P_goodpjw200_gen_v1,5,public,,member,INFO,Public member gen_v1 from goodpjw2008/s6e10-goodpjw2008-extra-members-oof: OOF 0.952399; Final B only
+P_goodpjw200_glm6_xgb_k,5,public,,member,INFO,Public member glm6_xgb_k from goodpjw2008/s6e10-goodpjw2008-extra-members-oof: OOF 0.960829; Final B only
+P_goodpjw200_lgb_k10,5,public,,member,INFO,Public member lgb_k10 from goodpjw2008/s6e10-goodpjw2008-extra-members-oof: OOF 0.961215; Final B only
+P_goodpjw200_realmlp_fa_aux_n16,5,public,,member,INFO,Public member realmlp_fa_aux_n16 from goodpjw2008/s6e10-goodpjw2008-extra-members-oof: OOF 0.961071; Final B only
+P_goodpjw200_realmlp_fa_auxev,5,public,,member,INFO,Public member realmlp_fa_auxev from goodpjw2008/s6e10-goodpjw2008-extra-members-oof: OOF 0.961055; Final B only
+P_goodpjw200_realmlp_pub_aux_k,5,public,,member,INFO,Public member realmlp_pub_aux_k from goodpjw2008/s6e10-goodpjw2008-extra-members-oof: OOF 0.960916; Final B only
+P_goodpjw200_realmlp_v4fa_auxfull,5,public,,member,INFO,Public member realmlp_v4fa_auxfull from goodpjw2008/s6e10-goodpjw2008-extra-members-oof: OOF 0.961275; Final B only
+P_goodpjw200_realmlp_vb,5,public,,member,INFO,Public member realmlp_vb from goodpjw2008/s6e10-goodpjw2008-extra-members-oof: OOF 0.961150; Final B only
+P_goodpjw200_tabm_v4aux,5,public,,member,INFO,Public member tabm_v4aux from goodpjw2008/s6e10-goodpjw2008-extra-members-oof: OOF 0.960466; Final B only
+P_goodpjw200_tabpfn_ne4,5,public,,member,INFO,Public member tabpfn_ne4 from goodpjw2008/s6e10-goodpjw2008-extra-members-oof: OOF 0.961491; Final B only
+P_goodpjw200_xgb_d10_k10,5,public,,member,INFO,Public member xgb_d10_k10 from goodpjw2008/s6e10-goodpjw2008-extra-members-oof: OOF 0.961258; Final B only
+P_goodpjw200_xgb_k10,5,public,,member,INFO,Public member xgb_k10 from goodpjw2008/s6e10-goodpjw2008-extra-members-oof: OOF 0.961256; Final B only
+P_kagankoral_cat_allcat_v1_k5,5,public,,member,INFO,Public member cat_allcat_v1_k5 from kagankoral/s6e10-ablation-members-oof: OOF 0.961095; Final B only
+P_kagankoral_cat_allcat_v2_k5,5,public,,member,INFO,Public member cat_allcat_v2_k5 from kagankoral/s6e10-ablation-members-oof: OOF 0.961127; Final B only
+P_kagankoral_cat_enc3_k5,5,public,,member,INFO,Public member cat_enc3_k5 from kagankoral/s6e10-ablation-members-oof: OOF 0.960635; Final B only
+P_kagankoral_cat_enc4_k10,5,public,,member,INFO,Public member cat_enc4_k10 from kagankoral/s6e10-ablation-members-oof: OOF 0.961022; Final B only
+P_kagankoral_cat_enc4_k5,5,public,,member,INFO,Public member cat_enc4_k5 from kagankoral/s6e10-ablation-members-oof: OOF 0.960805; Final B only
+P_kagankoral_cat_raw_k5,5,public,,member,INFO,Public member cat_raw_k5 from kagankoral/s6e10-ablation-members-oof: OOF 0.958711; Final B only
+P_kagankoral_lgb_enc3_k5,5,public,,member,INFO,Public member lgb_enc3_k5 from kagankoral/s6e10-ablation-members-oof: OOF 0.960585; Final B only
+P_kagankoral_lgb_enc4_k10,5,public,,member,INFO,Public member lgb_enc4_k10 from kagankoral/s6e10-ablation-members-oof: OOF 0.960987; Final B only
+P_kagankoral_lgb_enc4_k5,5,public,,member,INFO,Public member lgb_enc4_k5 from kagankoral/s6e10-ablation-members-oof: OOF 0.960731; Final B only
+P_kagankoral_lgb_raw_k5,5,public,,member,INFO,Public member lgb_raw_k5 from kagankoral/s6e10-ablation-members-oof: OOF 0.959041; Final B only
+P_kagankoral_realmlp_enc_k5,5,public,,member,INFO,Public member realmlp_enc_k5 from kagankoral/s6e10-ablation-members-oof: OOF 0.960956; Final B only
+P_kagankoral_realmlp_raw_s42_k5,5,public,,member,INFO,Public member realmlp_raw_s42_k5 from kagankoral/s6e10-ablation-members-oof: OOF 0.960883; Final B only
+P_kagankoral_realmlp_raw_s7_k5,5,public,,member,INFO,Public member realmlp_raw_s7_k5 from kagankoral/s6e10-ablation-members-oof: OOF 0.960885; Final B only
+P_kagankoral_xgb_enc3_k5,5,public,,member,INFO,Public member xgb_enc3_k5 from kagankoral/s6e10-ablation-members-oof: OOF 0.960590; Final B only
+P_kagankoral_xgb_enc4_k10,5,public,,member,INFO,Public member xgb_enc4_k10 from kagankoral/s6e10-ablation-members-oof: OOF 0.960972; Final B only
+P_kagankoral_xgb_enc4_k5,5,public,,member,INFO,Public member xgb_enc4_k5 from kagankoral/s6e10-ablation-members-oof: OOF 0.960793; Final B only
+P_kagankoral_xgb_raw_k5,5,public,,member,INFO,Public member xgb_raw_k5 from kagankoral/s6e10-ablation-members-oof: OOF 0.958899; Final B only
+P_koumeimaki_cat_w1,5,public,,member,INFO,Public member cat_w1 from koumeimaki/s6e10-route-tfm-nn-oof: OOF 0.961223; Final B only
+P_koumeimaki_lgb_w1,5,public,,member,INFO,Public member lgb_w1 from koumeimaki/s6e10-route-tfm-nn-oof: OOF 0.961198; Final B only
+P_koumeimaki_rmlp_f_nc,5,public,,member,INFO,Public member rmlp_f_nc from koumeimaki/s6e10-route-tfm-nn-oof: OOF 0.961295; Final B only
+P_koumeimaki_tabicl_fdcat_c250k,5,public,,member,INFO,Public member tabicl_fdcat_c250k from koumeimaki/s6e10-route-tfm-nn-oof: OOF 0.957281; Final B only
+P_koumeimaki_tabm_bcd_rc_v2,5,public,,member,INFO,Public member tabm_bcd_rc_v2 from koumeimaki/s6e10-route-tfm-nn-oof: OOF 0.960768; Final B only
+P_koumeimaki_tabpfn_catfd10,5,public,,member,INFO,Public member tabpfn_catfd10 from koumeimaki/s6e10-route-tfm-nn-oof: OOF 0.961178; Final B only
+P_koumeimaki_xgb_w1,5,public,,member,INFO,Public member xgb_w1 from koumeimaki/s6e10-route-tfm-nn-oof: OOF 0.961197; Final B only
+P_sachith7_lgb_cpu_strong,5,public,,member,INFO,Public member lgb_cpu_strong from sachith7/s6e10-stack-oof-predictions: OOF 0.961083; Final B only
+P_sachith7_xgb_A_auxall,5,public,,member,INFO,Public member xgb_A_auxall from sachith7/s6e10-stack-oof-predictions: OOF 0.960916; Final B only
+B14,4b,blend,B12w,blend,INFO,"B12w + Z4 at TFM weight 2: OOF 0.961730 (+0.000012, marginal); Final A candidate"
+TI0s,5,tfm,,smoke,INFO,"TabICL v2 smoke on T4 (5 pct rows, 2 folds): folds 0.9576/0.9580; 4.2 min per 300k test rows at 17k context"
+TI1,5,tfm,Z1,probe,RUNNING,"TabICL v2, 250k stratified context, 4 members (kernel s6e10-k1); Gate 2 on B12w at TFM weight 2"
+F1,5,public,B12w,blend,PLANNED,Final B: nested Caruana over 15 own legs + 180 public members
+F2,5,public,F1,blend,PLANNED,Final B: nested L2 logit stack (C=1) over F1's pool
+F3,5,public,F1,blend,PLANNED,Final B control: nested Caruana over the 180 public members only
+F5,5,public,B12w,blend,FAIL,"Rank mean of B12w legs + 23 public TFMs at weight 2: OOF 0.961342, -0.000376 vs B12w (prediction 0.9618-0.9620 failed): weak TFMs dilute"
+F6,5,public,F1,blend,PLANNED,"Final B: F1's pool, Caruana capped at 25 picks"
+F7,5,public,F2,blend,PLANNED,Final B: L2 stack at C=0.01 over F1's pool

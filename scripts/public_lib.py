@@ -194,7 +194,7 @@ def cmd_import():
     fold, ids, test_ids, _ = folds_ids()
     man = pd.read_csv(MANIFEST)
     have = {r.get("run_tag") for r in runlog.read_rows()}
-    led = pd.read_csv(LEDGER)
+    led = pd.read_csv(LEDGER, dtype=str, keep_default_na=False)  # "NULL" is a verdict, not NaN
     new_led = []
     for r in man[man["keep"]].itertuples():
         if r.tag in have:
