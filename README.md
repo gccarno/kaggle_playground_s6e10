@@ -1278,3 +1278,32 @@ No public OOF or test artifact is used.
 
 - **Gate:** Gate 2 on the B12w pool at TFM weight 2 (ADD > 2 SD, SWAP > −1 SD). A pass makes **B15** = B14 + K1 at TFM weight 2.
 - **Pre-registered fallback:** if K0s or K1's first fold projects past the 12 h session, relaunch K1 with `tabicl_params.context` 150k. That's the same probe at a smaller context, not a new one.
+
+**Batch 27 launch (Oct 19 00:00 UTC):** K0s (`446cbf82`) and K1 (`845df7a2`) run on Kaggle T4s, pushed from oci-free at code `321db97`. Hourly adopt crons on oci-free collect them on Oct 19–20.
+
+**Batch 28, Final B: the public library (pre-registered Oct 19, before any F blend is scored).**
+- **Import (`scripts/public_lib.py`):** 214 OOF/test pairs from 8 public datasets. 180 are kept, as `P_*` pseudo-runs (NOSUBMIT, Final B only, ledger axis "public"). Every member's source, audit numbers and cluster are in `experiments/public_manifest.csv`. The datasets:
+  - cdeotte's TFM library and his 124-member library;
+  - goodpjw2008's extra members;
+  - koumeimaki, kagankoral, dmitriykolmikov, sachith7, amanatar and kratosyan.
+- **Excluded:**
+  - 32 near-copies (rank correlation > 0.999 with a stronger kept member);
+  - goodpjw2008's `stack245` (a meta-model);
+  - `nj_01` in cdeotte's 124 library, which is najiama's blend re-hosted. It was imported by a script bug before the exclusion took, so its row is marked EXCLUDED and is never a leg.
+  - No member exceeds the 0.9625 leak line. The best single is goodpjw2008's TabPFN (0.961491).
+  - megayak's parquet library is skipped (no parquet engine, and we don't add packages for it). dariushafshar's golem library returns 404.
+- **Fold alignment:** koumeimaki ships its fold file, and it matches our partition exactly. The others state SKF(5, shuffle, 42). An unaligned member would still be out-of-fold for every row, so the nested blend scores stay honest either way.
+- **New tool:** `blend.py climb` does Caruana forward selection with replacement. It selects on 4 folds and scores the 5th, and that nested OOF is the decision number. Sanity check on our 15 legs: nested 0.961722 against B12w's 0.961718, with in-sample 0.961741. The 0.00002 optimism is what the nested score removes. `blend.py stack` gains `--C`. Blends with `P_` legs must be tagged `F*`.
+
+| Tag | Pool | Method | Prediction (nested OOF) |
+|---|---|---|---|
+| F1 | 15 own legs (B12w + Z4) + 180 public | climb | 0.96200–0.96215 (najiama's honest stack CV is 0.96208) |
+| F2 | same | nested L2 logit stack, C = 1 | within ±0.00005 of F1 |
+| F3 | 180 public only | climb | F1 − F3 > 0, about +0.00002 to +0.00008 = what our legs are worth to Final B |
+| F5 | B12w legs + public TFM members, TFMs at weight 2 | rank mean, unfitted | 0.9618–0.9620 |
+| F6 | F1's pool | climb capped at 25 picks | within 0.00002 of F1 (selection regularisation) |
+| F7 | F2's pool | L2 stack, C = 0.01 | within ±0.00003 of F2 |
+
+- **Decision rule:** the Final B candidate is the best nested OOF among F1, F2 and F6. Public is read only for direction (§5).
+- **Leak tripwire:** if an F blend's public score sits more than 0.0003 above the OOF→public line, a member is suspect. Then the members flagged by their fold-AUC spread get dropped, and the blend is refit.
+- **Slots:** F1–F7 plus B14 take the Oct 19 slots. B14 is the Final A candidate.

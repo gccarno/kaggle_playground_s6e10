@@ -18,6 +18,7 @@ test the same way.
     python scripts/blend.py stack T8 T14 T15 --write B1st --description "..."   # ...archived
     python scripts/blend.py disagree --ref T15 --all          # strength vs disagreement
     python scripts/blend.py write T8 T14 T15 --tag B1 --description "..." --notes "..."
+    python scripts/blend.py climb T8 T14 T15 P_x ... [--write F1 --description "..."]  # nested Caruana
 
 Legs are run_tags or run_ids from experiments/runs.csv.
 
@@ -212,7 +213,7 @@ def logit(p):
     return np.log(np.clip(p, 1e-7, 1 - 1e-7) / np.clip(1 - p, 1e-7, 1))
 
 
-def cmd_stack(keys, write=None):
+def cmd_stack(keys, write=None, C=1.0):
     """Control: a logistic stack on leg logits, fit on 4 folds and scored on the 5th, so
     its OOF is honest. Compared against the unfitted rank_mean on the same rows.
     With write=(tag, description, notes) the nested OOF is archived as a run; its test
@@ -225,9 +226,9 @@ def cmd_stack(keys, write=None):
     out = np.zeros(len(y))
     for f in np.unique(fold):
         tr, va = fold != f, fold == f
-        m = LogisticRegression(C=1.0, max_iter=1000).fit(X[tr], y[tr])
+        m = LogisticRegression(C=C, max_iter=1000).fit(X[tr], y[tr])
         out[va] = m.decision_function(X[va])
-    full = LogisticRegression(C=1.0, max_iter=1000).fit(X, y)
+    full = LogisticRegression(C=C, max_iter=1000).fit(X, y)
     w = full.coef_[0]
     rm = blend_oof(keys)
     d, sd = paired_delta(rm, out)
@@ -241,7 +242,65 @@ def cmd_stack(keys, write=None):
                 method="nested_logit_stack",
                 extra={"full_data_weights": {leg(k)[0]: round(float(v), 6)
                                              for k, v in zip(keys, w)},
-                       "intercept": round(float(full.intercept_[0]), 6)})
+                       "intercept": round(float(full.intercept_[0]), 6), "C": C})
+
+
+# ------------------------------------------------------------------ Caruana forward selection
+def _auc_fast(s, y):
+    """Mann-Whitney AUC from one argsort; ties in a sum of ranks are rare enough to ignore
+    while choosing. Every number that gets reported goes through auc() instead."""
+    r = np.empty(len(s))
+    r[np.argsort(s, kind="stable")] = np.arange(1, len(s) + 1)
+    n1 = y.sum()
+    return (r[y == 1].sum() - n1 * (n1 + 1) / 2) / (n1 * (len(y) - n1))
+
+
+def caruana(R, y, max_steps, tol=1e-7):
+    """Greedy forward selection WITH replacement over rank columns R (rows x legs): each step
+    adds the leg (possibly again) that most raises AUC of the running sum. The result is a
+    multiset, so the weights are integers, the same mechanism as listing a leg twice."""
+    S = np.zeros(len(y))
+    counts, best = {}, -1.0
+    for _ in range(max_steps):
+        scores = [_auc_fast(S + R[:, j], y) for j in range(R.shape[1])]
+        j = int(np.argmax(scores))
+        if scores[j] - best < tol:
+            break
+        best = scores[j]
+        S += R[:, j]
+        counts[j] = counts.get(j, 0) + 1
+    return counts
+
+
+def cmd_climb(keys, max_steps, write=None):
+    """Caruana selection with an honest score: select on 4 folds, score the 5th with that
+    multiset, rotate. The nested OOF is the decision number; the multiset refit on all
+    rows is what gets written (as rank_mean over the repeated legs)."""
+    check_aligned(keys)
+    _, y = truth()
+    fold = leg(keys[0])[3]
+    R = np.column_stack([oof_rank(k).astype(np.float32) for k in keys])
+    out = np.zeros(len(y))
+    for f in np.unique(fold):
+        tr, va = fold != f, fold == f
+        c = caruana(R[tr], y[tr], max_steps)
+        out[va] = sum(n * R[va, j] for j, n in c.items()) / sum(c.values())
+        print(f"  fold {f}: {sum(c.values())} picks of {len(c)} legs, held-out "
+              f"{AUC(out[va], y[va])():.6f}", flush=True)
+    full = caruana(R, y, max_steps)
+    multiset = [keys[j] for j, n in sorted(full.items(), key=lambda t: -t[1]) for _ in range(n)]
+    insample = auc(blend_oof(multiset))
+    print(f"nested caruana  {auc(out):.6f}   in-sample {insample:.6f}   "
+          f"({len(multiset)} picks of {len(full)} legs)")
+    print("full-data counts: " + "  ".join(f"{leg(keys[j])[0]} x{n}" for j, n in
+                                            sorted(full.items(), key=lambda t: -t[1])))
+    if write:
+        tag, description, notes = write
+        archive(multiset, tag, description, notes, oof=out, test=blend_test(multiset),
+                method="caruana_nested",
+                extra={"counts": {leg(keys[j])[0]: n for j, n in full.items()},
+                       "pool": [leg(k)[0] for k in keys], "in_sample_oof": round(insample, 6),
+                       "max_steps": max_steps})
 
 
 def cmd_disagree(ref, keys):
@@ -273,6 +332,9 @@ def cmd_write(keys, tag, description, notes):
 
 
 def archive(keys, tag, description, notes, oof, test, method, extra=None):
+    # Checkpoint 4: public members (P_ legs) may only enter Final B blends, tagged F*.
+    if any(leg(k)[0].startswith("P_") for k in keys) and not tag.startswith("F"):
+        raise SystemExit(f"{tag}: blends with public P_ legs must be tagged F* (Final B)")
     if any(r.get("run_tag") == tag for r in runlog.read_rows()):
         raise SystemExit(f"run_tag {tag!r} already exists")
     ids, y = truth()
@@ -324,6 +386,12 @@ def main():
     p.add_argument("--write", metavar="TAG", help="archive the nested stack as a run")
     p.add_argument("--description", default="")
     p.add_argument("--notes", default="")
+    p.add_argument("--C", type=float, default=1.0)
+    p = sub.add_parser("climb"); p.add_argument("legs", nargs="+")
+    p.add_argument("--max-steps", type=int, default=60)
+    p.add_argument("--write", metavar="TAG")
+    p.add_argument("--description", default="")
+    p.add_argument("--notes", default="")
     p = sub.add_parser("disagree")
     p.add_argument("--ref", required=True)
     p.add_argument("legs", nargs="*")
@@ -342,7 +410,9 @@ def main():
     elif a.cmd == "curve":
         cmd_curve(a.legs)
     elif a.cmd == "stack":
-        cmd_stack(a.legs, (a.write, a.description, a.notes) if a.write else None)
+        cmd_stack(a.legs, (a.write, a.description, a.notes) if a.write else None, a.C)
+    elif a.cmd == "climb":
+        cmd_climb(a.legs, a.max_steps, (a.write, a.description, a.notes) if a.write else None)
     elif a.cmd == "disagree":
         keys = a.legs
         if a.all:
