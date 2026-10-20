@@ -152,10 +152,10 @@ P_amanatar_forge_lgbm,5,public,,member,INFO,Public member forge_lgbm from amanat
 P_amanatar_forge_lgbm_xt,5,public,,member,INFO,Public member forge_lgbm_xt from amanatar/s6e10-forge-own-pairs: OOF 0.960903; Final B only
 P_amanatar_forge_realmlp,5,public,,member,INFO,Public member forge_realmlp from amanatar/s6e10-forge-own-pairs: OOF 0.961220; Final B only
 P_amanatar_forge_xgb,5,public,,member,INFO,Public member forge_xgb from amanatar/s6e10-forge-own-pairs: OOF 0.961047; Final B only
-P_cdeotte_ar_cat_5f,5,public,,member,INFO,Public member ar_cat_5f from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.960940; Final B only
-P_cdeotte_ar_lgb_5f,5,public,,member,INFO,Public member ar_lgb_5f from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961029; Final B only
-P_cdeotte_ar_realmlp_5f,5,public,,member,INFO,Public member ar_realmlp_5f from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.960879; Final B only
-P_cdeotte_ar_xgb_5f,5,public,,member,INFO,Public member ar_xgb_5f from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961049; Final B only
+P_cdeotte_ar_cat_5f,5,public,,member,INFO,"Public member ar_cat_5f from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.960940; Final B only; Oct 20 re-audit: near-copy of arhancanli12's original, which replaces it in the pool"
+P_cdeotte_ar_lgb_5f,5,public,,member,INFO,"Public member ar_lgb_5f from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961029; Final B only; Oct 20 re-audit: near-copy of arhancanli12's original, which replaces it in the pool"
+P_cdeotte_ar_realmlp_5f,5,public,,member,INFO,"Public member ar_realmlp_5f from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.960879; Final B only; Oct 20 re-audit: near-copy of arhancanli12's original, which replaces it in the pool"
+P_cdeotte_ar_xgb_5f,5,public,,member,INFO,"Public member ar_xgb_5f from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961049; Final B only; Oct 20 re-audit: near-copy of arhancanli12's original, which replaces it in the pool"
 P_cdeotte_bp_cat,5,public,,member,INFO,Public member bp_cat from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.960887; Final B only
 P_cdeotte_bp_lgbm,5,public,,member,INFO,Public member bp_lgbm from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.961058; Final B only
 P_cdeotte_bp_lgbm_xt,5,public,,member,INFO,Public member bp_lgbm_xt from cdeotte/s6e10-124-public-oof-and-test-predictions: OOF 0.960930; Final B only
@@ -337,3 +337,13 @@ F5,5,public,B12w,blend,FAIL,"Rank mean of B12w legs + 23 public TFMs at weight 2
 F6,5,public,F1,blend,NULL,"Cap of 25 picks never binds (climb stops at 8-21 picks), so F6 is identical to F1; not archived, no slot spent"
 F7,5,public,F2,blend,PASS,"L2 stack C=0.01 over 195 legs: OOF 0.962152, +0.000017 vs F2 (prediction within 0.00003 held); best nested OOF, Final B candidate"
 F8,5,public,F7,blend,FAIL,L2 stack C=0.01 over the 180 public members only: OOF 0.962152; F7 - F8 = +0.0000005 (prediction +0.00002..+0.0001 failed): our 15 legs add nothing to the Final B stack
+P_arhancanli_cat_5f,5,public,,member,INFO,Public member cat_5f from arhancanli12/s6e10-oof-test-predictions: OOF 0.960940; Final B only
+P_arhancanli_lgb_5f,5,public,,member,INFO,Public member lgb_5f from arhancanli12/s6e10-oof-test-predictions: OOF 0.961029; Final B only
+P_arhancanli_realmlp_5f,5,public,,member,INFO,Public member realmlp_5f from arhancanli12/s6e10-oof-test-predictions: OOF 0.960879; Final B only
+P_arhancanli_xgb_5f,5,public,,member,INFO,Public member xgb_5f from arhancanli12/s6e10-oof-test-predictions: OOF 0.961049; Final B only
+P_megayak_realmlp_v4_s123,5,public,,member,INFO,Public member realmlp_v4_s123 from megayak/s6e10-oof-library: OOF 0.961159; Final B only
+P_megayak_realmlp_v4_s42,5,public,,member,INFO,Public member realmlp_v4_s42 from megayak/s6e10-oof-library: OOF 0.961139; Final B only
+P_megayak_realmlp_v4_s7,5,public,,member,INFO,Public member realmlp_v4_s7 from megayak/s6e10-oof-library: OOF 0.961133; Final B only
+P_megayak_realmlp_v4og_s42,5,public,,member,INFO,Public member realmlp_v4og_s42 from megayak/s6e10-oof-library: OOF 0.961149; Final B only
+P_megayak_realmlp_v4og_s7,5,public,,member,INFO,Public member realmlp_v4og_s7 from megayak/s6e10-oof-library: OOF 0.961206; Final B only
+P_najiama_07_XGBoost,5,public,,member,INFO,Public member 07_XGBoost from najiama/s6e10-oof: OOF 0.960875; Final B only

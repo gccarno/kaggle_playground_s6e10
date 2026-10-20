@@ -311,7 +311,7 @@ def cmd_adopt(tag, result_dir, description, notes):
     d = Path(result_dir)
     res = json.loads((d / f"{tag}.json").read_text())
     arr = np.load(d / f"{tag}.npz")
-    legs = res["pool"] if res["method"] == "nested_logit_stack" else list(res["counts"])
+    legs = list(res["counts"]) if "counts" in res else res["pool"]
     extra = {k: v for k, v in res.items() if k not in ("tag", "method", "nested_oof")}
     print(f"{tag}: {res['method']}, nested OOF {res['nested_oof']:.6f} (burst)")
     archive(legs, tag, description, notes, oof=arr["oof"], test=arr["test"],

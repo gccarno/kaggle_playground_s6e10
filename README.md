@@ -1338,3 +1338,27 @@ No public OOF or test artifact is used.
 - **TI1 (batch 27) fails on budget.** The kernel hit the 12 h limit inside fold 0. Validation took 236 min for 140k rows at a 250k context, and the 300k test rows would need about 500 min. The 90 min/fold projection came from the 17k-context smoke: cost scales with context × rows, not rows alone. The pre-registered 150k fallback would still need about 37 T4-hours, above this week's quota, so it isn't launched. The axis stays closed unless the user reopens it at a much smaller context. TI0s is renamed from K0s on both machines.
 - **Slots, Oct 20 23:15 UTC:** queued F7, F2, F1, F3, then auto-fill (B10, Z2, Z1, Q5, Q4, Q3). Oct 19's 10 went to B14 (public **0.96125**, our best so far) plus 9 replicates.
 - **Process note:** F8's pre-registration was written to the README before F8 ran but committed after, in this same entry's commit.
+
+### Leaderboard review (Oct 20 06:45 UTC)
+- **Board:** 2,442 teams. #1 0.96341, #2 0.96326, #3–6 0.9622–0.9624. About 85 teams are at 0.9620 or above, 38 of them at exactly 0.96206, which is one public notebook. We're about **#680 at 0.96125** (B14).
+- **OOF→public fit** (131 runs): slope 0.973, residual σ 0.00034. Our blends land about **0.0005 below their OOF** (B14 0.961730 → 0.96125), while honest public stacks report CV ≈ LB (najiama CV 0.96208, LB 0.96206).
+- **Correction to batch 28's tripwire:** given those public stacks, an F7 score near 0.9621 is normal, not a sign of leakage. The tripwire moves to **public − OOF > +0.0003**, so F7 above 0.9625 is suspect.
+- **What F7's score will tell us:** 0.9617 means the public split is harder for every model. 0.9621 means the 0.0005 gap was specific to our own models.
+
+**Batch 29, a bigger library and non-linear meta-stackers (pre-registered Oct 20, before any of these runs).**
+- **New import** (from the same audit, re-run on oci-burst over all 246 pairs):
+  - megayak's parquet library and arhancanli12's library, converted to `.npy` in a throwaway uv environment with pyarrow, so the project's packages are unchanged. Both ship fold columns, and **both match our partition exactly**.
+  - goodpjw2008's TabPFN-member CSVs, and najiama's one non-blend member (07 XGBoost).
+  - **Net:** 10 new kept members, 186 in total. arhancanli12's 4 originals replace cdeotte's 4 re-hosts (those `P_cdeotte_ar_*` are now near-copies and leave the pool). The new information is megayak's 5 RealMLP-v4 seeds (up to 0.961206) and najiama's XGBoost. Every goodpjw2008 and other megayak column is a near-copy.
+  - dariushafshar's golem library still fails to download. Submission-only datasets (no OOF) are excluded: they can't be validated or stacked honestly, and they're already tuned to the public LB.
+- **New tool `scripts/burst_meta.py`:** a nested LightGBM meta-stacker (15 leaves, lr 0.03, L2 10, min leaf 200). For each outer fold it trains on three folds, early-stops on the fourth, and predicts the outer fold. Test = mean of the five models.
+
+| Tag | Pool | Method | Mechanism | Prediction (nested OOF) |
+|---|---|---|---|---|
+| F9 | 15 own + 186 public | L2 logit stack, C = 0.01 (F7's method) | 6 new partly-independent members | F7 + 0.000000 to +0.00003 |
+| F10 | same | LightGBM meta on the 201 logits | non-linear trust: e.g. believe the TFMs where the GBDTs disagree | F9 − 0.0001 to F9 + 0.0001 |
+| F11 | same + 21 raw columns | LightGBM meta | trust that depends on the region of feature space | F10 + 0.00000 to +0.00010 |
+| F12 | — | rank mean of F9 and the better of F10/F11 | stacks with different inductive biases make partly independent errors | ≥ max of the two, by up to +0.00005 |
+
+- **Gate (Final B):** the best nested OOF becomes the Final B candidate if it beats F7 by more than the paired SD of their difference. Otherwise F7 stays.
+- **Slots:** every F9–F12 run that beats F7 is queued for Oct 21 in OOF order.
