@@ -13,6 +13,10 @@ gets the same feature blend.cmd_stack builds.
     python scripts/pack_pool.py OUTDIR KEY [KEY ...]
     -> OUTDIR/oof.npy (n_train x m), test.npy (n_test x m), meta.json (tags, run_ids),
        truth.npz (y, fold, train ids, test ids)
+
+A public member (P_ tag) whose imported CSVs are not on this machine is read from its raw
+download under data/public/ instead (public_lib.py fetch), and must hash to the oof_sha
+the audit recorded, so a VM re-download of a newer dataset version cannot slip in.
 """
 import json, sys
 from pathlib import Path
@@ -30,6 +34,17 @@ def score(p):
     return (logit(p) if p.min() >= 0 and p.max() <= 1 else p).astype(np.float32)
 
 
+def raw_public(tag):
+    import hashlib
+    from public_lib import MANIFEST, N_TEST, N_TRAIN, PUB, load
+    man = pd.read_csv(MANIFEST)
+    m = man[(man["tag"] == tag) & man["keep"]].iloc[0]
+    o, t = load(PUB / m.oof_file, N_TRAIN), load(PUB / m.test_file, N_TEST)
+    if hashlib.sha256(o.tobytes()).hexdigest()[:16] != m.oof_sha:
+        raise SystemExit(f"{tag}: raw OOF does not hash to the audited oof_sha (new version?)")
+    return o, t
+
+
 def main():
     out, keys = Path(sys.argv[1]), sys.argv[2:]
     out.mkdir(parents=True, exist_ok=True)
@@ -39,6 +54,12 @@ def main():
     O = T = None
     for j, r in enumerate(rows):
         d = REPO_ROOT / r["preds_dir"]
+        if r["run_tag"].startswith("P_") and not d.exists():
+            assert fold is not None, "list an own leg first: it supplies the fold and id order"
+            po, pt = raw_public(r["run_tag"])
+            O[:, j], T[:, j] = score(po), score(pt)
+            print(f"{j + 1}/{len(rows)} {r['run_tag']} (raw)", flush=True)
+            continue
         o = pd.read_csv(next(d.glob("oof_proba_*.csv")))
         t = pd.read_csv(next(d.glob("test_proba_*.csv")))
         if fold is None:
