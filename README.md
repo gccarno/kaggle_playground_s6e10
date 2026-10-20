@@ -1310,3 +1310,31 @@ No public OOF or test artifact is used.
 - **Tag rename:** `K1` was already taken (Phase 2's CatBoost on raw features), so the TabICL runs are logged as **TI0s** (`446cbf82`) and **TI1** (`845df7a2`). The kernel slugs stay `s6e10-k0s`/`s6e10-k1`, and the adopt crons rename the rows by run_id. **TI0s passes:** the install guard held, folds 0.9576/0.9580 at 5% rows. Test prediction takes 4.2 min per 300k rows at a 17k context, so TI1 at 250k projects to about 90 min per fold, inside the 12 h session.
 - **F5 result: it fails.** OOF 0.961342, which is −0.000376 against B12w. The prediction was 0.9618–0.9620. Equal weight on 23 public TFMs of mixed strength (mitra2 0.9571, causilo 0.9583, among others) dilutes the strong legs, so Final B needs selection (F1) or fitting (F2), not an unfitted mean.
 - **F1 and F2 were stopped** before finishing, because the laptop ran out of memory. Each holds about 195 legs × 1M rows in memory. Neither wrote a run.
+
+**Batch 28 rerun on oci-burst (Oct 20 01:20 UTC).** The user brought up oci-burst (16 vCPU, 62 GB).
+- **Pool:** `pack_pool.py` packed the 195 legs into float32 logit columns. The public members were read from their raw downloads, and every one hashed to its audited `oof_sha`.
+- **Blends:** `burst_blends.py` ran F1, F2, F3, F6 and F7 in parallel. The stacks took 2.5 min each, the climbs 23–27 min.
+
+**F8 pre-registration (Oct 20, after F1–F7 were scored and before F8 runs).**
+- **Why:** F3 says our 15 legs are worth nothing to the climb (F1 − F3 = −0.000005), yet the stack gives W4, Z2 and X3 weights of +0.05 to +0.07. F8 prices our legs in the method that wins.
+- **F8:** F7's stack (C = 0.01) on the 180 public members only.
+- **Prediction:** F7 − F8 between +0.00002 and +0.0001. If it's ≤ 0, our legs add nothing to Final B.
+
+**Batch 28 result (Oct 20): a fitted stack over the public library is the Final B candidate, and our legs add nothing to it.**
+
+| Tag | run_id | Nested OOF | vs B12w | Prediction | Verdict |
+|---|---|---|---|---|---|
+| F7 | `4398fb27` | **0.962152** | +0.000434 | within 0.00003 of F2 | pass, **Final B candidate** |
+| F8 | `b8a4fdd9` | 0.962152 | +0.000434 | F7 − F8 = +0.00002…+0.0001 | fail: F7 − F8 = +0.0000005 |
+| F2 | `9967474a` | 0.962135 | +0.000417 | within 0.00005 of F1 | missed, in its favour (+0.0002) |
+| F3 | `35ae3ef3` | 0.961943 | +0.000225 | F1 − F3 > 0 | fail: −0.000005 |
+| F1 | `fe775e2e` | 0.961938 | +0.000220 | 0.96200–0.96215 | fail |
+| F6 | — | = F1 | — | within 0.00002 of F1 | NULL: the 25-pick cap never binds (the climb stops at 8–21 picks), so not archived |
+
+- **Stack beats climb by +0.0002.** The climb picks 8–9 legs with integer weights. The stack fits all 195, including negative weights: cdeotte's `causilo` gets −0.23 against `tabfm` +0.31. That subtracts shared error, which a rank mean of positive picks can't do. Finding 18 (rank mean ≥ stack) was measured on 11 correlated legs of our own and doesn't carry over to 195 diverse ones.
+- **C hardly matters:** C = 1 and C = 0.01 agree to within 0.00005 in every fold. With 700k rows per fit, 195 coefficients are well determined, so this isn't overfitting.
+- **Our legs are worth about zero in Final B.** Both F3 (climb) and F8 (stack) match their twins that include our legs. The stack does give W4, Z2 and X3 weights of +0.05 to +0.07, but those weights only replace public members that carry the same information. Final A (ours-only) remains the hedge if the public library turns out to leak.
+- **Leak tripwire for tonight:** with F7 at 0.96215 OOF, our OOF→public line predicts about 0.9616–0.9617 public. A public score above about 0.9620 would trigger the §8 batch 28 tripwire.
+- **TI1 (batch 27) fails on budget.** The kernel hit the 12 h limit inside fold 0. Validation took 236 min for 140k rows at a 250k context, and the 300k test rows would need about 500 min. The 90 min/fold projection came from the 17k-context smoke: cost scales with context × rows, not rows alone. The pre-registered 150k fallback would still need about 37 T4-hours, above this week's quota, so it isn't launched. The axis stays closed unless the user reopens it at a much smaller context. TI0s is renamed from K0s on both machines.
+- **Slots, Oct 20 23:15 UTC:** queued F7, F2, F1, F3, then auto-fill (B10, Z2, Z1, Q5, Q4, Q3). Oct 19's 10 went to B14 (public **0.96125**, our best so far) plus 9 replicates.
+- **Process note:** F8's pre-registration was written to the README before F8 ran but committed after, in this same entry's commit.

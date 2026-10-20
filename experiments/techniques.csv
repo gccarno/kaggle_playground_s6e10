@@ -37,5 +37,5 @@ Random forest,tree-structure,lgb_params.boosting_type,R1,all,Average many deep t
 Extra-trees,tree-structure,lgb_params.extra_trees,R2,all,"Pick split thresholds at random, which smooths the step functions.","R2: -0.00016 solo, ADD -0.000006."
 Linear leaves,tree-structure,lgb_params.linear_tree,R3,numerics,Fit a linear model inside each leaf instead of a constant.,"R3: -0.00019 solo, ADD -0.000013."
 CatBoost tree shape,tree-structure,cat_params.grow_policy,R4 R5,all,Grow asymmetric (Depthwise) or leaf-wise (Lossguide) trees instead of oblivious ones.,"R4/R5: -0.00028 solo, ADD -0.000017 (finding 22)."
-TabICL v2,tfm,learner.tabicl,TI1,all 21,In-context learning with column-then-row attention over a 250k-row stratified context per fold.,TI0s smoke passes on T4; TI1 running.
+TabICL v2,tfm,learner=tabicl,TI1,all 21,In-context learning with column-then-row attention over a 250k-row stratified context per fold.,TI0s smoke passes on T4; TI1 timed out in fold 0 (about 12.4 T4-hours per fold at a 250k context).
 Public members,public,learner.public,F1 F2 F3,n/a,Public OOF/test pairs imported as pseudo-runs for Final B blends.,180 kept of 214 after near-copy and meta audit.

@@ -20,5 +20,5 @@ family,closed,,Raw-feature family points (xgb/cat/glm/MLP smoke) are near LightG
 features,closed,"5,20","Batch 22 closed every untried encoder empirically: quantization, window TE, binned TE, delay difference, one-hot are all null on T24."
 one-hot,closed,20,One-hot of the categoricals and ratings costs lgb 0.0001 (Q5): native categorical splits group levels; indicators can only peel one off at a time.
 tree-structure,closed,22,"Same inputs, different tree growth (rf, extra-trees, linear leaves, asymmetric CatBoost): all weaker solo and all negative ADD. A view is its inputs, not its tree shape."
-public,open,,"Checkpoint 4: public OOF/test pairs enter Final B only (180 audited members, manifest). Final A stays ours-only."
-tfm-tabicl,open,,Our own TabICL v2 leg (TI1) for Final A: a second in-context family next to TabPFN.
+public,open,,"Final B only. 180 audited members. Nested L2 stack F7 0.962152 (+0.00043 vs B12w); the public-only stack F8 ties it, so our legs add nothing there."
+tfm-tabicl,closed,,TI1 did not fit the GPU budget: one fold at a 250k context needs ~12.4 T4-hours (62 h for 5 folds). Not relaunched; public TabICL members carry the family in Final B.
