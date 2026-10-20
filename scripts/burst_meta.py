@@ -8,7 +8,12 @@ model trains on three of the other four folds, early-stops on the fourth, and pr
 outer fold, which therefore never touched training or stopping. The test prediction is the
 mean of the five outer models' test probabilities.
 
-    python burst_meta.py POOLDIR OUTDIR TAG {logits|logits+raw} [TRAIN_CSV TEST_CSV]
+    python burst_meta.py POOLDIR OUTDIR TAG {logits|logits+raw|resid+raw} [TRAIN_CSV TEST_CSV]
+
+resid+raw (F13): the L2 logit stack (C = 0.01) is fit on the three training folds and its
+logit becomes LightGBM's init_score, so the trees (lr 0.01, 7 leaves) only learn where the
+linear stack is systematically wrong, from the logits plus the raw columns. The stopping
+fold is outside the stack's fit, so early stopping stays honest.
 """
 import json, sys, time
 from pathlib import Path
@@ -35,7 +40,7 @@ def raw(train_csv, test_csv, ids, test_ids):
     cols = [c for c in te.columns if c != "id"]
     both = pd.concat([tr[cols], te[cols]], ignore_index=True)
     for c in cols:
-        if both[c].dtype == object:
+        if not pd.api.types.is_numeric_dtype(both[c]):
             both[c] = both[c].astype("category").cat.codes
     X = both.to_numpy(np.float32)
     return X[:len(tr)], X[len(tr):], cols
@@ -50,7 +55,8 @@ def main():
     t = np.load(pool / "truth.npz")
     y, fold, ids, test_ids = t["y"].astype(int), t["fold"], t["ids"], t["test_ids"]
     names = json.loads((pool / "meta.json").read_text())["tags"]
-    if mode == "logits+raw":
+    n_pool = O.shape[1]
+    if mode in ("logits+raw", "resid+raw"):
         Rtr, Rte, rc = raw(sys.argv[5], sys.argv[6], ids, test_ids)
         O, T, names = np.hstack([O, Rtr]), np.hstack([T, Rte]), names + [f"raw:{c}" for c in rc]
     folds = np.unique(fold)
@@ -59,13 +65,28 @@ def main():
     for i, f in enumerate(folds):
         stop = folds[(i + 1) % len(folds)]
         tr, es, va = (fold != f) & (fold != stop), fold == stop, fold == f
-        m = lgb.train(PARAMS, lgb.Dataset(O[tr], y[tr]), 3000,
-                      valid_sets=[lgb.Dataset(O[es], y[es])],
-                      callbacks=[lgb.early_stopping(100, verbose=False)])
-        oof[va] = m.predict(O[va], num_iteration=m.best_iteration)
-        test += m.predict(T, num_iteration=m.best_iteration) / len(folds)
+        if mode == "resid+raw":
+            from sklearn.linear_model import LogisticRegression
+            lr = LogisticRegression(C=0.01, max_iter=2000).fit(O[tr, :n_pool], y[tr])
+            b = {k: lr.decision_function(X[:, :n_pool]) for k, X in
+                 (("tr", O[tr]), ("es", O[es]), ("va", O[va]), ("te", T))}
+            prm = {**PARAMS, "learning_rate": 0.01, "num_leaves": 7}
+            m = lgb.train(prm, lgb.Dataset(O[tr], y[tr], init_score=b["tr"]), 3000,
+                          valid_sets=[lgb.Dataset(O[es], y[es], init_score=b["es"])],
+                          callbacks=[lgb.early_stopping(200, verbose=False)])
+            it = m.best_iteration
+            oof[va] = b["va"] + m.predict(O[va], num_iteration=it, raw_score=True)
+            test += 1 / (1 + np.exp(-(b["te"] + m.predict(T, num_iteration=it, raw_score=True)))) / len(folds)
+            info[int(f)] = {"stack_only": auc(b["va"], y[va])}
+        else:
+            m = lgb.train(PARAMS, lgb.Dataset(O[tr], y[tr]), 3000,
+                          valid_sets=[lgb.Dataset(O[es], y[es])],
+                          callbacks=[lgb.early_stopping(100, verbose=False)])
+            oof[va] = m.predict(O[va], num_iteration=m.best_iteration)
+            test += m.predict(T, num_iteration=m.best_iteration) / len(folds)
         gain += m.feature_importance("gain")
-        info[int(f)] = {"best_iter": m.best_iteration, "held_out": auc(oof[va], y[va])}
+        info[int(f)] = {**info.get(int(f), {}), "best_iter": m.best_iteration,
+                        "held_out": auc(oof[va], y[va])}
         print(f"{tag} fold {f}: {info[int(f)]}", flush=True)
     top = np.argsort(-gain)[:25]
     res = {"tag": tag, "method": f"nested_lgb_meta[{mode}]", "nested_oof": auc(oof, y),

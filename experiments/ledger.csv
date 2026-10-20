@@ -347,3 +347,9 @@ P_megayak_realmlp_v4_s7,5,public,,member,INFO,Public member realmlp_v4_s7 from m
 P_megayak_realmlp_v4og_s42,5,public,,member,INFO,Public member realmlp_v4og_s42 from megayak/s6e10-oof-library: OOF 0.961149; Final B only
 P_megayak_realmlp_v4og_s7,5,public,,member,INFO,Public member realmlp_v4og_s7 from megayak/s6e10-oof-library: OOF 0.961206; Final B only
 P_najiama_07_XGBoost,5,public,,member,INFO,Public member 07_XGBoost from najiama/s6e10-oof: OOF 0.960875; Final B only
+F9,5,public,F7,blend,INFO,"L2 stack C=0.01 over 15 own + 186 public: OOF 0.962155, F7 + 0.000003 (prediction 0..+0.00003 held); 6 new members nearly redundant"
+F10,5,public,F9,blend,FAIL,"LightGBM meta on 201 logits: OOF 0.961924, F9 - 0.00023 (prediction +-0.0001 failed); trees chop calibrated logits"
+F11,5,public,F10,blend,FAIL,LightGBM meta on logits + raw columns: OOF 0.961828 (prediction >= F10 failed)
+F12,5,public,F9,blend,FAIL,Rank mean of F9 and F10: OOF 0.962132 (prediction >= F9 failed)
+F14,5,public,F9,blend,FAIL,"Leak hedge: stack over 15 own + 25 fold-verified public members: OOF 0.961889 (prediction 0.9619-0.9621, missed by 0.00001); +0.00016 over B14"
+F13,5,public,F9,blend,NULL,"L2 stack + residual LightGBM on logits + raw: 1-458 trees, per-fold +-0.00003; OOF 0.962103 (3-fold base); no residual structure"

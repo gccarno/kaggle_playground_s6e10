@@ -1362,3 +1362,42 @@ No public OOF or test artifact is used.
 
 - **Gate (Final B):** the best nested OOF becomes the Final B candidate if it beats F7 by more than the paired SD of their difference. Otherwise F7 stays.
 - **Slots:** every F9–F12 run that beats F7 is queued for Oct 21 in OOF order.
+
+**Batch 29 partial results and the F13 pre-registration (Oct 20, after F9–F11, before F12/F13).**
+- **F9: 0.962155**, F7 + 0.000003. Inside the predicted range (+0 to +0.00003). The six new members are nearly redundant.
+- **F10: 0.961924**, F9 − 0.00023. **Fails** (predicted within ±0.0001). LightGBM as the meta-model stops after 190–300 trees and loses to the linear stack. The member logits are already calibrated, so a weighted sum is close to the right shape, and trees cut each one into steps.
+- **F11: 0.961828**, F10 − 0.0001. **Fails** (predicted ≥ F10). Adding the raw columns to a tree meta-model costs more.
+- **F12 (unchanged, pre-registered):** rank mean of F9 and F10, the better of the two LightGBM metas.
+- **F13, new: residual boosting.** The L2 stack (C = 0.01) is fit on the three training folds, and its logit is LightGBM's `init_score` (lr 0.01, 7 leaves, early stop 200, on logits + raw columns). Early stopping uses a fold outside the stack's fit.
+  - **Mechanism:** keep the linear structure, and let the trees learn only the regions where it is systematically wrong.
+  - **Prediction:** F9 + 0.00000 to +0.00006. If early stopping lands at about 0 trees, there's no residual structure (NULL).
+
+**Batch 29 results: F12 and F13. F14 pre-registered (Oct 20, before F14 runs).**
+- **F12: 0.962132.** **Fails** (predicted ≥ F9). The tree meta drags the rank mean down.
+- **F13: 0.962103, NULL.** Residual boosting stopped at 1–458 trees, and per-fold changes stayed within ±0.00003 of the stack alone. Its base is a 3-fold stack, which is why it sits below F9. The linear stack has no regional errors left for trees to fix.
+- **Conclusion:** the L2 stack is at this library's ceiling (about 0.96215). F9's +0.000003 over F7 is noise, so **F7 stays the Final B candidate**. No more GPU: Z3 already gave TabPFN the teacher, a TabPFN run costs about 8 T4-hours, and our TFM legs carry no weight in Final B.
+- **F14 (leak hedge):** F7's method (L2 stack, C = 0.01) on our 15 legs plus the **25 public members whose folds we verified**:
+  - the fold-file libraries (koumeimaki, megayak, arhancanli12);
+  - cdeotte's re-hosts that are near-copies of those members.
+  - **Mechanism:** a member whose OOF was contaminated in-fold would look strong in CV and fail on private. The stack would then overweight it, and nested CV cannot detect it. F14 drops the 161 unverifiable members.
+  - **Prediction:** 0.9619–0.9621, between B14 and F9.
+  - **Use:** if F7's public score comes in > 0.0003 above its OOF (the tripwire), F14 replaces it as Final B.
+
+**Batch 29 result (Oct 20): F14 and leave-one-library-out.**
+- **F14: 0.961889** (`a975808f`). The prediction (0.9619–0.9621) missed by 0.00001. With only fold-verified members it's still +0.00016 over B14, so that's what Final B is worth without trusting any unverifiable member.
+- **Leave-one-library-out** (F9's stack, information only, no runs written):
+
+| Library dropped | Members | Δ nested OOF |
+|---|---|---|
+| goodpjw2008 extra members | 15 | −0.000038 |
+| cdeotte 124-library | 117 | −0.000036 |
+| cdeotte TFM | 11 | −0.000026 |
+| amanatar | 6 | −0.000024 |
+| kagankoral | 17 | −0.000023 |
+| sachith7 | 2 | −0.000014 |
+| koumeimaki | 7 | −0.000008 |
+| dmitriykolmikov, arhancanli12 | 1, 4 | −0.000005 |
+| megayak, najiama, **our 15** | 5, 1, 15 | −0.000001 to 0 |
+
+- **What it means:** Final B's +0.0004 comes from breadth. No library carries more than 0.00004, so a leak hidden in any one library couldn't produce the gain. Our own legs carry nothing.
+- **Slots, Oct 20 (queued in priority order):** F7, F14, F9, F2, F1, F3, F10, F13, F12, F11. 79 eligible runs remain banked for auto-fill through Oct 29.
