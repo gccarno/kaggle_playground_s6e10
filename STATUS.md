@@ -1,41 +1,35 @@
 # S6E10 status: start here
 
-*Rewritten in place after every batch (last: 2026-10-20 08:30 UTC, batch 29 done). For the visual version, see the dashboard (tabs **Experiments**, **Features**, **EDA**): run `python scripts/dashboard.py`, which writes `reports/dashboard.html` and is published as the "S6E10 Experiment Board" artifact. README.md is the contract and FINDINGS.md has the explanations. This page only orients.*
+*Rewritten in place after every batch. Last update: 2026-10-21 00:50 UTC, batch 29's public scores are in. For the visual version, see the dashboard (tabs **Experiments**, **Features**, **EDA**). It comes from `python scripts/dashboard.py`, which writes `reports/dashboard.html`, published as the "S6E10 Experiment Board" artifact. README.md is the contract and FINDINGS.md has the explanations. This page only orients.*
 
 ## Where we are
-- **Board (Oct 20 06:45 UTC):** 2,442 teams. #1 0.96341, #3–6 0.9622–0.9624, and about 85 teams at ≥ 0.9620 (38 tied at 0.96206, one public notebook). **Us: about #680 at 0.96125 (B14).**
+- **Board (Oct 20 06:45 UTC):** 2,442 teams. #1 is at 0.96341, #3–6 at 0.9622–0.9624, and about 85 teams are at ≥ 0.9620. We were about #680 at 0.96125 (B14). **F7 at 0.96178 is now our best public score** and should land around the 0.9618 band.
 - **Final A (ours-only): B14.** OOF 0.961730, public 0.96125.
-- **Final B (public library): F7.** A nested L2 logit stack over 15 own + 180 public members: **OOF 0.962152, +0.00043.** In batch 29 it held up against everything we tried:
+- **Final B (public library): F7.** OOF 0.962152, **public 0.96178** (public − OOF −0.00037: the normal band, so the tripwire didn't fire).
 
-| Tried | Nested OOF | Read |
-|---|---|---|
-| F9: same stack, 186 public (6 new) | 0.962155 | the new members are redundant |
-| F10/F11: LightGBM as meta-model | 0.96192 / 0.96183 | trees lose to the linear stack |
-| F13: stack + residual LightGBM | NULL | no regional errors left |
-| F14: only fold-verified members (leak hedge) | 0.961889 | +0.00016 over B14 without trusting any unverified member |
-| Leave-one-library-out | −0.00004 at most | the lift is breadth; no library dominates, ours adds 0 |
+## What the Oct 20 slots told us
+| Run | OOF | Public | Public − OOF |
+|---|---|---|---|
+| F2 / **F7** / F9 / F13 (L2 stacks) | 0.96210–0.96216 | 0.96178–0.96179 | −0.00032 to −0.00038 |
+| F12 (stack + tree meta) | 0.962132 | 0.96171 | −0.00042 |
+| F10 / F11 (LightGBM meta) | 0.96192 / 0.96183 | 0.96152 | about −0.0004 |
+| F14 (fold-verified members only) | 0.961889 | 0.96149 | −0.00040 |
+| F1 / F3 (climbs) | 0.96194 | 0.96142 / 0.96147 | −0.0005 |
+| B14 / B12w (ours only) | 0.96173 / 0.96172 | 0.96125 / 0.96122 | −0.0005 |
 
-- **GPU:** none planned. TI1 (TabICL) failed on budget, TabPFN runs cost about 8 h, and our TFM legs carry no weight in Final B.
+- **No sign of a leak.** Stacks that use public members keep the same public − OOF offset as our own blends. A leaked member would push public above the line.
+- **The OOF gains transfer.** F7 − B14 is +0.00042 on OOF and +0.00053 on public. The OOF ranking of the stacks holds on public to about 0.00001.
 
-## Priority queue for submissions
-**Tonight, Oct 20 23:15 UTC (queued on oci-free, in this order):**
-1. **F7:** the Final B candidate. Its public score answers the offset question (see below).
-2. **F14:** the leak hedge.
-3. **F9, F2:** stack variants, i.e. the noise floor between near-identical stacks.
-4. **F1, F3:** climbs, the selection-vs-fitting comparison on public.
-5. **F10, F13, F12, F11:** meta-stacker variants.
+## Decision for the user: the final pair
+- **Recommended: F7 + B14.** F7 is our best on both OOF and public. B14 keeps one entry fully ours-only (§5.2) in case a public library is contaminated in a way public can't show.
+- **Alternative: F7 + F14.** F14 is +0.00024 on public over B14, but it uses 25 public members (fold-verified). It's a stronger second entry, though not an ours-only one.
 
-**Oct 21–28:** auto-fill takes the 79 banked runs (calibration points). Anything new jumps the queue:
-- a re-stack if a new public OOF library appears (check daily; 2 min on burst);
-- F14 to the front if the tripwire fires.
-
-**Oct 29–31:** auto-fill stops (by design). Slots go only to hand-picked finalists.
-
-## Decision after tonight's scores
-- **Normal:** F7's public − OOF lies between −0.0008 and +0.0003. Our blends ran −0.0005 and honest public stacks about 0.
-  - **Proposed final pair:** **F7 + B14**, or **F7 + F14** (F14 is a stronger hedge than B14 but uses verified public members). That's the user's call: §5 says Final A is ours-only.
-- **Tripwire:** public − OOF > +0.0003. F14 becomes Final B, and we drop the most suspect library and refit.
+## Submission queue
+- **Oct 21–28:** auto-fill takes the 79 banked runs (calibration points). Anything new jumps the queue: re-stack if a new public OOF library appears (check daily; 2 min on burst).
+- **Oct 29–31:** auto-fill stops (by design). Slots go to the two finalists only.
 
 ## Infra
-- **oci-burst is up** (16 vCPU / 62 GB) and holds the 201-leg pool (`~/s6e10/pool201`). It's needed only for re-stacks. **Proposal:** tear it down after Oct 21's read unless a new library appears, and by Oct 29 at the latest. A `terraform apply` needs the user's OK.
-- **Cleanup:** remove the TabICL adopt crons on oci-free after today. Remove the scheduler cron after Oct 31.
+- **oci-burst is up** (16 vCPU / 62 GB) and holds the 201-leg pool (`~/s6e10/pool201`). It's now also the build box for the kaggle-harness tests, so keep it until **Oct 29**. Tearing it down then needs the user's OK for the `terraform apply`.
+- **Cleanup:**
+  - remove the TabICL adopt crons on oci-free (now due);
+  - remove the scheduler cron after Oct 31.

@@ -330,12 +330,12 @@ P_sachith7_xgb_A_auxall,5,public,,member,INFO,Public member xgb_A_auxall from sa
 B14,4b,blend,B12w,blend,INFO,"B12w + Z4 at TFM weight 2: OOF 0.961730 (+0.000012, marginal), public 0.96125 (best so far); Final A candidate"
 TI0s,5,tfm,,smoke,PASS,"TabICL v2 smoke on a T4, 5% rows, 2 folds: OOF 0.957738; install guard and checkpoint path work"
 TI1,5,tfm,Z1,probe,FAIL,Kernel hit the 12 h limit inside fold 0: 140k val rows took 236 min at a 250k context (projected from the 17k-context smoke; cost scales with context x rows). About 62 T4-hours for the full run; no OOF
-F1,5,public,B12w,blend,FAIL,"Nested Caruana over 15 own + 180 public: OOF 0.961938 (prediction 0.96200-0.96215 missed); selects 8 distinct legs, 7 public + Z2"
-F2,5,public,F1,blend,PASS,"Nested L2 logit stack C=1 over 195 legs: OOF 0.962135, +0.000417 vs B12w; beats the climb by +0.0002 (prediction 'within 0.00005 of F1' missed in its favour)"
-F3,5,public,F1,blend,FAIL,Climb over 180 public only: OOF 0.961943; F1 - F3 = -0.000005 (prediction +0.00002..+0.00008 failed): the climb finds no use for our legs
+F1,5,public,B12w,blend,FAIL,"Nested Caruana over 15 own + 180 public: OOF 0.961938 (prediction 0.96200-0.96215 missed); selects 8 distinct legs, 7 public + Z2; public 0.96142"
+F2,5,public,F1,blend,PASS,"Nested L2 logit stack C=1 over 195 legs: OOF 0.962135, +0.000417 vs B12w; beats the climb by +0.0002 (prediction 'within 0.00005 of F1' missed in its favour); public 0.96179"
+F3,5,public,F1,blend,FAIL,Climb over 180 public only: OOF 0.961943; F1 - F3 = -0.000005 (prediction +0.00002..+0.00008 failed): the climb finds no use for our legs; public 0.96147
 F5,5,public,B12w,blend,FAIL,"Rank mean of B12w legs + 23 public TFMs at weight 2: OOF 0.961342, -0.000376 vs B12w (prediction 0.9618-0.9620 failed): weak TFMs dilute"
 F6,5,public,F1,blend,NULL,"Cap of 25 picks never binds (climb stops at 8-21 picks), so F6 is identical to F1; not archived, no slot spent"
-F7,5,public,F2,blend,PASS,"L2 stack C=0.01 over 195 legs: OOF 0.962152, +0.000017 vs F2 (prediction within 0.00003 held); best nested OOF, Final B candidate"
+F7,5,public,F2,blend,PASS,"L2 stack C=0.01 over 195 legs: OOF 0.962152, +0.000017 vs F2 (prediction within 0.00003 held); best nested OOF, Final B candidate; public 0.96178 (public-OOF -0.00037, normal band): Final B"
 F8,5,public,F7,blend,FAIL,L2 stack C=0.01 over the 180 public members only: OOF 0.962152; F7 - F8 = +0.0000005 (prediction +0.00002..+0.0001 failed): our 15 legs add nothing to the Final B stack
 P_arhancanli_cat_5f,5,public,,member,INFO,Public member cat_5f from arhancanli12/s6e10-oof-test-predictions: OOF 0.960940; Final B only
 P_arhancanli_lgb_5f,5,public,,member,INFO,Public member lgb_5f from arhancanli12/s6e10-oof-test-predictions: OOF 0.961029; Final B only
@@ -347,9 +347,9 @@ P_megayak_realmlp_v4_s7,5,public,,member,INFO,Public member realmlp_v4_s7 from m
 P_megayak_realmlp_v4og_s42,5,public,,member,INFO,Public member realmlp_v4og_s42 from megayak/s6e10-oof-library: OOF 0.961149; Final B only
 P_megayak_realmlp_v4og_s7,5,public,,member,INFO,Public member realmlp_v4og_s7 from megayak/s6e10-oof-library: OOF 0.961206; Final B only
 P_najiama_07_XGBoost,5,public,,member,INFO,Public member 07_XGBoost from najiama/s6e10-oof: OOF 0.960875; Final B only
-F9,5,public,F7,blend,INFO,"L2 stack C=0.01 over 15 own + 186 public: OOF 0.962155, F7 + 0.000003 (prediction 0..+0.00003 held); 6 new members nearly redundant"
-F10,5,public,F9,blend,FAIL,"LightGBM meta on 201 logits: OOF 0.961924, F9 - 0.00023 (prediction +-0.0001 failed); trees chop calibrated logits"
-F11,5,public,F10,blend,FAIL,LightGBM meta on logits + raw columns: OOF 0.961828 (prediction >= F10 failed)
-F12,5,public,F9,blend,FAIL,Rank mean of F9 and F10: OOF 0.962132 (prediction >= F9 failed)
-F14,5,public,F9,blend,FAIL,"Leak hedge: stack over 15 own + 25 fold-verified public members: OOF 0.961889 (prediction 0.9619-0.9621, missed by 0.00001); +0.00016 over B14"
-F13,5,public,F9,blend,NULL,"L2 stack + residual LightGBM on logits + raw: 1-458 trees, per-fold +-0.00003; OOF 0.962103 (3-fold base); no residual structure"
+F9,5,public,F7,blend,INFO,"L2 stack C=0.01 over 15 own + 186 public: OOF 0.962155, F7 + 0.000003 (prediction 0..+0.00003 held); 6 new members nearly redundant; public 0.96178"
+F10,5,public,F9,blend,FAIL,"LightGBM meta on 201 logits: OOF 0.961924, F9 - 0.00023 (prediction +-0.0001 failed); trees chop calibrated logits; public 0.96152"
+F11,5,public,F10,blend,FAIL,LightGBM meta on logits + raw columns: OOF 0.961828 (prediction >= F10 failed); public 0.96152
+F12,5,public,F9,blend,FAIL,Rank mean of F9 and F10: OOF 0.962132 (prediction >= F9 failed); public 0.96171
+F14,5,public,F9,blend,FAIL,"Leak hedge: stack over 15 own + 25 fold-verified public members: OOF 0.961889 (prediction 0.9619-0.9621, missed by 0.00001); +0.00016 over B14; public 0.96149 (-0.00040), +0.00024 over B14 on public"
+F13,5,public,F9,blend,NULL,"L2 stack + residual LightGBM on logits + raw: 1-458 trees, per-fold +-0.00003; OOF 0.962103 (3-fold base); no residual structure; public 0.96178"

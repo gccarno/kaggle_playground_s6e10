@@ -1401,3 +1401,20 @@ No public OOF or test artifact is used.
 
 - **What it means:** Final B's +0.0004 comes from breadth. No library carries more than 0.00004, so a leak hidden in any one library couldn't produce the gain. Our own legs carry nothing.
 - **Slots, Oct 20 (queued in priority order):** F7, F14, F9, F2, F1, F3, F10, F13, F12, F11. 79 eligible runs remain banked for auto-fill through Oct 29.
+
+**Batch 29 public read (Oct 21 00:45 UTC; Oct 20 slots).** Public − OOF for all ten:
+
+| Run | OOF | Public | Public − OOF |
+|---|---|---|---|
+| F2 | 0.962135 | 0.96179 | −0.00035 |
+| **F7** | 0.962152 | **0.96178** | **−0.00037** |
+| F9, F13 | 0.962155 / 0.962103 | 0.96178 | −0.00038 / −0.00032 |
+| F12 | 0.962132 | 0.96171 | −0.00042 |
+| F10, F11 | 0.961924 / 0.961828 | 0.96152 | −0.00040 / −0.00031 |
+| F14 | 0.961889 | 0.96149 | −0.00040 |
+| F3, F1 | 0.961943 / 0.961938 | 0.96147 / 0.96142 | −0.00047 / −0.00052 |
+| *(B14, B12w)* | *0.961730 / 0.961718* | *0.96125 / 0.96122* | *−0.00048 / −0.00050* |
+
+- **The tripwire didn't fire.** F7's −0.00037 is in the normal band (−0.0008 to +0.0003). Every stack with public members kept the same offset as our own ours-only blends (−0.0003 to −0.0005). That's what honest members predict. A leaked member would have pushed public above the line.
+- **The OOF lift transfers.** F7 − B14 is +0.00042 on OOF and +0.00053 on public. F14 − B14 is +0.00016 on OOF and +0.00024 on public. The OOF order of the stacks is kept on public to within about 0.00001, the noise floor between near-identical stacks.
+- **Decision for the user (final pair):** **F7 stays Final B.** For Final A there are two options. **B14** is ours-only, as README §5.2 has it. **F14** is +0.00024 on public but uses 25 fold-verified public members. Both readings say the honest choice is F7 + B14 unless §5.2 is relaxed.
