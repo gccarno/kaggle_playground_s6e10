@@ -1,0 +1,269 @@
+ref,date,run_id,status,public,private,description
+57784712,2026-10-29 23:15:26.147000,4398fb27,SubmissionStatus.COMPLETE,0.96178,0.96235,"[4398fb27] F7: nested L2 logit stack C=0.01, 15 own + 180 public legs (Final B)"
+57784710,2026-10-29 23:15:23.613000,9967474a,SubmissionStatus.COMPLETE,0.96179,0.96234,"[9967474a] F2: nested L2 logit stack C=1, 15 own + 180 public legs (Final B)"
+57784708,2026-10-29 23:15:21.153000,fe775e2e,SubmissionStatus.COMPLETE,0.96142,0.96215,"[fe775e2e] F1: nested Caruana climb, 15 own + 180 public legs (Final B)"
+57784707,2026-10-29 23:15:18.743000,35ae3ef3,SubmissionStatus.COMPLETE,0.96147,0.96214,"[35ae3ef3] F3: nested Caruana climb, 180 public legs only (Final B)"
+57784706,2026-10-29 23:15:16.277000,66a5745d,SubmissionStatus.COMPLETE,0.96178,0.96235,"[66a5745d] F9: nested L2 logit stack C=0.01, 15 own + 186 public legs (Final B)"
+57784704,2026-10-29 23:15:13.693000,75983c3e,SubmissionStatus.COMPLETE,0.96152,0.96223,[75983c3e] F10: nested LightGBM meta-stacker on 201 logits (Final B)
+57784702,2026-10-29 23:15:11.343000,fd364584,SubmissionStatus.COMPLETE,0.96152,0.96223,[fd364584] F11: nested LightGBM meta-stacker on 201 logits + 21 raw columns (Final B)
+57784699,2026-10-29 23:15:08.830000,e83c8c30,SubmissionStatus.COMPLETE,0.96171,0.96234,[e83c8c30] F12: rank mean of F9 and F10 (Final B)
+57784697,2026-10-29 23:15:06.493000,24d11efc,SubmissionStatus.COMPLETE,0.96178,0.96235,[24d11efc] F13: L2 stack + residual LightGBM on logits and raw columns (Final B)
+57784695,2026-10-29 23:15:03.983000,a975808f,SubmissionStatus.COMPLETE,0.96149,0.96222,"[a975808f] F14: nested L2 stack C=0.01, 15 own + 25 fold-verified public legs (Final B leak hedge)"
+57750946,2026-10-28 23:15:31.450000,4398fb27,SubmissionStatus.COMPLETE,0.96178,0.96235,"[4398fb27] F7: nested L2 logit stack C=0.01, 15 own + 180 public legs (Final B)"
+57750943,2026-10-28 23:15:25.013000,9967474a,SubmissionStatus.COMPLETE,0.96179,0.96234,"[9967474a] F2: nested L2 logit stack C=1, 15 own + 180 public legs (Final B)"
+57750940,2026-10-28 23:15:22.650000,fe775e2e,SubmissionStatus.COMPLETE,0.96142,0.96215,"[fe775e2e] F1: nested Caruana climb, 15 own + 180 public legs (Final B)"
+57750938,2026-10-28 23:15:20.313000,35ae3ef3,SubmissionStatus.COMPLETE,0.96147,0.96214,"[35ae3ef3] F3: nested Caruana climb, 180 public legs only (Final B)"
+57750937,2026-10-28 23:15:17.807000,66a5745d,SubmissionStatus.COMPLETE,0.96178,0.96235,"[66a5745d] F9: nested L2 logit stack C=0.01, 15 own + 186 public legs (Final B)"
+57750934,2026-10-28 23:15:14.403000,75983c3e,SubmissionStatus.COMPLETE,0.96152,0.96223,[75983c3e] F10: nested LightGBM meta-stacker on 201 logits (Final B)
+57750932,2026-10-28 23:15:11.993000,fd364584,SubmissionStatus.COMPLETE,0.96152,0.96223,[fd364584] F11: nested LightGBM meta-stacker on 201 logits + 21 raw columns (Final B)
+57750931,2026-10-28 23:15:09.343000,e83c8c30,SubmissionStatus.COMPLETE,0.96171,0.96234,[e83c8c30] F12: rank mean of F9 and F10 (Final B)
+57750929,2026-10-28 23:15:06.480000,24d11efc,SubmissionStatus.COMPLETE,0.96178,0.96235,[24d11efc] F13: L2 stack + residual LightGBM on logits and raw columns (Final B)
+57750928,2026-10-28 23:15:03.677000,a975808f,SubmissionStatus.COMPLETE,0.96149,0.96222,"[a975808f] F14: nested L2 stack C=0.01, 15 own + 25 fold-verified public legs (Final B leak hedge)"
+57715245,2026-10-27 23:15:31.940000,4398fb27,SubmissionStatus.COMPLETE,0.96178,0.96235,"[4398fb27] F7: nested L2 logit stack C=0.01, 15 own + 180 public legs (Final B)"
+57715242,2026-10-27 23:15:28.713000,9967474a,SubmissionStatus.COMPLETE,0.96179,0.96234,"[9967474a] F2: nested L2 logit stack C=1, 15 own + 180 public legs (Final B)"
+57715241,2026-10-27 23:15:26.050000,fe775e2e,SubmissionStatus.COMPLETE,0.96142,0.96215,"[fe775e2e] F1: nested Caruana climb, 15 own + 180 public legs (Final B)"
+57715239,2026-10-27 23:15:23.237000,35ae3ef3,SubmissionStatus.COMPLETE,0.96147,0.96214,"[35ae3ef3] F3: nested Caruana climb, 180 public legs only (Final B)"
+57715237,2026-10-27 23:15:20.367000,66a5745d,SubmissionStatus.COMPLETE,0.96178,0.96235,"[66a5745d] F9: nested L2 logit stack C=0.01, 15 own + 186 public legs (Final B)"
+57715232,2026-10-27 23:15:17.463000,75983c3e,SubmissionStatus.COMPLETE,0.96152,0.96223,[75983c3e] F10: nested LightGBM meta-stacker on 201 logits (Final B)
+57715230,2026-10-27 23:15:14.360000,fd364584,SubmissionStatus.COMPLETE,0.96152,0.96223,[fd364584] F11: nested LightGBM meta-stacker on 201 logits + 21 raw columns (Final B)
+57715226,2026-10-27 23:15:10.893000,e83c8c30,SubmissionStatus.COMPLETE,0.96171,0.96234,[e83c8c30] F12: rank mean of F9 and F10 (Final B)
+57715224,2026-10-27 23:15:07.480000,24d11efc,SubmissionStatus.COMPLETE,0.96178,0.96235,[24d11efc] F13: L2 stack + residual LightGBM on logits and raw columns (Final B)
+57715223,2026-10-27 23:15:04.823000,a975808f,SubmissionStatus.COMPLETE,0.96149,0.96222,"[a975808f] F14: nested L2 stack C=0.01, 15 own + 25 fold-verified public legs (Final B leak hedge)"
+57680909,2026-10-26 23:15:26.480000,4398fb27,SubmissionStatus.COMPLETE,0.96178,0.96235,"[4398fb27] F7: nested L2 logit stack C=0.01, 15 own + 180 public legs (Final B)"
+57680908,2026-10-26 23:15:24.087000,9967474a,SubmissionStatus.COMPLETE,0.96179,0.96234,"[9967474a] F2: nested L2 logit stack C=1, 15 own + 180 public legs (Final B)"
+57680907,2026-10-26 23:15:21.587000,fe775e2e,SubmissionStatus.COMPLETE,0.96142,0.96215,"[fe775e2e] F1: nested Caruana climb, 15 own + 180 public legs (Final B)"
+57680906,2026-10-26 23:15:19.233000,35ae3ef3,SubmissionStatus.COMPLETE,0.96147,0.96214,"[35ae3ef3] F3: nested Caruana climb, 180 public legs only (Final B)"
+57680905,2026-10-26 23:15:16.767000,66a5745d,SubmissionStatus.COMPLETE,0.96178,0.96235,"[66a5745d] F9: nested L2 logit stack C=0.01, 15 own + 186 public legs (Final B)"
+57680904,2026-10-26 23:15:14.317000,75983c3e,SubmissionStatus.COMPLETE,0.96152,0.96223,[75983c3e] F10: nested LightGBM meta-stacker on 201 logits (Final B)
+57680902,2026-10-26 23:15:11.870000,fd364584,SubmissionStatus.COMPLETE,0.96152,0.96223,[fd364584] F11: nested LightGBM meta-stacker on 201 logits + 21 raw columns (Final B)
+57680901,2026-10-26 23:15:09.467000,e83c8c30,SubmissionStatus.COMPLETE,0.96171,0.96234,[e83c8c30] F12: rank mean of F9 and F10 (Final B)
+57680899,2026-10-26 23:15:07.063000,24d11efc,SubmissionStatus.COMPLETE,0.96178,0.96235,[24d11efc] F13: L2 stack + residual LightGBM on logits and raw columns (Final B)
+57680897,2026-10-26 23:15:04.487000,a975808f,SubmissionStatus.COMPLETE,0.96149,0.96222,"[a975808f] F14: nested L2 stack C=0.01, 15 own + 25 fold-verified public legs (Final B leak hedge)"
+57644883,2026-10-25 23:15:24.237000,4398fb27,SubmissionStatus.COMPLETE,0.96178,0.96235,"[4398fb27] F7: nested L2 logit stack C=0.01, 15 own + 180 public legs (Final B)"
+57644882,2026-10-25 23:15:21.933000,9967474a,SubmissionStatus.COMPLETE,0.96179,0.96234,"[9967474a] F2: nested L2 logit stack C=1, 15 own + 180 public legs (Final B)"
+57644881,2026-10-25 23:15:19.673000,fe775e2e,SubmissionStatus.COMPLETE,0.96142,0.96215,"[fe775e2e] F1: nested Caruana climb, 15 own + 180 public legs (Final B)"
+57644880,2026-10-25 23:15:17.413000,35ae3ef3,SubmissionStatus.COMPLETE,0.96147,0.96214,"[35ae3ef3] F3: nested Caruana climb, 180 public legs only (Final B)"
+57644879,2026-10-25 23:15:15.203000,66a5745d,SubmissionStatus.COMPLETE,0.96178,0.96235,"[66a5745d] F9: nested L2 logit stack C=0.01, 15 own + 186 public legs (Final B)"
+57644878,2026-10-25 23:15:12.860000,75983c3e,SubmissionStatus.COMPLETE,0.96152,0.96223,[75983c3e] F10: nested LightGBM meta-stacker on 201 logits (Final B)
+57644876,2026-10-25 23:15:10.500000,fd364584,SubmissionStatus.COMPLETE,0.96152,0.96223,[fd364584] F11: nested LightGBM meta-stacker on 201 logits + 21 raw columns (Final B)
+57644875,2026-10-25 23:15:08.147000,e83c8c30,SubmissionStatus.COMPLETE,0.96171,0.96234,[e83c8c30] F12: rank mean of F9 and F10 (Final B)
+57644873,2026-10-25 23:15:05.840000,24d11efc,SubmissionStatus.COMPLETE,0.96178,0.96235,[24d11efc] F13: L2 stack + residual LightGBM on logits and raw columns (Final B)
+57644871,2026-10-25 23:15:03.597000,a975808f,SubmissionStatus.COMPLETE,0.96149,0.96222,"[a975808f] F14: nested L2 stack C=0.01, 15 own + 25 fold-verified public legs (Final B leak hedge)"
+57609047,2026-10-24 23:15:25.773000,4398fb27,SubmissionStatus.COMPLETE,0.96178,0.96235,"[4398fb27] F7: nested L2 logit stack C=0.01, 15 own + 180 public legs (Final B)"
+57609046,2026-10-24 23:15:23.487000,9967474a,SubmissionStatus.COMPLETE,0.96179,0.96234,"[9967474a] F2: nested L2 logit stack C=1, 15 own + 180 public legs (Final B)"
+57609045,2026-10-24 23:15:21.217000,fe775e2e,SubmissionStatus.COMPLETE,0.96142,0.96215,"[fe775e2e] F1: nested Caruana climb, 15 own + 180 public legs (Final B)"
+57609044,2026-10-24 23:15:18.930000,35ae3ef3,SubmissionStatus.COMPLETE,0.96147,0.96214,"[35ae3ef3] F3: nested Caruana climb, 180 public legs only (Final B)"
+57609043,2026-10-24 23:15:16.650000,66a5745d,SubmissionStatus.COMPLETE,0.96178,0.96235,"[66a5745d] F9: nested L2 logit stack C=0.01, 15 own + 186 public legs (Final B)"
+57609042,2026-10-24 23:15:13.910000,75983c3e,SubmissionStatus.COMPLETE,0.96152,0.96223,[75983c3e] F10: nested LightGBM meta-stacker on 201 logits (Final B)
+57609041,2026-10-24 23:15:11.473000,fd364584,SubmissionStatus.COMPLETE,0.96152,0.96223,[fd364584] F11: nested LightGBM meta-stacker on 201 logits + 21 raw columns (Final B)
+57609040,2026-10-24 23:15:09.200000,e83c8c30,SubmissionStatus.COMPLETE,0.96171,0.96234,[e83c8c30] F12: rank mean of F9 and F10 (Final B)
+57609038,2026-10-24 23:15:06.937000,24d11efc,SubmissionStatus.COMPLETE,0.96178,0.96235,[24d11efc] F13: L2 stack + residual LightGBM on logits and raw columns (Final B)
+57609037,2026-10-24 23:15:04.580000,a975808f,SubmissionStatus.COMPLETE,0.96149,0.96222,"[a975808f] F14: nested L2 stack C=0.01, 15 own + 25 fold-verified public legs (Final B leak hedge)"
+57574365,2026-10-23 23:15:25.427000,4398fb27,SubmissionStatus.COMPLETE,0.96178,0.96235,"[4398fb27] F7: nested L2 logit stack C=0.01, 15 own + 180 public legs (Final B)"
+57574363,2026-10-23 23:15:23.207000,9967474a,SubmissionStatus.COMPLETE,0.96179,0.96234,"[9967474a] F2: nested L2 logit stack C=1, 15 own + 180 public legs (Final B)"
+57574361,2026-10-23 23:15:20.943000,fe775e2e,SubmissionStatus.COMPLETE,0.96142,0.96215,"[fe775e2e] F1: nested Caruana climb, 15 own + 180 public legs (Final B)"
+57574360,2026-10-23 23:15:18.613000,35ae3ef3,SubmissionStatus.COMPLETE,0.96147,0.96214,"[35ae3ef3] F3: nested Caruana climb, 180 public legs only (Final B)"
+57574358,2026-10-23 23:15:16.387000,66a5745d,SubmissionStatus.COMPLETE,0.96178,0.96235,"[66a5745d] F9: nested L2 logit stack C=0.01, 15 own + 186 public legs (Final B)"
+57574357,2026-10-23 23:15:14.067000,75983c3e,SubmissionStatus.COMPLETE,0.96152,0.96223,[75983c3e] F10: nested LightGBM meta-stacker on 201 logits (Final B)
+57574356,2026-10-23 23:15:11.733000,fd364584,SubmissionStatus.COMPLETE,0.96152,0.96223,[fd364584] F11: nested LightGBM meta-stacker on 201 logits + 21 raw columns (Final B)
+57574355,2026-10-23 23:15:09.403000,e83c8c30,SubmissionStatus.COMPLETE,0.96171,0.96234,[e83c8c30] F12: rank mean of F9 and F10 (Final B)
+57574352,2026-10-23 23:15:06.600000,24d11efc,SubmissionStatus.COMPLETE,0.96178,0.96235,[24d11efc] F13: L2 stack + residual LightGBM on logits and raw columns (Final B)
+57574350,2026-10-23 23:15:04.280000,a975808f,SubmissionStatus.COMPLETE,0.96149,0.96222,"[a975808f] F14: nested L2 stack C=0.01, 15 own + 25 fold-verified public legs (Final B leak hedge)"
+57540607,2026-10-22 23:15:25.773000,34748cd9,SubmissionStatus.COMPLETE,0.95994,0.96069,"[34748cd9] W9: MLP (PLR numerics + FD/age embeddings), raw columns"
+57540605,2026-10-22 23:15:23.367000,4e0159fc,SubmissionStatus.COMPLETE,0.95992,0.96070,[4e0159fc] W10: W9 + FD route profile
+57540603,2026-10-22 23:15:20.950000,f5df566f,SubmissionStatus.COMPLETE,0.96059,0.96150,[f5df566f] W5: U18 + the 13 ratings as CatBoost categoricals (CTR-only view)
+57540602,2026-10-22 23:15:18.620000,f8520c7f,SubmissionStatus.COMPLETE,0.96061,0.96126,[f8520c7f] W11: W10 with seed_bag 3
+57540601,2026-10-22 23:15:16.377000,7a185d50,SubmissionStatus.COMPLETE,0.95985,0.96047,[7a185d50] W14: W10 + teacher
+57540600,2026-10-22 23:15:13.820000,41d4d547,SubmissionStatus.COMPLETE,0.96034,0.96113,"[41d4d547] W4: U10 + age and 13 ratings as CatBoost categoricals (pure all-CTR view, no profile/teacher)"
+57540596,2026-10-22 23:15:11.430000,be455188,SubmissionStatus.COMPLETE,0.96098,0.96177,"[be455188] B7: rank_mean of B6 cat legs (-T14,-T1) + MLP legs W11/W9/W14 + W5 (CTR view+ratings) + W4 (all-CTR, no teacher); sequential Gate 2"
+57540594,2026-10-22 23:15:08.963000,0cfc1174,SubmissionStatus.COMPLETE,0.96123,0.96204,[0cfc1174] B13k3: B12w with the three TabPFN legs at weight 3 (rank mean of 20 slots)
+57540593,2026-10-22 23:15:06.537000,cc839b3d,SubmissionStatus.COMPLETE,0.96123,0.96205,"[cc839b3d] B13p: B12w greedy-pruned (minus W14, X1m, T24; X4 kept), TabPFN weight 2"
+57540592,2026-10-22 23:15:04.120000,eda537d3,SubmissionStatus.COMPLETE,0.96123,0.96207,[eda537d3] B13pk3: B13p pool with TabPFN legs at weight 3
+57499847,2026-10-21 23:15:27.690000,89704b27,SubmissionStatus.COMPLETE,0.96024,0.96098,[89704b27] Q1: T24 + quantized FD/age/delays (divisors 5/25/100)
+57499846,2026-10-21 23:15:24.990000,4eee8cc4,SubmissionStatus.COMPLETE,0.96014,0.96111,"[4eee8cc4] Q2: T24 + window TE of FD (neighbour-route rates, radii 1-50)"
+57499839,2026-10-21 23:15:22.447000,6a4c1011,SubmissionStatus.COMPLETE,0.96029,0.96097,[6a4c1011] Q3: T24 + binned TE of age and delays
+57499838,2026-10-21 23:15:19.747000,3d1d9e10,SubmissionStatus.COMPLETE,0.96017,0.96101,[3d1d9e10] Q4: T24 + arr_delay - dep_delay
+57499834,2026-10-21 23:15:16.897000,f2ce861d,SubmissionStatus.COMPLETE,0.96030,0.96098,[f2ce861d] Q5: T24 with the 4 categoricals and 13 ratings one-hot encoded
+57499831,2026-10-21 23:15:14.130000,bd525499,SubmissionStatus.COMPLETE,0.96049,0.96133,"[bd525499] Z1: TabPFN-3.5 full context, raw columns"
+57499829,2026-10-21 23:15:11.640000,b77b3516,SubmissionStatus.COMPLETE,0.96068,0.96162,[b77b3516] Z2: Z1 + FD and age as categoricals
+57499825,2026-10-21 23:15:09.297000,98754488,SubmissionStatus.COMPLETE,0.96116,0.96192,"[98754488] B10: B8 + Z1 + Z2 (TabPFN-3.5 raw and FD/age-as-categorical), rank mean of 13"
+57499824,2026-10-21 23:15:06.387000,538c0c67,SubmissionStatus.COMPLETE,0.96056,0.96150,[538c0c67] Z3: Z2 + teacher
+57499823,2026-10-21 23:15:03.760000,0571d27a,SubmissionStatus.COMPLETE,0.96118,0.96195,"[0571d27a] B11: B10 + Z3 (TabPFN-3.5 + teacher), rank mean of 14"
+57455709,2026-10-20 23:15:25.820000,fd364584,SubmissionStatus.COMPLETE,0.96152,0.96223,[fd364584] F11: nested LightGBM meta-stacker on 201 logits + 21 raw columns (Final B)
+57455707,2026-10-20 23:15:23.463000,e83c8c30,SubmissionStatus.COMPLETE,0.96171,0.96234,[e83c8c30] F12: rank mean of F9 and F10 (Final B)
+57455705,2026-10-20 23:15:20.903000,24d11efc,SubmissionStatus.COMPLETE,0.96178,0.96235,[24d11efc] F13: L2 stack + residual LightGBM on logits and raw columns (Final B)
+57455703,2026-10-20 23:15:18.493000,75983c3e,SubmissionStatus.COMPLETE,0.96152,0.96223,[75983c3e] F10: nested LightGBM meta-stacker on 201 logits (Final B)
+57455702,2026-10-20 23:15:16.130000,35ae3ef3,SubmissionStatus.COMPLETE,0.96147,0.96214,"[35ae3ef3] F3: nested Caruana climb, 180 public legs only (Final B)"
+57455701,2026-10-20 23:15:13.813000,fe775e2e,SubmissionStatus.COMPLETE,0.96142,0.96215,"[fe775e2e] F1: nested Caruana climb, 15 own + 180 public legs (Final B)"
+57455700,2026-10-20 23:15:11.477000,9967474a,SubmissionStatus.COMPLETE,0.96179,0.96234,"[9967474a] F2: nested L2 logit stack C=1, 15 own + 180 public legs (Final B)"
+57455699,2026-10-20 23:15:09.197000,66a5745d,SubmissionStatus.COMPLETE,0.96178,0.96235,"[66a5745d] F9: nested L2 logit stack C=0.01, 15 own + 186 public legs (Final B)"
+57455697,2026-10-20 23:15:06.830000,a975808f,SubmissionStatus.COMPLETE,0.96149,0.96222,"[a975808f] F14: nested L2 stack C=0.01, 15 own + 25 fold-verified public legs (Final B leak hedge)"
+57455695,2026-10-20 23:15:04.353000,4398fb27,SubmissionStatus.COMPLETE,0.96178,0.96235,"[4398fb27] F7: nested L2 logit stack C=0.01, 15 own + 180 public legs (Final B)"
+57412148,2026-10-19 23:15:25.107000,ff096c57,SubmissionStatus.COMPLETE,0.96056,0.96123,[ff096c57] X4R: X4 replicate at model_seed 43 (B8R leg)
+57412147,2026-10-19 23:15:22.943000,cfb860fd,SubmissionStatus.COMPLETE,0.96067,0.96126,[cfb860fd] X3R: X3 replicate at model_seed 43 (B8R leg)
+57412144,2026-10-19 23:15:20.773000,6bf09ce8,SubmissionStatus.COMPLETE,0.96058,0.96132,[6bf09ce8] U11R: U11 replicate at model_seed 43 (B8R leg)
+57412143,2026-10-19 23:15:18.447000,dca1f935,SubmissionStatus.COMPLETE,0.96051,0.96140,[dca1f935] U18R: U18 replicate at model_seed 43 (B8R leg)
+57412142,2026-10-19 23:15:16.123000,d7608501,SubmissionStatus.COMPLETE,0.96039,0.96133,[d7608501] U24R: U24 replicate at model_seed 43 (B8R leg)
+57412141,2026-10-19 23:15:13.690000,eb16781b,SubmissionStatus.COMPLETE,0.96024,0.96102,[eb16781b] T24R: T24 replicate at model_seed 43 (B8R leg)
+57412140,2026-10-19 23:15:11.427000,385811d6,SubmissionStatus.COMPLETE,0.96004,0.96076,[385811d6] W14R: W14 replicate at model_seed 43 (B8R leg)
+57412138,2026-10-19 23:15:09.067000,2c21dd40,SubmissionStatus.COMPLETE,0.96078,0.96138,[2c21dd40] X1mR: X1m replicate at model_seed 43 (B8R leg)
+57412137,2026-10-19 23:15:06.673000,e9edcb35,SubmissionStatus.COMPLETE,0.96029,0.96112,[e9edcb35] W4R: W4 replicate at model_seed 43 (B8R leg)
+57412135,2026-10-19 23:15:04.247000,754f9b07,SubmissionStatus.COMPLETE,0.96125,0.96203,"[754f9b07] B14: B12w + Z4, TabPFN legs at weight 2 (19 entries)"
+57371823,2026-10-18 23:15:24.187000,dcd70b08,SubmissionStatus.COMPLETE,0.96005,0.96073,[dcd70b08] W12: W10 + rating embeddings
+57371820,2026-10-18 23:15:21.873000,b9497ceb,SubmissionStatus.COMPLETE,0.96042,0.96102,[b9497ceb] X5: X2 + teacher
+57371817,2026-10-18 23:15:19.553000,cdb0b9e7,SubmissionStatus.COMPLETE,0.96075,0.96122,[cdb0b9e7] Y1: X3 with a 10-epoch OneCycle
+57371816,2026-10-18 23:15:17.330000,22e5a5c4,SubmissionStatus.COMPLETE,0.96068,0.96108,[22e5a5c4] Y2: X3 with emb_dim 32
+57371815,2026-10-18 23:15:15.130000,614a47ec,SubmissionStatus.COMPLETE,0.96063,0.96118,[614a47ec] Y3: X3 with plr_sigma 1.0
+57371814,2026-10-18 23:15:12.850000,a73476b5,SubmissionStatus.COMPLETE,0.96070,0.96122,"[a73476b5] Y4: X4 + rating embeddings (no-profile, all-embedding MLP)"
+57371813,2026-10-18 23:15:10.550000,292f2bdb,SubmissionStatus.COMPLETE,0.96065,0.96123,[292f2bdb] Y5: X3 with hidden 512
+57371812,2026-10-18 23:15:08.223000,0753b7fc,SubmissionStatus.COMPLETE,0.96067,0.96145,[0753b7fc] U22R: U22 replicate at model_seed 43 (B8R leg)
+57371811,2026-10-18 23:15:05.847000,efdab2bd,SubmissionStatus.COMPLETE,0.96059,0.96156,[efdab2bd] W5R: W5 replicate at model_seed 43 (B8R leg)
+57371808,2026-10-18 23:15:03.547000,67dc16eb,SubmissionStatus.COMPLETE,0.96101,0.96179,"[67dc16eb] B8R: B8 recipe, all 11 legs replicated at model_seed 43 (batch 20)"
+57328694,2026-10-17 23:15:25.920000,a7efacb6,SubmissionStatus.COMPLETE,0.96012,0.96068,[a7efacb6] W15: W10 + FD target encoding
+57328692,2026-10-17 23:15:23.570000,08c3738f,SubmissionStatus.COMPLETE,0.96004,0.96070,[08c3738f] W13: W10 with dropout 0.25
+57328691,2026-10-17 23:15:21.237000,12bedad2,SubmissionStatus.COMPLETE,0.96067,0.96132,"[12bedad2] W7: U11 + arr_delay as a CatBoost categorical (the old U21, after the NaN-level fix)"
+57328689,2026-10-17 23:15:18.870000,3bcd5d1c,SubmissionStatus.COMPLETE,0.96067,0.96125,[3bcd5d1c] X2: W10 with seed_bag 5 (base for X3-X6)
+57328688,2026-10-17 23:15:16.500000,cbd6a24f,SubmissionStatus.COMPLETE,0.96069,0.96131,[cbd6a24f] X1m: W11 with seed_bag 10
+57328686,2026-10-17 23:15:14.077000,bd496856,SubmissionStatus.COMPLETE,0.96073,0.96123,[bd496856] X3: X2 + rating embeddings
+57328685,2026-10-17 23:15:11.553000,8832a8d6,SubmissionStatus.COMPLETE,0.96065,0.96124,[8832a8d6] X4: X2 without the FD profile (bagged W9)
+57328683,2026-10-17 23:15:09.217000,1be77029,SubmissionStatus.COMPLETE,0.96072,0.96124,[1be77029] X6: X2 with a 10-epoch OneCycle
+57328680,2026-10-17 23:15:06.827000,5f5eb27a,SubmissionStatus.COMPLETE,0.96105,0.96177,"[5f5eb27a] B8: B7 with bagged MLP legs (X1m for W11, X4 for W9), +X3 rating-embedding MLP, -U13"
+57328677,2026-10-17 23:15:04.467000,6ea49b38,SubmissionStatus.COMPLETE,0.96064,0.96130,[6ea49b38] Z4: Z2 + FD route profile (batch 23)
+57285983,2026-10-16 23:15:26.377000,c7dd9841,SubmissionStatus.COMPLETE,0.96041,0.96113,"[c7dd9841] W3: T14 + age/rating pair TEs (xgb, profile view)"
+57285981,2026-10-16 23:15:24.007000,a19789bf,SubmissionStatus.COMPLETE,0.95966,0.96069,"[a19789bf] W2: V2 + explicit pair TEs, xgb TE view"
+57285980,2026-10-16 23:15:21.623000,34748cd9,SubmissionStatus.COMPLETE,0.95994,0.96069,"[34748cd9] W9: MLP (PLR numerics + FD/age embeddings), raw columns"
+57285977,2026-10-16 23:15:19.180000,4e0159fc,SubmissionStatus.COMPLETE,0.95992,0.96070,[4e0159fc] W10: W9 + FD route profile
+57285976,2026-10-16 23:15:16.703000,f5df566f,SubmissionStatus.COMPLETE,0.96059,0.96150,[f5df566f] W5: U18 + the 13 ratings as CatBoost categoricals (CTR-only view)
+57285975,2026-10-16 23:15:14.270000,f8520c7f,SubmissionStatus.COMPLETE,0.96061,0.96126,[f8520c7f] W11: W10 with seed_bag 3
+57285973,2026-10-16 23:15:11.683000,7a185d50,SubmissionStatus.COMPLETE,0.95985,0.96047,[7a185d50] W14: W10 + teacher
+57285972,2026-10-16 23:15:09.183000,eda537d3,SubmissionStatus.COMPLETE,0.96123,0.96207,[eda537d3] B13pk3: B13p pool with TabPFN legs at weight 3
+57285970,2026-10-16 23:15:06.813000,0cfc1174,SubmissionStatus.COMPLETE,0.96123,0.96204,[0cfc1174] B13k3: B12w with the three TabPFN legs at weight 3 (rank mean of 20 slots)
+57285968,2026-10-16 23:15:04.387000,cc839b3d,SubmissionStatus.COMPLETE,0.96123,0.96205,"[cc839b3d] B13p: B12w greedy-pruned (minus W14, X1m, T24; X4 kept), TabPFN weight 2"
+57246306,2026-10-15 23:15:06.323000,41d4d547,SubmissionStatus.COMPLETE,0.96034,0.96113,"[41d4d547] W4: U10 + age and 13 ratings as CatBoost categoricals (pure all-CTR view, no profile/teacher)"
+57246304,2026-10-15 23:15:03.877000,be455188,SubmissionStatus.COMPLETE,0.96098,0.96177,"[be455188] B7: rank_mean of B6 cat legs (-T14,-T1) + MLP legs W11/W9/W14 + W5 (CTR view+ratings) + W4 (all-CTR, no teacher); sequential Gate 2"
+57201576,2026-10-15 01:31:49.960000,1337a5f8,SubmissionStatus.COMPLETE,0.96122,0.96201,[1337a5f8] B12w: B11 with the three TabPFN legs at weight 2 (rank mean of 17 slots)
+57201480,2026-10-15 01:28:22.763000,588e2764,SubmissionStatus.COMPLETE,0.96059,0.96121,"[588e2764] R5: U11 with leaf-wise CatBoost trees (Lossguide, 64 leaves)"
+57201474,2026-10-15 01:28:03.543000,7b3f4349,SubmissionStatus.COMPLETE,0.96046,0.96118,[7b3f4349] R4: U11 with depthwise (non-symmetric) CatBoost trees
+57201010,2026-10-15 01:13:00.903000,9c3bb4d4,SubmissionStatus.COMPLETE,0.95984,0.96088,[9c3bb4d4] R2: T24 with extremely randomized split thresholds (lgb extra_trees)
+57200975,2026-10-15 01:11:18.180000,93a24794,SubmissionStatus.COMPLETE,0.96012,0.96077,[93a24794] R3: T24 with linear models in the leaves (lgb linear_tree)
+57200919,2026-10-15 01:09:36.793000,e68c47ed,SubmissionStatus.COMPLETE,0.95767,0.95841,"[e68c47ed] R1: T24 as a random forest (lgb rf, 1023 leaves, 500 trees)"
+57199899,2026-10-15 00:27:57.797000,538c0c67,SubmissionStatus.COMPLETE,0.96056,0.96150,[538c0c67] Z3: Z2 + teacher
+57199883,2026-10-15 00:27:27.640000,0571d27a,SubmissionStatus.COMPLETE,0.96118,0.96195,"[0571d27a] B11: B10 + Z3 (TabPFN-3.5 + teacher), rank mean of 14"
+57197526,2026-10-14 23:15:26.570000,1ad1715a,SubmissionStatus.COMPLETE,0.96073,0.96157,[1ad1715a] B6m: B6 minus T14 (T14 LOO -0.000002)
+57197524,2026-10-14 23:15:24.190000,8a510d85,SubmissionStatus.COMPLETE,0.96073,0.96156,[8a510d85] B6b: B6 with U19 (seed-bagged U11) in place of U11
+57197523,2026-10-14 23:15:21.743000,89704b27,SubmissionStatus.COMPLETE,0.96024,0.96098,[89704b27] Q1: T24 + quantized FD/age/delays (divisors 5/25/100)
+57197522,2026-10-14 23:15:19.073000,4eee8cc4,SubmissionStatus.COMPLETE,0.96014,0.96111,"[4eee8cc4] Q2: T24 + window TE of FD (neighbour-route rates, radii 1-50)"
+57197520,2026-10-14 23:15:16.657000,6a4c1011,SubmissionStatus.COMPLETE,0.96029,0.96097,[6a4c1011] Q3: T24 + binned TE of age and delays
+57197519,2026-10-14 23:15:14.333000,3d1d9e10,SubmissionStatus.COMPLETE,0.96017,0.96101,[3d1d9e10] Q4: T24 + arr_delay - dep_delay
+57197518,2026-10-14 23:15:11.910000,f2ce861d,SubmissionStatus.COMPLETE,0.96030,0.96098,[f2ce861d] Q5: T24 with the 4 categoricals and 13 ratings one-hot encoded
+57197517,2026-10-14 23:15:09.273000,bd525499,SubmissionStatus.COMPLETE,0.96049,0.96133,"[bd525499] Z1: TabPFN-3.5 full context, raw columns"
+57197515,2026-10-14 23:15:06.903000,b77b3516,SubmissionStatus.COMPLETE,0.96068,0.96162,[b77b3516] Z2: Z1 + FD and age as categoricals
+57197514,2026-10-14 23:15:04.467000,98754488,SubmissionStatus.COMPLETE,0.96116,0.96192,"[98754488] B10: B8 + Z1 + Z2 (TabPFN-3.5 raw and FD/age-as-categorical), rank mean of 13"
+57158549,2026-10-13 23:15:27.567000,1f39fd2a,SubmissionStatus.COMPLETE,0.96074,0.96155,[1f39fd2a] B6s: B6 + U23 (U11 seed twin)
+57158545,2026-10-13 23:15:24.997000,385811d6,SubmissionStatus.COMPLETE,0.96004,0.96076,[385811d6] W14R: W14 replicate at model_seed 43 (B8R leg)
+57158540,2026-10-13 23:15:22.390000,eb16781b,SubmissionStatus.COMPLETE,0.96024,0.96102,[eb16781b] T24R: T24 replicate at model_seed 43 (B8R leg)
+57158539,2026-10-13 23:15:19.020000,e9edcb35,SubmissionStatus.COMPLETE,0.96029,0.96112,[e9edcb35] W4R: W4 replicate at model_seed 43 (B8R leg)
+57158538,2026-10-13 23:15:16.627000,cfb860fd,SubmissionStatus.COMPLETE,0.96067,0.96126,[cfb860fd] X3R: X3 replicate at model_seed 43 (B8R leg)
+57158537,2026-10-13 23:15:14.167000,ff096c57,SubmissionStatus.COMPLETE,0.96056,0.96123,[ff096c57] X4R: X4 replicate at model_seed 43 (B8R leg)
+57158534,2026-10-13 23:15:11.870000,d7608501,SubmissionStatus.COMPLETE,0.96039,0.96133,[d7608501] U24R: U24 replicate at model_seed 43 (B8R leg)
+57158532,2026-10-13 23:15:09.603000,dca1f935,SubmissionStatus.COMPLETE,0.96051,0.96140,[dca1f935] U18R: U18 replicate at model_seed 43 (B8R leg)
+57158530,2026-10-13 23:15:06.890000,6bf09ce8,SubmissionStatus.COMPLETE,0.96058,0.96132,[6bf09ce8] U11R: U11 replicate at model_seed 43 (B8R leg)
+57158529,2026-10-13 23:15:04.280000,2c21dd40,SubmissionStatus.COMPLETE,0.96078,0.96138,[2c21dd40] X1mR: X1m replicate at model_seed 43 (B8R leg)
+57121779,2026-10-12 23:15:27.070000,efdab2bd,SubmissionStatus.COMPLETE,0.96059,0.96156,[efdab2bd] W5R: W5 replicate at model_seed 43 (B8R leg)
+57121777,2026-10-12 23:15:24.707000,0753b7fc,SubmissionStatus.COMPLETE,0.96067,0.96145,[0753b7fc] U22R: U22 replicate at model_seed 43 (B8R leg)
+57121775,2026-10-12 23:15:22.370000,67dc16eb,SubmissionStatus.COMPLETE,0.96101,0.96179,"[67dc16eb] B8R: B8 recipe, all 11 legs replicated at model_seed 43 (batch 20)"
+57121773,2026-10-12 23:15:19.867000,292f2bdb,SubmissionStatus.COMPLETE,0.96065,0.96123,[292f2bdb] Y5: X3 with hidden 512
+57121771,2026-10-12 23:15:17.257000,614a47ec,SubmissionStatus.COMPLETE,0.96063,0.96118,[614a47ec] Y3: X3 with plr_sigma 1.0
+57121770,2026-10-12 23:15:14.833000,22e5a5c4,SubmissionStatus.COMPLETE,0.96068,0.96108,[22e5a5c4] Y2: X3 with emb_dim 32
+57121769,2026-10-12 23:15:12.377000,cdb0b9e7,SubmissionStatus.COMPLETE,0.96075,0.96122,[cdb0b9e7] Y1: X3 with a 10-epoch OneCycle
+57121768,2026-10-12 23:15:09.827000,a73476b5,SubmissionStatus.COMPLETE,0.96070,0.96122,"[a73476b5] Y4: X4 + rating embeddings (no-profile, all-embedding MLP)"
+57121766,2026-10-12 23:15:07.073000,b9497ceb,SubmissionStatus.COMPLETE,0.96042,0.96102,[b9497ceb] X5: X2 + teacher
+57121764,2026-10-12 23:15:04.183000,1c181629,SubmissionStatus.COMPLETE,0.94847,0.94862,[1c181629] W6: W1 representation with glm
+57087503,2026-10-11 23:15:25.853000,a7efacb6,SubmissionStatus.COMPLETE,0.96012,0.96068,[a7efacb6] W15: W10 + FD target encoding
+57087501,2026-10-11 23:15:23.267000,08c3738f,SubmissionStatus.COMPLETE,0.96004,0.96070,[08c3738f] W13: W10 with dropout 0.25
+57087499,2026-10-11 23:15:20.823000,dcd70b08,SubmissionStatus.COMPLETE,0.96005,0.96073,[dcd70b08] W12: W10 + rating embeddings
+57087498,2026-10-11 23:15:18.263000,12bedad2,SubmissionStatus.COMPLETE,0.96067,0.96132,"[12bedad2] W7: U11 + arr_delay as a CatBoost categorical (the old U21, after the NaN-level fix)"
+57087497,2026-10-11 23:15:15.947000,3bcd5d1c,SubmissionStatus.COMPLETE,0.96067,0.96125,[3bcd5d1c] X2: W10 with seed_bag 5 (base for X3-X6)
+57087495,2026-10-11 23:15:13.490000,8832a8d6,SubmissionStatus.COMPLETE,0.96065,0.96124,[8832a8d6] X4: X2 without the FD profile (bagged W9)
+57087493,2026-10-11 23:15:11.080000,cbd6a24f,SubmissionStatus.COMPLETE,0.96069,0.96131,[cbd6a24f] X1m: W11 with seed_bag 10
+57087492,2026-10-11 23:15:08.677000,bd496856,SubmissionStatus.COMPLETE,0.96073,0.96123,[bd496856] X3: X2 + rating embeddings
+57087490,2026-10-11 23:15:06.243000,1be77029,SubmissionStatus.COMPLETE,0.96072,0.96124,[1be77029] X6: X2 with a 10-epoch OneCycle
+57087489,2026-10-11 23:15:03.863000,5f5eb27a,SubmissionStatus.COMPLETE,0.96105,0.96177,"[5f5eb27a] B8: B7 with bagged MLP legs (X1m for W11, X4 for W9), +X3 rating-embedding MLP, -U13"
+57054359,2026-10-10 23:15:25.690000,fd2029e9,SubmissionStatus.COMPLETE,0.95951,0.96060,"[fd2029e9] W1: T1 + explicit pair TEs (age x cats, rating pairs, FD x class/type), lgb"
+57054357,2026-10-10 23:15:23.373000,c7dd9841,SubmissionStatus.COMPLETE,0.96041,0.96113,"[c7dd9841] W3: T14 + age/rating pair TEs (xgb, profile view)"
+57054356,2026-10-10 23:15:20.967000,a19789bf,SubmissionStatus.COMPLETE,0.95966,0.96069,"[a19789bf] W2: V2 + explicit pair TEs, xgb TE view"
+57054355,2026-10-10 23:15:18.577000,4e0159fc,SubmissionStatus.COMPLETE,0.95992,0.96070,[4e0159fc] W10: W9 + FD route profile
+57054353,2026-10-10 23:15:16.217000,7a185d50,SubmissionStatus.COMPLETE,0.95985,0.96047,[7a185d50] W14: W10 + teacher
+57054352,2026-10-10 23:15:13.823000,34748cd9,SubmissionStatus.COMPLETE,0.95994,0.96069,"[34748cd9] W9: MLP (PLR numerics + FD/age embeddings), raw columns"
+57054351,2026-10-10 23:15:11.343000,41d4d547,SubmissionStatus.COMPLETE,0.96034,0.96113,"[41d4d547] W4: U10 + age and 13 ratings as CatBoost categoricals (pure all-CTR view, no profile/teacher)"
+57054349,2026-10-10 23:15:09.037000,f8520c7f,SubmissionStatus.COMPLETE,0.96061,0.96126,[f8520c7f] W11: W10 with seed_bag 3
+57054348,2026-10-10 23:15:06.597000,f5df566f,SubmissionStatus.COMPLETE,0.96059,0.96150,[f5df566f] W5: U18 + the 13 ratings as CatBoost categoricals (CTR-only view)
+57054347,2026-10-10 23:15:04.200000,be455188,SubmissionStatus.COMPLETE,0.96098,0.96177,"[be455188] B7: rank_mean of B6 cat legs (-T14,-T1) + MLP legs W11/W9/W14 + W5 (CTR view+ratings) + W4 (all-CTR, no teacher); sequential Gate 2"
+57023419,2026-10-09 23:15:26.153000,a8316f82,SubmissionStatus.COMPLETE,0.96058,0.96126,[a8316f82] U23: U11 seed twin (model_seed 7)
+57023417,2026-10-09 23:15:23.810000,35a4ace3,SubmissionStatus.COMPLETE,0.96066,0.96131,[35a4ace3] U20: U11 + dep_delay as a CatBoost categorical
+57023414,2026-10-09 23:15:21.450000,2222cda3,SubmissionStatus.COMPLETE,0.96054,0.96121,"[2222cda3] U17: U4 with CatBoost lr 0.04, 6000 iterations"
+57023413,2026-10-09 23:15:18.857000,dfa83498,SubmissionStatus.COMPLETE,0.96054,0.96125,[dfa83498] U16: U4 with seed_bag 3
+57023412,2026-10-09 23:15:16.517000,fa7bdc80,SubmissionStatus.COMPLETE,0.96050,0.96133,[fa7bdc80] U24: U11 with a CatBoost teacher
+57023411,2026-10-09 23:15:14.137000,beb81d09,SubmissionStatus.COMPLETE,0.96062,0.96143,[beb81d09] U18: U9 + age as a CatBoost categorical
+57023408,2026-10-09 23:15:11.813000,0b12edd1,SubmissionStatus.COMPLETE,0.96064,0.96135,[0b12edd1] U19: U11 with seed_bag 3
+57023406,2026-10-09 23:15:09.513000,f964e00c,SubmissionStatus.COMPLETE,0.96064,0.96142,[f964e00c] U22: U11 + the 13 ratings as CatBoost categoricals
+57023404,2026-10-09 23:15:06.970000,c4086055,SubmissionStatus.COMPLETE,0.96074,0.96156,"[c4086055] B6: rank_mean of T14/U11/T1/T24/U13/U22/U18/U24 (sequential Gate 2 on B5: +U22, U9 out, +U18, +U24)"
+57023403,2026-10-09 23:15:04.310000,d2de2320,SubmissionStatus.COMPLETE,0.96067,0.96150,"[d2de2320] B5: rank_mean of T14/U11/U9/T1/T24/U13 (sequential Gate 2 on B4: U11 replaces U4, + U13)"
+56977374,2026-10-08 23:15:23.697000,cbf31660,SubmissionStatus.COMPLETE,0.96044,0.96128,[cbf31660] U9: U4 without the profile (CatBoost CTRs as the only route view)
+56977370,2026-10-08 23:15:21.353000,2c7c01dc,SubmissionStatus.COMPLETE,0.96057,0.96122,[2c7c01dc] U4s: U4 seed twin (model_seed 7)
+56977368,2026-10-08 23:15:18.943000,9399f1b0,SubmissionStatus.COMPLETE,0.96053,0.96121,[9399f1b0] U4s2: U4 seed twin (model_seed 1337)
+56977366,2026-10-08 23:15:16.127000,cd1698fa,SubmissionStatus.COMPLETE,0.96060,0.96121,[cd1698fa] U15: U4 with CatBoost depth 8
+56977364,2026-10-08 23:15:13.680000,b7f0c8a9,SubmissionStatus.COMPLETE,0.96014,0.96068,[b7f0c8a9] U10: U9 without the teacher (pure CatBoost CTR route view)
+56977362,2026-10-08 23:15:11.343000,6ea54be6,SubmissionStatus.COMPLETE,0.96027,0.96127,[6ea54be6] U13: U9 with a CatBoost teacher
+56977361,2026-10-08 23:15:09.020000,fc4a9df0,SubmissionStatus.COMPLETE,0.96036,0.96128,[fc4a9df0] U14: U9 seed twin (model_seed 7)
+56977358,2026-10-08 23:15:06.703000,00a6fe3c,SubmissionStatus.COMPLETE,0.96066,0.96135,[00a6fe3c] U11: U4 + age as a CatBoost categorical
+56977357,2026-10-08 23:15:04.410000,fb906814,SubmissionStatus.COMPLETE,0.96064,0.96143,[fb906814] B4: rank_mean of T14/U4/U9/T1/T24 (B3 with U9 in place of T8)
+56927768,2026-10-08 01:33:30.510000,a9403089,SubmissionStatus.COMPLETE,0.96056,0.96133,[a9403089] B3: rank_mean of T8/T14/U4/T1/T24 (B2 with U4 in place of T15)
+56892813,2026-10-06 23:15:22.447000,2212dd7c,SubmissionStatus.COMPLETE,0.96017,0.96095,[2212dd7c] T10: T8 seed twin (model_seed 1337)
+56892812,2026-10-06 23:15:20.043000,949548bc,SubmissionStatus.COMPLETE,0.95909,0.96003,[949548bc] T12: T8 + original rows appended to training folds
+56892809,2026-10-06 23:15:17.720000,e295bfa7,SubmissionStatus.COMPLETE,0.96011,0.96091,[e295bfa7] T13: T8 + rating sum/zero-count/min
+56892807,2026-10-06 23:15:15.283000,1af30fff,SubmissionStatus.COMPLETE,0.96016,0.96082,[1af30fff] T23: T8 with a route-aware teacher (teacher also sees the FD profile)
+56892806,2026-10-06 23:15:12.997000,6363a28e,SubmissionStatus.COMPLETE,0.96017,0.96099,[6363a28e] T24: T8 with a CatBoost teacher
+56892805,2026-10-06 23:15:10.677000,81ae7cd7,SubmissionStatus.COMPLETE,0.96008,0.96090,[81ae7cd7] T25: T8 with a 500-round teacher (best original-CV setting)
+56892804,2026-10-06 23:15:08.407000,9ed7ebee,SubmissionStatus.COMPLETE,0.96026,0.96102,"[9ed7ebee] T26: T14 seed twin (xgb leg, model_seed 7)"
+56892803,2026-10-06 23:15:06.027000,f9677b17,SubmissionStatus.COMPLETE,0.96040,0.96111,"[f9677b17] T27: T15 seed twin (cat leg, model_seed 7)"
+56892802,2026-10-06 23:15:03.523000,f29ba752,SubmissionStatus.COMPLETE,0.96019,0.96097,[f29ba752] T28: T8 + per-value target encoding of age
+56863439,2026-10-05 23:15:29.410000,757b4901,SubmissionStatus.COMPLETE,0.95994,0.96074,[757b4901] T29: T8 + age as a categorical (identity access)
+56863438,2026-10-05 23:15:26.807000,c736b2cf,SubmissionStatus.COMPLETE,0.95953,0.96070,"[c736b2cf] U1: T1 + teacher (TE route view, lgb leg)"
+56863436,2026-10-05 23:15:24.333000,65ffd758,SubmissionStatus.COMPLETE,0.95947,0.96065,[65ffd758] U5: U1 + te_pseudo (test soft labels in the route TE support)
+56863435,2026-10-05 23:15:21.927000,94b087c0,SubmissionStatus.COMPLETE,0.95960,0.96083,"[94b087c0] U2: U1 with xgb (TE route view, xgb leg)"
+56863433,2026-10-05 23:15:19.523000,1c1c3d66,SubmissionStatus.COMPLETE,0.95974,0.96084,"[1c1c3d66] U3: U1 with cat (TE route view, cat leg)"
+56863431,2026-10-05 23:15:14.157000,17c85549,SubmissionStatus.COMPLETE,0.96056,0.96117,[17c85549] U4: T15 + FD as a CatBoost categorical (ordered-TS route view)
+56863429,2026-10-05 23:15:11.720000,2ef8460b,SubmissionStatus.COMPLETE,0.95962,0.96072,"[2ef8460b] V2: T1 with xgb (TE route view, no teacher)"
+56863428,2026-10-05 23:15:09.240000,9f93364b,SubmissionStatus.COMPLETE,0.95959,0.96032,"[9f93364b] V3: T1 with cat (TE route view, no teacher)"
+56863426,2026-10-05 23:15:06.897000,69b9c704,SubmissionStatus.COMPLETE,0.96044,0.96117,"[69b9c704] B1: rank_mean of T8/T14/T15 (3 families, T8 representation)"
+56863423,2026-10-05 23:15:04.483000,ead789bd,SubmissionStatus.COMPLETE,0.96053,0.96132,"[ead789bd] B2: rank_mean of T8/T14/T15 + T1 (TE route rep) + T24 (cat teacher), sequential Gate 2 pool"
+56835446,2026-10-04 23:15:23.207000,4cde76c7,SubmissionStatus.COMPLETE,0.96039,0.96111,"[4cde76c7] T14: T8 representation, XGBoost leg"
+56835444,2026-10-04 23:15:20.793000,636833f2,SubmissionStatus.COMPLETE,0.96040,0.96110,"[636833f2] T15: T8 representation, CatBoost leg"
+56835441,2026-10-04 23:15:18.410000,3c4ec810,SubmissionStatus.COMPLETE,0.96027,0.96095,[3c4ec810] T16: T8 seed twin (model_seed 7)
+56835440,2026-10-04 23:15:16.033000,8dc6ed00,SubmissionStatus.COMPLETE,0.96028,0.96094,[8dc6ed00] T17: T8 seed twin (model_seed 2024)
+56835438,2026-10-04 23:15:13.820000,fc3188ab,SubmissionStatus.COMPLETE,0.96033,0.96098,[fc3188ab] T18: T8 seed twin (model_seed 31337)
+56835435,2026-10-04 23:15:11.237000,1f8aa334,SubmissionStatus.COMPLETE,0.95977,0.96065,[1f8aa334] T19: T1 + original rows pooled into the FD target encoding
+56835434,2026-10-04 23:15:08.657000,d981cc08,SubmissionStatus.COMPLETE,0.96028,0.96095,[d981cc08] T20: T8 + per-route categorical shares (class/type/customer/gender)
+56835433,2026-10-04 23:15:06.340000,f27d4805,SubmissionStatus.COMPLETE,0.96026,0.96103,[f27d4805] T21: T8 + per-route std of the other numerics
+56835432,2026-10-04 23:15:04.040000,7a4d0a7c,SubmissionStatus.COMPLETE,0.96021,0.96100,[7a4d0a7c] T22: T8 + profile keyed on route x class
+56810295,2026-10-04 00:40:26.887000,f19b5e12,SubmissionStatus.COMPLETE,0.96025,0.96101,[f19b5e12] T11: T8 with seed_bag 3
+56795735,2026-10-03 10:28:19.613000,4ecb3d67,SubmissionStatus.COMPLETE,0.95827,0.95912,[4ecb3d67] K1: CatBoost on raw features (family point)
+56794857,2026-10-03 09:36:34.557000,4a621eb8,SubmissionStatus.COMPLETE,0.96000,0.96079,[4a621eb8] T9: T2 with lgb max_bin 4096
+56794780,2026-10-03 09:31:53.883000,5ee7f1d3,SubmissionStatus.COMPLETE,0.96022,0.96097,[5ee7f1d3] T8: T2 + teacher logit
+56794683,2026-10-03 09:26:21.583000,6844d407,SubmissionStatus.COMPLETE,0.96018,0.96084,[6844d407] T7: T2 + per-value TE of flight_distance
+56794601,2026-10-03 09:21:54.040000,b9272bbf,SubmissionStatus.COMPLETE,0.95833,0.95937,[b9272bbf] T6: A0 + per-value TE of age (negative control)
+56787240,2026-10-03 02:06:47.627000,5cdc1a57,SubmissionStatus.COMPLETE,0.95906,0.96012,[5cdc1a57] T5: A0 + flight_distance frequency (control for T1)
+56787178,2026-10-03 02:02:59.337000,17bd6d92,SubmissionStatus.COMPLETE,0.95904,0.96017,[17bd6d92] T4: A0 with lgb max_bin 4096
+56787103,2026-10-03 01:59:12.873000,f7b789ea,SubmissionStatus.COMPLETE,0.95820,0.95942,[f7b789ea] T3: A0 + teacher logit (lgb fit on original rows only)
+56787037,2026-10-03 01:54:57.267000,46e7df22,SubmissionStatus.COMPLETE,0.96004,0.96074,[46e7df22] T2: A0 + per-flight_distance profiles of other numerics
+56786965,2026-10-03 01:50:42.783000,0a155047,SubmissionStatus.COMPLETE,0.95971,0.96061,[0a155047] T1: A0 + per-value TE of flight_distance
+56764013,2026-10-02 02:35:33.443000,061c20f8,SubmissionStatus.COMPLETE,0.95818,0.95947,[061c20f8] X1: XGBoost on raw features (family point)
+56763949,2026-10-02 02:30:22.700000,8d189ab3,SubmissionStatus.COMPLETE,0.92227,0.92162,[8d189ab3] G1: logistic regression on raw features (non-GBDT family check)
+56763939,2026-10-02 02:29:26.650000,e48f031c,SubmissionStatus.COMPLETE,0.87640,0.87578,[e48f031c] D2: A0 minus all 13 ratings (degraded)
+56763894,2026-10-02 02:26:33.113000,e8fbc4b0,SubmissionStatus.COMPLETE,0.95301,0.95355,"[e8fbc4b0] D1: A0 minus online_boarding, wifi (degraded)"
+56763875,2026-10-02 02:25:13.447000,7ecc574a,SubmissionStatus.COMPLETE,0.95834,0.95948,[7ecc574a] L255: A0 with num_leaves=255
+56763859,2026-10-02 02:24:01.027000,1936c4df,SubmissionStatus.COMPLETE,0.95781,0.95880,[1936c4df] L7: A0 with num_leaves=7
+56763817,2026-10-02 02:20:27.637000,ea8495f9,SubmissionStatus.COMPLETE,0.95833,0.95947,[ea8495f9] A0b3: A0 with 3-seed bag per fold
+56763767,2026-10-02 02:17:32.160000,cbbda46e,SubmissionStatus.COMPLETE,0.95839,0.95946,[cbbda46e] A0s: A0 at model_seed=1337 (seed-noise floor)
+56763720,2026-10-02 02:14:47.613000,ee4536ff,SubmissionStatus.COMPLETE,0.95829,0.95941,"[ee4536ff] A0 baseline: raw 21 features, 5-fold LightGBM"
