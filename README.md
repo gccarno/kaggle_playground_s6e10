@@ -1418,3 +1418,28 @@ No public OOF or test artifact is used.
 - **The tripwire didn't fire.** F7's −0.00037 is in the normal band (−0.0008 to +0.0003). Every stack with public members kept the same offset as our own ours-only blends (−0.0003 to −0.0005). That's what honest members predict. A leaked member would have pushed public above the line.
 - **The OOF lift transfers.** F7 − B14 is +0.00042 on OOF and +0.00053 on public. F14 − B14 is +0.00016 on OOF and +0.00024 on public. The OOF order of the stacks is kept on public to within about 0.00001, the noise floor between near-identical stacks.
 - **Decision for the user (final pair):** **F7 stays Final B.** For Final A there are two options. **B14** is ours-only, as README §5.2 has it. **F14** is +0.00024 on public but uses 25 fold-verified public members. Both readings say the honest choice is F7 + B14 unless §5.2 is relaxed.
+
+**Final selection (Oct 31 17:50 UTC).** Selected by hand on the Submissions page: **F7** (`4398fb27`, Final B) and **B14** (`754f9b07`, Final A, ours-only). The plan said to commit a predicted private score and rank band on Oct 30. That step was skipped.
+
+### Contest close (2026-11-01)
+
+**Result: private rank 461 of 3,748 (top 12.3%), private AUC 0.96235, up 422 places from public rank 883.** #1 scored 0.96318 (a gap of 0.00083). Rank 49 scored 0.96239, and about 40 teams tied at 0.96235. The leaderboard is marked preliminary until Kaggle verifies it. The rank was read off the private leaderboard page, because the CLI only exports the public board.
+
+| Final | OOF | Public | Private | Private − OOF |
+|---|---|---|---|---|
+| **F7** | 0.962152 | 0.96178 | **0.96235** | +0.00020 |
+| B14 | 0.961730 | 0.96125 | 0.96203 | +0.00030 |
+
+- **F7 tied for the best private score among all 141 submitted runs** (F9 and F13 also scored 0.96235), so the OOF-based pick was optimal within our library. The ours-only hedge cost nothing. Without a manual selection, Kaggle would have taken F2 + F9, which score the same.
+- **The instrument held.** Over the 141 runs, private = OOF + 0.00046 ± 0.00030 (Spearman 0.972) and private = public + 0.00075 ± 0.00025 (Spearman 0.950). OOF ranked private better than public overall. Within the top 19 runs (OOF > 0.9615), which are separated by less than the noise, public did slightly better (0.970 vs 0.944).
+- **The public deficit of about 0.0004 was a property of the public 20%.** It appeared in every run, including A0, and private reversed it. That supports the batch-29 leak reading.
+- **Where the private gain came from (A0 0.95941 → F7 0.96235, +0.00294):**
+  - route features plus teacher (T8): +0.00156 (53%);
+  - diverse-view blend (B7): +0.00080 (27%);
+  - TabPFN legs at weight 2 (B12w): +0.00024 (8%);
+  - public library stack (F7): +0.00034 (12%).
+- **The shake-up came from others falling.** Our public→private offset was steady while teams above us dropped. Public #1 (0.96473) isn't in the private top 49. Public-board overfitting is a likely part of that, but only part, because teams also use public submissions for probing and tests they never meant to keep.
+- **Scheduler defect:** 127 of our 268 submissions repeated an already-scored run. That includes the ten F-runs re-sent every night from Oct 21 to Oct 29 (90 slots), when they should have gone to the banked calibration runs. A rule for the next contest: before the cron goes live, add a guard that refuses any run_id already present in the submissions table.
+- **New tool:** `scripts/collect_private.py` pages the Kaggle SDK, because CLI 2.2.3 caps at 200 submissions with no page token. It writes `experiments/private_scores.csv` (every submission) and fills `private_lb_score` in runs.csv. Before writing, it checks that resubmitted copies agree.
+- **Write-up:** "Kaggle S6E10 write-up" (Claude Doc, https://claude.ai/artifact/3isjvPQZBBWYtLoK7E1NEY).
+- **Repo made public on Nov 1** (§5.1). The code dataset `gcarno/s6e10-code` stays private.

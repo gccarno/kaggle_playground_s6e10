@@ -327,7 +327,7 @@ P_koumeimaki_tabpfn_catfd10,5,public,,member,INFO,Public member tabpfn_catfd10 f
 P_koumeimaki_xgb_w1,5,public,,member,INFO,Public member xgb_w1 from koumeimaki/s6e10-route-tfm-nn-oof: OOF 0.961197; Final B only
 P_sachith7_lgb_cpu_strong,5,public,,member,INFO,Public member lgb_cpu_strong from sachith7/s6e10-stack-oof-predictions: OOF 0.961083; Final B only
 P_sachith7_xgb_A_auxall,5,public,,member,INFO,Public member xgb_A_auxall from sachith7/s6e10-stack-oof-predictions: OOF 0.960916; Final B only
-B14,4b,blend,B12w,blend,INFO,"B12w + Z4 at TFM weight 2: OOF 0.961730 (+0.000012, marginal), public 0.96125 (best so far); Final A candidate"
+B14,4b,blend,B12w,blend,FINAL,"B12w + Z4 at TFM weight 2: OOF 0.961730 (+0.000012, marginal), public 0.96125 (best so far); Final A candidate; Final A (ours-only hedge); PRIVATE 0.96203 (private-OOF +0.00030)"
 TI0s,5,tfm,,smoke,PASS,"TabICL v2 smoke on a T4, 5% rows, 2 folds: OOF 0.957738; install guard and checkpoint path work"
 TI1,5,tfm,Z1,probe,FAIL,Kernel hit the 12 h limit inside fold 0: 140k val rows took 236 min at a 250k context (projected from the 17k-context smoke; cost scales with context x rows). About 62 T4-hours for the full run; no OOF
 F1,5,public,B12w,blend,FAIL,"Nested Caruana over 15 own + 180 public: OOF 0.961938 (prediction 0.96200-0.96215 missed); selects 8 distinct legs, 7 public + Z2; public 0.96142"
@@ -335,7 +335,7 @@ F2,5,public,F1,blend,PASS,"Nested L2 logit stack C=1 over 195 legs: OOF 0.962135
 F3,5,public,F1,blend,FAIL,Climb over 180 public only: OOF 0.961943; F1 - F3 = -0.000005 (prediction +0.00002..+0.00008 failed): the climb finds no use for our legs; public 0.96147
 F5,5,public,B12w,blend,FAIL,"Rank mean of B12w legs + 23 public TFMs at weight 2: OOF 0.961342, -0.000376 vs B12w (prediction 0.9618-0.9620 failed): weak TFMs dilute"
 F6,5,public,F1,blend,NULL,"Cap of 25 picks never binds (climb stops at 8-21 picks), so F6 is identical to F1; not archived, no slot spent"
-F7,5,public,F2,blend,PASS,"L2 stack C=0.01 over 195 legs: OOF 0.962152, +0.000017 vs F2 (prediction within 0.00003 held); best nested OOF, Final B candidate; public 0.96178 (public-OOF -0.00037, normal band): Final B"
+F7,5,public,F2,blend,FINAL,"L2 stack C=0.01 over 195 legs: OOF 0.962152, +0.000017 vs F2 (prediction within 0.00003 held); best nested OOF, Final B candidate; public 0.96178 (public-OOF -0.00037, normal band): Final B; PRIVATE 0.96235 (private-OOF +0.00020): tied best private of all 141 submitted runs; rank 461/3748"
 F8,5,public,F7,blend,FAIL,L2 stack C=0.01 over the 180 public members only: OOF 0.962152; F7 - F8 = +0.0000005 (prediction +0.00002..+0.0001 failed): our 15 legs add nothing to the Final B stack
 P_arhancanli_cat_5f,5,public,,member,INFO,Public member cat_5f from arhancanli12/s6e10-oof-test-predictions: OOF 0.960940; Final B only
 P_arhancanli_lgb_5f,5,public,,member,INFO,Public member lgb_5f from arhancanli12/s6e10-oof-test-predictions: OOF 0.961029; Final B only

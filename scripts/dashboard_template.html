@@ -43,7 +43,7 @@ header { display: grid; gap: 4px; }
 .gates b { color: var(--ink); font-weight: 600; }
 .pill { display: inline-block; font: 500 .7rem/1 var(--f-mono); padding: 3px 6px; border-radius: 3px; letter-spacing: .03em; border: 1px solid currentColor; white-space: nowrap; }
 .v-PASS { color: var(--pass); } .v-FAIL { color: var(--fail); } .v-NULL { color: var(--null); }
-.v-LEG { color: var(--leg); } .v-RUNNING, .v-PLANNED { color: var(--run); } .v-CHAMPION { color: var(--champ); background: var(--accent-soft); }
+.v-LEG { color: var(--leg); } .v-RUNNING, .v-PLANNED { color: var(--run); } .v-CHAMPION, .v-FINAL { color: var(--champ); background: var(--accent-soft); }
 .v-INFO, .v-SUPERSEDED { color: var(--muted); border-style: dashed; }
 .s-closed { color: var(--null); } .s-open { color: var(--pass); } .s-running { color: var(--run); } .s-info { color: var(--muted); border-style: dashed; }
 .st-tried { color: var(--pass); } .st-running { color: var(--run); } .st-not-tried { color: var(--fail); border-style: dashed; }
@@ -239,8 +239,9 @@ $("#gen").textContent = D.generated;
 const c = D.champ, legsN = D.comp.length;
 $("#tiles").innerHTML = [
   ["champ", "Champion", c.tag, `OOF ${f6(c.oof)} · public ${f5(c.pub)} · ${legsN} legs`],
-  ["", "Days left", D.days_left, "Deadline Oct 31, 23:59 UTC"],
-  ["", "Submissions", D.subs_used, `of ${D.subs_total} possible (10 per day)`],
+  D.final ? ["champ", "Final rank (private)", `${D.final.rank} / ${D.final.teams}`, `${D.final.tag} private ${f5(D.final.private)} · public rank ${D.final.public_rank} · #1 ${f5(D.final.winner)}`]
+          : ["", "Days left", D.days_left, "Deadline Oct 31, 23:59 UTC"],
+  ["", "Submissions", D.subs_used, D.final ? `${D.subs_unique} distinct runs, of ${D.subs_total} possible` : `of ${D.subs_total} possible (10 per day)`],
   ["", "Runs logged", D.n_runs, `${D.rows.filter(r => r.verdict === "RUNNING").length} running now`],
 ].map(([k, l, b, s]) => `<div class="tile ${k}"><span>${l}</span><b>${esc(b)}</b><small>${esc(s)}</small></div>`).join("");
 
@@ -268,7 +269,7 @@ $("#axes").innerHTML = D.axes.map(a => `<div class="axis">
 const opts = (sel, label, vals) => { sel.innerHTML = `<option value="">${label}: all</option>` + vals.map(v => `<option>${esc(v)}</option>`).join(""); };
 const uniq = k => [...new Set(D.rows.map(r => r[k]).filter(Boolean))];
 opts($("#fphase"), "Phase", uniq("phase")); opts($("#faxis"), "Axis", uniq("axis").sort()); opts($("#fverdict"), "Verdict", uniq("verdict").sort());
-const cols = [["tag","Tag"],["date","Date"],["phase","Ph"],["learner","Learner"],["axis","Axis"],["twin","Twin"],["oof","OOF"],["delta","Δ vs twin"],["pub","Public"],["verdict","Verdict"],["note","What it tested / result"]];
+const cols = [["tag","Tag"],["date","Date"],["phase","Ph"],["learner","Learner"],["axis","Axis"],["twin","Twin"],["oof","OOF"],["delta","Δ vs twin"],["pub","Public"],["prv","Private"],["verdict","Verdict"],["note","What it tested / result"]];
 let sortK = "ts", sortDir = -1;
 function render() {
   const q = $("#q").value.toLowerCase(), p = $("#fphase").value, a = $("#faxis").value, v = $("#fverdict").value;
@@ -277,12 +278,12 @@ function render() {
   rs.sort((x, y) => { const A = x[sortK], B = y[sortK];
     if (A == null || A === "") return 1; if (B == null || B === "") return -1;
     return (A < B ? -1 : A > B ? 1 : 0) * sortDir; });
-  $("#runs").innerHTML = `<thead><tr>${cols.map(([k, l]) => `<th data-k="${k}" tabindex="0"${["oof","delta","pub"].includes(k) ? ' style="text-align:right"' : ""}>${l}${sortK === k ? (sortDir > 0 ? " ▲" : " ▼") : ""}</th>`).join("")}</tr></thead><tbody>` +
+  $("#runs").innerHTML = `<thead><tr>${cols.map(([k, l]) => `<th data-k="${k}" tabindex="0"${["oof","delta","pub","prv"].includes(k) ? ' style="text-align:right"' : ""}>${l}${sortK === k ? (sortDir > 0 ? " ▲" : " ▼") : ""}</th>`).join("")}</tr></thead><tbody>` +
     rs.map(r => `<tr><td class="tag">${esc(r.tag)}</td><td class="mono">${esc(r.date)}</td><td>${esc(r.phase)}</td><td>${esc(r.learner)}</td><td>${esc(r.axis)}</td><td class="mono">${esc(r.twin)}</td>
-      <td class="n">${f6(r.oof)}</td><td class="n ${dcls(r.delta)}">${sd(r.delta)}</td><td class="n">${f5(r.pub)}</td><td>${pill(r.verdict)}</td><td>${esc(r.note)}</td></tr>`).join("") + "</tbody>";
+      <td class="n">${f6(r.oof)}</td><td class="n ${dcls(r.delta)}">${sd(r.delta)}</td><td class="n">${f5(r.pub)}</td><td class="n">${f5(r.prv)}</td><td>${pill(r.verdict)}</td><td>${esc(r.note)}</td></tr>`).join("") + "</tbody>";
   $("#count").textContent = `${rs.length} of ${D.rows.length} ledger rows`;
   document.querySelectorAll("#runs th[data-k]").forEach(th => {
-    const go = () => { const k = th.dataset.k; sortDir = sortK === k ? -sortDir : (["oof","delta","pub","ts","date"].includes(k) ? -1 : 1); sortK = k; render(); };
+    const go = () => { const k = th.dataset.k; sortDir = sortK === k ? -sortDir : (["oof","delta","pub","prv","ts","date"].includes(k) ? -1 : 1); sortK = k; render(); };
     th.onclick = go; th.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } };
   });
 }

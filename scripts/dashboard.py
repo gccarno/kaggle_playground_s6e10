@@ -31,6 +31,9 @@ FIRST_DAY = datetime(2026, 10, 1, tzinfo=timezone.utc)
 GATE1 = 0.00014          # shipping gate, OOF delta vs strict twin
 PUBLIC_SD = 0.000152     # paired public dAUC SD, seed-twin pair
 SEED_FLOOR = 0.000039    # |OOF(A0) - OOF(A0s)|
+# Contest close (README section 8, "Contest close"). Read off the private leaderboard page on
+# 2026-11-01 (preliminary until Kaggle verifies it); the CLI only exports the public board.
+FINAL = {"tag": "F7", "rank": 461, "teams": 3748, "public_rank": 883, "winner": 0.96318}
 
 
 def load():
@@ -93,6 +96,7 @@ def build(runs, led, axes, tech, cfgs):
             "date": r.loc[t, "timestamp_utc"][:10] if have else "",
             "ts": r.loc[t, "timestamp_utc"] if have else "",
             "oof": o, "pub": num(r.loc[t, "public_lb_score"]) if have else None,
+            "prv": num(r.loc[t, "private_lb_score"]) if have else None,
             "delta": (o - tw) if (o is not None and tw is not None) else None,
             "full": bool(have and r.loc[t, "sample_frac"] == 1),
         })
@@ -150,10 +154,15 @@ def build(runs, led, axes, tech, cfgs):
 
     now = datetime.now(timezone.utc)
     sub = runs[runs.public_lb_score.notna()]
+    ps = ROOT / "experiments" / "private_scores.csv"   # every submission, incl. resubmits
+    n_subs = len(pd.read_csv(ps)) if ps.exists() else len(sub)
+    final = None
+    if ps.exists() and FINAL["tag"] in r.index:
+        final = {**FINAL, "private": num(r.loc[FINAL["tag"], "private_lb_score"])}
     return {
         "generated": now.strftime("%Y-%m-%d %H:%M UTC"),
         "days_left": max(0, (DEADLINE - now).days),
-        "subs_used": int(len(sub)), "subs_total": 10 * 31,
+        "subs_used": int(n_subs), "subs_unique": int(len(sub)), "subs_total": 10 * 31, "final": final,
         "champ": champ, "comp": comp, "rows": rows, "axes": ax, "phases": phases,
         "gate1": GATE1, "public_sd": PUBLIC_SD, "seed_floor": SEED_FLOOR,
         "n_runs": len(runs), "techs": techs, "see": see, "eda": eda,
