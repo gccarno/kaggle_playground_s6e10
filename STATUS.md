@@ -17,8 +17,7 @@
   - public library: 12%.
 
 ## Open items
-- **Cleanup on oci-free:** remove the scheduler cron and the TabICL adopt crons (the `oci` MCP connection timed out on Nov 1, so this hasn't been done).
-- **Tear down oci-burst** if it's still up (`terraform apply` in ~/Documents/oci-infra needs the user's OK).
+- **VM cleanup done (Nov 1):** all S6E10 crons removed from oci-free (scheduler, TabICL adopt, stale Z4 one-shot; backup at `~/crontab.bak.2026-11-01`). oci-burst is gone: not in Terraform state, and only oci-free is listed in the compartment.
 - **Next contest:**
   - guard the scheduler against re-submitting a run_id (127 of our 268 submissions were repeats);
   - commit the predicted private score before the deadline;
