@@ -32,8 +32,8 @@ GATE1 = 0.00014          # shipping gate, OOF delta vs strict twin
 PUBLIC_SD = 0.000152     # paired public dAUC SD, seed-twin pair
 SEED_FLOOR = 0.000039    # |OOF(A0) - OOF(A0s)|
 # Contest close (README section 8, "Contest close"). Read off the private leaderboard page on
-# 2026-11-01 (preliminary until Kaggle verifies it); the CLI only exports the public board.
-FINAL = {"tag": "F7", "rank": 461, "teams": 3748, "public_rank": 883, "winner": 0.96318}
+# 2026-11-02 (final standings after Kaggle's verification); the CLI only exports the public board.
+FINAL = {"tag": "F7", "rank": 458, "teams": 3735, "public_rank": 876, "winner": 0.96318}
 
 
 def load():

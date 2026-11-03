@@ -1423,7 +1423,7 @@ No public OOF or test artifact is used.
 
 ### Contest close (2026-11-01)
 
-**Result: private rank 461 of 3,748 (top 12.3%), private AUC 0.96235, up 422 places from public rank 883.** #1 scored 0.96318 (a gap of 0.00083). Rank 49 scored 0.96239, and about 40 teams tied at 0.96235. The leaderboard is marked preliminary until Kaggle verifies it. The rank was read off the private leaderboard page, because the CLI only exports the public board.
+**Result: private rank 458 of 3,735 (top 12.3%), private AUC 0.96235, up 418 places from public rank 876 (final standings).** #1 scored 0.96318 (a gap of 0.00083). Rank 49 scored 0.96239, and about 40 teams tied at 0.96235. The preliminary board on Nov 1 had us 461 of 3,748 (public 883). Kaggle's verification removed 13 teams, and the final standings (checked Nov 2) are 458 of 3,735. The private rank was read off the leaderboard page, because the CLI only exports the public board.
 
 | Final | OOF | Public | Private | Private − OOF |
 |---|---|---|---|---|
